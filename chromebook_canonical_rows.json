@@ -1,0 +1,1747 @@
+[
+  {
+    "id": "ME_common_kick_off",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "Kick off",
+    "baselineStart": "2026-02-04",
+    "baselineEnd": "2026-02-04",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-04",
+        "baselineEnd": "2026-02-04",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-04",
+        "baselineEnd": "2026-02-04",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_id_master_detail_ready",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "ID Master/Detail Ready",
+    "baselineStart": "2026-01-06",
+    "baselineEnd": "2026-01-06",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-01-06",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-01-06",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_me_design",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "ME design",
+    "baselineStart": "2026-01-06",
+    "baselineEnd": "2026-02-04",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-02-04",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-02-04",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_mockup_drawing_release",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "Mockup drawing release",
+    "baselineStart": "2026-02-05",
+    "baselineEnd": "2026-02-13",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-05",
+        "baselineEnd": "2026-02-13",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-05",
+        "baselineEnd": "2026-02-13",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_mockup_ready",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "Mockup ready",
+    "baselineStart": "2026-02-13",
+    "baselineEnd": "2026-02-13",
+    "mode": "build",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-13",
+        "baselineEnd": "2026-02-13",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-13",
+        "baselineEnd": "2026-02-13",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_mockup_review",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "Mockup review",
+    "baselineStart": "2026-02-25",
+    "baselineEnd": "2026-02-26",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-25",
+        "baselineEnd": "2026-02-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-25",
+        "baselineEnd": "2026-02-26",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_dfm_review",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "DFM review",
+    "baselineStart": "2026-03-02",
+    "baselineEnd": "2026-03-04",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-02",
+        "baselineEnd": "2026-03-04",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-02",
+        "baselineEnd": "2026-03-04",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_me_drawing_modification_for_tooling",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "ME drawing modification for tooling",
+    "baselineStart": "2026-03-04",
+    "baselineEnd": "2026-03-06",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-04",
+        "baselineEnd": "2026-03-06",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-04",
+        "baselineEnd": "2026-03-06",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_me_tooling_create",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "ME tooling create",
+    "baselineStart": "2026-03-07",
+    "baselineEnd": "2026-04-17",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-07",
+        "baselineEnd": "2026-04-17",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-07",
+        "baselineEnd": "2026-04-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_t1_t2",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "T1+T2",
+    "baselineStart": "2026-04-18",
+    "baselineEnd": "2026-04-25",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-04-18",
+        "baselineEnd": "2026-04-25",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-04-18",
+        "baselineEnd": "2026-04-25",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "ME_common_si_me_parts",
+    "phase": "ME",
+    "sourceSection": "ME Development",
+    "task": "SI ME parts",
+    "baselineStart": "2026-04-26",
+    "baselineEnd": "2026-05-12",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-04-26",
+        "baselineEnd": "2026-05-12",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-04-26",
+        "baselineEnd": "2026-05-12",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_layout",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "Layout",
+    "baselineStart": "2026-01-06",
+    "baselineEnd": "2026-02-11",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-02-11",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-01-06",
+        "baselineEnd": "2026-02-11",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_db_gerber_released",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "DB Gerber released",
+    "baselineStart": "2026-02-12",
+    "baselineEnd": "2026-02-12",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-12",
+        "baselineEnd": "2026-02-12",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-12",
+        "baselineEnd": "2026-02-12",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_pcb_fab",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "PCB FAB",
+    "baselineStart": "2026-02-25",
+    "baselineEnd": "2026-03-10",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-02-25",
+        "baselineEnd": "2026-03-10",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-02-25",
+        "baselineEnd": "2026-03-10",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_db_smt_build",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "DB SMT Build",
+    "baselineStart": "2026-03-11",
+    "baselineEnd": "2026-03-15",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-11",
+        "baselineEnd": "2026-03-15",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-11",
+        "baselineEnd": "2026-03-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_ship_db_pcba_eta_to_tpe_rd_hp",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "Ship DB PCBA ETA to TPE RD & HP",
+    "baselineStart": "2026-03-23",
+    "baselineEnd": "2026-03-23",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-03-23",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-03-23",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_db_svtp_test",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "DB SVTP test",
+    "baselineStart": "2026-03-23",
+    "baselineEnd": "2026-04-26",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-04-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-04-26",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_google_validation",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "Google validation",
+    "baselineStart": "2026-03-23",
+    "baselineEnd": "2026-04-26",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-04-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-03-23",
+        "baselineEnd": "2026-04-26",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "DB_common_db_exit",
+    "phase": "DB",
+    "sourceSection": "DB Build",
+    "task": "DB exit",
+    "baselineStart": "2026-04-23",
+    "baselineEnd": "2026-04-23",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-04-23",
+        "baselineEnd": "2026-04-23",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-04-23",
+        "baselineEnd": "2026-04-23",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_gerber_release",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI Gerber release",
+    "baselineStart": "2026-04-27",
+    "baselineEnd": "2026-04-27",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-04-27",
+        "baselineEnd": "2026-04-27",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-04-27",
+        "baselineEnd": "2026-04-27",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_pcb_fab",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "PCB FAB",
+    "baselineStart": "2026-04-27",
+    "baselineEnd": "2026-05-11",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-04-27",
+        "baselineEnd": "2026-05-11",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-04-27",
+        "baselineEnd": "2026-05-11",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_smt_build",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI SMT build",
+    "baselineStart": "2026-05-12",
+    "baselineEnd": "2026-05-24",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-12",
+        "baselineEnd": "2026-05-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-12",
+        "baselineEnd": "2026-05-24",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_pre_build",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI Pre-Build",
+    "baselineStart": "2026-05-15",
+    "baselineEnd": "2026-05-15",
+    "mode": "build",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-15",
+        "baselineEnd": "2026-05-15",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-15",
+        "baselineEnd": "2026-05-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_main_build",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI Main build",
+    "baselineStart": "2026-05-19",
+    "baselineEnd": "2026-05-20",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-19",
+        "baselineEnd": "2026-05-20",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-19",
+        "baselineEnd": "2026-05-20",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_oobip",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "OOBIP",
+    "baselineStart": "2026-05-20",
+    "baselineEnd": "2026-05-27",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_2": {
+        "baselineStart": "2026-05-20",
+        "baselineEnd": "2026-05-27",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_ship_si_unit_eta_to_nsdd_pcba_only",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "Ship SI unit ETA to NSDD (PCBA Only)",
+    "baselineStart": "2026-05-22",
+    "baselineEnd": "2026-05-22",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-22",
+        "baselineEnd": "2026-05-22",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-22",
+        "baselineEnd": "2026-05-22",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_ship_si_unit_eta_to_qad_tpe_rd_hp",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "Ship SI unit ETA to QAD/TPE RD & HP",
+    "baselineStart": "2026-05-27",
+    "baselineEnd": "2026-05-27",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-28",
+        "baselineEnd": "2026-05-28",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-27",
+        "baselineEnd": "2026-05-27",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_svtp_test",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI SVTP test",
+    "baselineStart": "2026-05-28",
+    "baselineEnd": "2026-06-24",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-28",
+        "baselineEnd": "2026-06-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-28",
+        "baselineEnd": "2026-06-24",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_google_dogfooding",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "Google dogfooding",
+    "baselineStart": "2026-05-28",
+    "baselineEnd": "2026-06-24",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-05-28",
+        "baselineEnd": "2026-06-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-05-28",
+        "baselineEnd": "2026-06-24",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "SI_common_si_exit",
+    "phase": "SI",
+    "sourceSection": "SI Phase",
+    "task": "SI exit",
+    "baselineStart": "2026-07-02",
+    "baselineEnd": "2026-07-02",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-02",
+        "baselineEnd": "2026-07-02",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-02",
+        "baselineEnd": "2026-07-02",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_gerber_release",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV Gerber release",
+    "baselineStart": "2026-06-18",
+    "baselineEnd": "2026-06-18",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-06-24",
+        "baselineEnd": "2026-06-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-06-18",
+        "baselineEnd": "2026-06-18",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pcb_fab",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PCB FAB",
+    "baselineStart": "2026-06-19",
+    "baselineEnd": "2026-07-06",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-06-24",
+        "baselineEnd": "2026-07-08",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-06-19",
+        "baselineEnd": "2026-07-06",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_smt_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV SMT Build",
+    "baselineStart": "2026-07-07",
+    "baselineEnd": "2026-07-10",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-09",
+        "baselineEnd": "2026-07-12",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-07",
+        "baselineEnd": "2026-07-10",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_VN_vn_smt_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "VN SMT build",
+    "baselineStart": "2026-07-21",
+    "baselineEnd": "2026-07-22",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-27",
+        "baselineEnd": "2026-07-28",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-21",
+        "baselineEnd": "2026-07-22",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_pre_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV Pre-Build",
+    "baselineStart": "2026-07-10",
+    "baselineEnd": "2026-07-10",
+    "mode": "build",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-13",
+        "baselineEnd": "2026-07-13",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-10",
+        "baselineEnd": "2026-07-10",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_VN_vn_pre_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "VN Pre-build",
+    "baselineStart": "2026-07-27",
+    "baselineEnd": "2026-07-27",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-08-01",
+        "baselineEnd": "2026-08-01",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-27",
+        "baselineEnd": "2026-07-27",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_main_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV Main build",
+    "baselineStart": "2026-07-14",
+    "baselineEnd": "2026-07-15",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-16",
+        "baselineEnd": "2026-07-17",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-14",
+        "baselineEnd": "2026-07-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_VN_vn_main_build",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "VN Main-build",
+    "baselineStart": "2026-07-29",
+    "baselineEnd": "2026-07-29",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-08-05",
+        "baselineEnd": "2026-08-06",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-29",
+        "baselineEnd": "2026-07-29",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_oobip",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "OOBIP",
+    "baselineStart": "2026-07-11",
+    "baselineEnd": "2026-07-31",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_2": {
+        "baselineStart": "2026-07-11",
+        "baselineEnd": "2026-07-31",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_ship_pv_unit_eta_to_nsdd_pcba_only",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "Ship PV unit ETA to NSDD (PCBA Only)",
+    "baselineStart": "2026-07-15",
+    "baselineEnd": "2026-07-15",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-20",
+        "baselineEnd": "2026-07-20",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-15",
+        "baselineEnd": "2026-07-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_ship_pv_unit_eta_to_qad_tpe_rd_hp",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "Ship PV unit ETA to QAD/TPE RD & HP",
+    "baselineStart": "2026-07-22",
+    "baselineEnd": "2026-07-22",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-24",
+        "baselineEnd": "2026-07-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-22",
+        "baselineEnd": "2026-07-22",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_svtp_test",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV SVTP test",
+    "baselineStart": "2026-07-23",
+    "baselineEnd": "2026-08-19",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-24",
+        "baselineEnd": "2026-08-31",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-23",
+        "baselineEnd": "2026-08-19",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_google_dogfooding",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "Google dogfooding",
+    "baselineStart": "2026-07-23",
+    "baselineEnd": "2026-08-19",
+    "mode": "normal",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-07-24",
+        "baselineEnd": "2026-08-31",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-07-23",
+        "baselineEnd": "2026-08-19",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_code_freeze_fsi_candidate",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "Code Freeze(FSI candidate)",
+    "baselineStart": "2026-08-28",
+    "baselineEnd": "2026-08-28",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-11",
+        "baselineEnd": "2026-09-11",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-28",
+        "baselineEnd": "2026-08-28",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_regression",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV Regression",
+    "baselineStart": "2026-08-31",
+    "baselineEnd": "2026-09-03",
+    "mode": "build",
+    "site": "common",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-12",
+        "baselineEnd": "2026-09-17",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-31",
+        "baselineEnd": "2026-09-03",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_rtm_ties_1",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "RTM Ties-1",
+    "baselineStart": "2026-09-04",
+    "baselineEnd": "2026-09-04",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-18",
+        "baselineEnd": "2026-09-18",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-04",
+        "baselineEnd": "2026-09-04",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV_common_pv_exit",
+    "phase": "PV",
+    "sourceSection": "PV Phase",
+    "task": "PV exit",
+    "baselineStart": "2026-09-03",
+    "baselineEnd": "2026-09-03",
+    "mode": "normal",
+    "site": "common",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-11",
+        "baselineEnd": "2026-09-11",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-03",
+        "baselineEnd": "2026-09-03",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_KS_pv_r_build_use_pv_mb_w_o_r_i_swdl_obe",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- KS",
+    "task": "PV-R build (use PV MB) w/o R/I, SWDL, OBE",
+    "baselineStart": "2026-08-17",
+    "baselineEnd": "2026-08-17",
+    "mode": "build",
+    "site": "KS",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-08-26",
+        "baselineEnd": "2026-08-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-17",
+        "baselineEnd": "2026-08-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_KS_by_part",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- KS",
+    "task": "By part",
+    "baselineStart": "2026-08-21",
+    "baselineEnd": "2026-08-25",
+    "mode": "build",
+    "site": "KS",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-08-31",
+        "baselineEnd": "2026-09-03",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-21",
+        "baselineEnd": "2026-08-25",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_KS_tooling_lock_down",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- KS",
+    "task": "Tooling lock down",
+    "baselineStart": "2026-08-25",
+    "baselineEnd": "2026-08-25",
+    "mode": "normal",
+    "site": "KS",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-03",
+        "baselineEnd": "2026-09-03",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-25",
+        "baselineEnd": "2026-08-25",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_pv_r_build_use_pv_mb_w_o_r_i_swdl_obe",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "PV-R build (use PV MB) w/o R/I, SWDL, OBE",
+    "baselineStart": "2026-08-27",
+    "baselineEnd": "2026-08-27",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-08-26",
+        "baselineEnd": "2026-08-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-08-27",
+        "baselineEnd": "2026-08-27",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_tooling_lock_down",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "Tooling lock down",
+    "baselineStart": "2026-09-02",
+    "baselineEnd": "2026-09-02",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-03",
+        "baselineEnd": "2026-09-03",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-02",
+        "baselineEnd": "2026-09-02",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_vn_smt_build",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "VN SMT build",
+    "baselineStart": "2026-09-11",
+    "baselineEnd": "2026-09-13",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-28",
+        "baselineEnd": "2026-09-30",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-11",
+        "baselineEnd": "2026-09-13",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_mv_pre_build",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "MV Pre-Build",
+    "baselineStart": "2026-09-05",
+    "baselineEnd": "2026-09-05",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-21",
+        "baselineEnd": "2026-09-21",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-05",
+        "baselineEnd": "2026-09-05",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_vn_pre_build",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "VN Pre-build",
+    "baselineStart": "2026-09-15",
+    "baselineEnd": "2026-09-15",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-06",
+        "baselineEnd": "2026-10-06",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-15",
+        "baselineEnd": "2026-09-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_mv_main_build",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "MV Main build",
+    "baselineStart": "2026-09-08",
+    "baselineEnd": "2026-09-13",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-23",
+        "baselineEnd": "2026-09-24",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-08",
+        "baselineEnd": "2026-09-13",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_vn_main_build",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "VN Main-build",
+    "baselineStart": "2026-09-17",
+    "baselineEnd": "2026-09-17",
+    "mode": "build",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-08",
+        "baselineEnd": "2026-10-09",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-17",
+        "baselineEnd": "2026-09-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_mv_ifooba",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "MV iFOOBA",
+    "baselineStart": "2026-09-13",
+    "baselineEnd": "2026-09-15",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-24",
+        "baselineEnd": "2026-09-26",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-13",
+        "baselineEnd": "2026-09-15",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_marketing_ooba",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "Marketing OOBA",
+    "baselineStart": "2026-09-15",
+    "baselineEnd": "2026-09-17",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-09-28",
+        "baselineEnd": "2026-09-30",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-15",
+        "baselineEnd": "2026-09-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_mini_regression_1",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "Mini Regression -1",
+    "baselineStart": "2026-09-14",
+    "baselineEnd": "2026-09-16",
+    "mode": "build",
+    "site": "VN",
+    "type": "range",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-06",
+        "baselineEnd": "2026-10-08",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-14",
+        "baselineEnd": "2026-09-16",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_product_release_ks",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "Product release-KS",
+    "baselineStart": "2026-09-17",
+    "baselineEnd": "2026-09-17",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-08",
+        "baselineEnd": "2026-10-08",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-17",
+        "baselineEnd": "2026-09-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_product_release_vn",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "Product release-VN",
+    "baselineStart": "2026-09-24",
+    "baselineEnd": "2026-09-24",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-15",
+        "baselineEnd": "2026-10-15",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-24",
+        "baselineEnd": "2026-09-24",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_first_order_drop",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "First Order Drop",
+    "baselineStart": "2026-09-17",
+    "baselineEnd": "2026-09-17",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-09",
+        "baselineEnd": "2026-10-09",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-17",
+        "baselineEnd": "2026-09-17",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_ks_fcs",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "KS FCS",
+    "baselineStart": "2026-09-24",
+    "baselineEnd": "2026-09-24",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-16",
+        "baselineEnd": "2026-10-16",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-09-24",
+        "baselineEnd": "2026-09-24",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  },
+  {
+    "id": "PV-R/MV_VN_vn_fcs",
+    "phase": "PV-R/MV",
+    "sourceSection": "ME PV-R- VN",
+    "task": "VN FCS",
+    "baselineStart": "2026-10-02",
+    "baselineEnd": "2026-10-02",
+    "mode": "normal",
+    "site": "VN",
+    "type": "milestone",
+    "source": {
+      "sheet": "Milestone_FCS",
+      "scenario": "scenario_2"
+    },
+    "scenarios": {
+      "scenario_1": {
+        "baselineStart": "2026-10-23",
+        "baselineEnd": "2026-10-23",
+        "label": "Education Azul (KS FCS 2026/10/16_M152 release) (VN FCS 2026/10/23) Development : 41WKs"
+      },
+      "scenario_2": {
+        "baselineStart": "2026-10-02",
+        "baselineEnd": "2026-10-02",
+        "label": "Education Azul (KS FCS 2026/9/24_M151 2nd release) (VN FCS 2026/10/2) Development : 38WKs"
+      }
+    }
+  }
+]
