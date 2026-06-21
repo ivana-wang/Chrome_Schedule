@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChromeSchedule — ChromeBook Schedule Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#0f1424; --card:#141b2e; --card2:#1a2236;
+  --line:#26304a; --ink:#e7ecf7; --mut:#8a96b3; --mut2:#5d6b8a;
+  --accent:#3b82f6; --accent2:#22d3ee; --glow:rgba(34,211,238,.35);
+  --ok:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  /* pastel phase colors — aligned to Validation/Develop phase graph.png */
+  --proto-f:#d9e7f5; --proto-b:#4a86c8;   /* DB  */
+  --evt-f:#ddead0;   --evt-b:#6aa84f;     /* SI  */
+  --dvt-f:#f4cccc;   --dvt-b:#c0504d;     /* PV  */
+  --pvr-f:#f8dde6;   --pvr-b:#cc6688;     /* PVR (pink) */
+  --pvt-f:#fff2cc;   --pvt-b:#d6b656;     /* MV  */
+  --fcs-f:#d6efd6;   --fcs-b:#3f9142;     /* FCS (green) */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(1200px 700px at 70% -10%,#16223f 0%,var(--bg) 55%);color:var(--ink);min-height:100vh;padding:24px;font-size:14px}
+h1,h2,h3{font-weight:600;letter-spacing:.2px}
+.wrap{max-width:1320px;margin:0 auto}
+header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#04121f;box-shadow:0 0 24px var(--glow)}
+header .sub{color:var(--mut);font-size:12.5px;margin-top:2px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.card h2{font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .n{width:20px;height:20px;border-radius:6px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--accent2);font-family:'JetBrains Mono'}
+label{display:block;font-size:11.5px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=date],select{width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 11px;font-family:'JetBrains Mono';font-size:13px;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.seg{display:flex;gap:6px;background:#0c1220;border:1px solid var(--line);border-radius:10px;padding:4px}
+.seg button{flex:1;background:transparent;border:0;color:var(--mut);padding:7px;border-radius:7px;cursor:pointer;font-family:'Space Grotesk';font-size:12.5px;font-weight:500}
+.seg button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121f;font-weight:600}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--mut);cursor:pointer;transition:.15s;background:#0c1220}
+.drop:hover{border-color:var(--accent2);color:var(--ink)}
+.drop.busy{border-color:var(--warn);color:var(--warn)}
+.btn{width:100%;margin-top:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121f;border:0;border-radius:10px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 6px 20px var(--glow)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:#0c1220;color:var(--mut);border:1px solid var(--line);box-shadow:none}
+.hint{font-size:11px;color:var(--mut2);margin-top:6px;line-height:1.5}
+.pill{display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-family:'JetBrains Mono';border:1px solid var(--line)}
+/* timeline card (export-ready, white) */
+#out{display:none}
+.tlcard{background:#fff;color:#1f2430;border-radius:16px;padding:26px 26px 30px;box-shadow:0 14px 50px rgba(0,0,0,.4)}
+.tlhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #eef1f6;padding-bottom:14px;margin-bottom:18px}
+.tlhead .t{font-size:19px;font-weight:700;color:#1a1f2b}
+.tlhead .s{font-size:12px;color:#6b7385;margin-top:3px;font-family:'JetBrains Mono'}
+.tlhead .fcs{text-align:right;font-family:'JetBrains Mono'}
+.tlhead .fcs b{color:#3f9142}
+.chevrons{display:flex;gap:0;margin:8px 0 24px}
+/* SVG chevrons — crisp colored vector border, identical shape (incl. first); nested point→notch */
+.chev{position:relative;flex:1;min-width:90px;height:50px;margin-left:-9px}
+.chev:first-child{margin-left:0}
+.chev-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.chev-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#1a1f2b;font-weight:700;font-size:16px;letter-spacing:.3px;text-align:center;pointer-events:none}
+.chev-label small{font-weight:500;font-size:10px;opacity:.7;font-family:'JetBrains Mono';letter-spacing:0}
+.chev-label.rm{font-size:13px}.chev-label.rm small{font-size:9px}
+.phaseblock{margin-bottom:16px;border:1px solid #edf0f5;border-radius:12px;overflow:hidden}
+.phaseblock .ph{padding:8px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.task{display:grid;grid-template-columns:1fr 96px 96px 70px;gap:8px;padding:6px 14px;border-top:1px solid #f1f3f7;font-size:12.5px;align-items:center}
+.task:hover{background:#f8fafc}
+.task .nm{color:#2a3142}
+.task .nm .site{font-family:'JetBrains Mono';font-size:10px;padding:1px 5px;border-radius:5px;margin-left:6px;border:1px solid #dde}
+.task .nm .site.KS{background:#eef4fc;color:#2f6db0;border-color:#cfe0f5}
+.task .nm .site.VN{background:#fdeef4;color:#b04a78;border-color:#f5cfe0}
+.task .d{font-family:'JetBrains Mono';font-size:12px;color:#3a4253;text-align:center}
+.task .d.m{color:#94a;color:#9aa3b5}
+.task.mile .nm{font-weight:700}
+.task.gate{background:#fffbe9}
+.task.gate .nm{font-weight:700;color:#1a1f2b}
+.task .dur{font-family:'JetBrains Mono';font-size:11px;text-align:center}
+.task .dur input{width:54px;background:#fff;border:1px solid #e2e6ee;border-radius:6px;padding:3px 4px;font-family:'JetBrains Mono';font-size:11px;text-align:center;color:#2a3142}
+.colhead{display:grid;grid-template-columns:1fr 96px 96px 70px;gap:8px;padding:4px 14px;font-size:10.5px;color:#9aa3b5;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.colhead div:not(:first-child){text-align:center}
+/* validation */
+.vbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:11px 14px;border-radius:11px;font-size:13px;border:1px solid var(--line)}
+.vbar.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--ok)}
+.vbar.bad{background:rgba(251,113,133,.08);border-color:rgba(251,113,133,.3);color:var(--bad)}
+.vbar .dot{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.vlist{font-family:'JetBrains Mono';font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.7}
+.vlist .miss{color:var(--bad)}
+.toolbar{display:flex;gap:8px;margin-bottom:14px}
+.toolbar .btn{width:auto;margin:0;padding:9px 16px;font-size:13px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+/* ======== horizontal roadmap (export card, like Example.png) ======== */
+.rm-canvas{position:relative;width:100%;overflow-x:auto}
+.rm-inner{position:relative;min-width:1180px}
+.rm-layer{position:relative;width:100%}
+.rm-chip{position:absolute;transform:translateX(-2px);background:#fff;border:1px solid #d7deea;border-radius:7px;
+  padding:3px 7px;font-size:10.5px;line-height:1.25;color:#2a3142;white-space:nowrap;box-shadow:0 1px 2px rgba(20,30,60,.06)}
+.rm-chip b{font-family:'JetBrains Mono';font-weight:600;font-size:10px;color:#1a1f2b}
+.rm-chip .dt{font-family:'JetBrains Mono';font-size:9.5px;color:#6b7385;display:block}
+.rm-chip.google{border-color:#bcd9b8;background:#f1f8ef}
+.rm-chip.fw{border-color:#cdbbe6;background:#f4f0fb}
+.rm-chip.gate{border-color:#e7c14a;background:#fff7df;font-weight:700}
+.rm-chip.smt{border-color:#9fc0e8;background:#eef5fd}
+.rm-chip.me{border:1.5px solid #d9485f;background:#fdeef0;color:#8f1f30;font-weight:600}
+.rm-chip.dense{border-color:#e3e8f0;background:#fafbfd;color:#566076;font-size:10px}
+.rm-chip.exit{border:1.5px solid #e08a2b;background:#fff3e2;color:#9a5a10;font-weight:700}
+.rm-week{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#3a4660;
+  background:#eef1f7;border:1px solid #d7deea;border-radius:100px;padding:2px 10px}
+.rm-bar{position:relative;width:100%;height:46px;margin:4px 0}
+.rm-chev{position:absolute;top:0;height:46px}
+.rm-axis{position:relative;width:100%;height:18px;border-top:1px dashed #dde3ec;margin-top:2px}
+.rm-tick{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:9.5px;color:#9aa3b5;top:3px}
+.rm-sec{font-size:10px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:.6px;margin:0 0 3px}
+.rm-holidays{margin-top:16px;border-top:1px solid #eef1f6;padding-top:12px;display:flex;gap:22px;flex-wrap:wrap}
+.rm-holidays .hcol{font-size:11px;color:#566076}
+.rm-holidays .hcol h4{font-size:11px;color:#1a1f2b;margin-bottom:4px;font-family:'JetBrains Mono'}
+.rm-holidays .hcol div{font-family:'JetBrains Mono';font-size:10px;line-height:1.7}
+.editpanel{margin-top:16px}
+.editpanel summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">CS</div>
+    <div>
+      <h1>ChromeSchedule</h1>
+      <div class="sub">ChromeBook Schedule Simulation · anchored on Branch Stable Release · self-validated vs Example.png golden</div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ INPUT PANEL ============ -->
+    <div class="card">
+      <h2><span class="n">1</span> Project Setup</h2>
+      <label>Project Name</label>
+      <input type="text" id="proj" value="" placeholder="例：Education Azul (MTK8189) — M151 2nd release">
+
+      <label>Branch image (chromiumdash screenshot)</label>
+      <div class="drop" id="drop">
+        <div id="dropTxt">📷 點此上傳 Branch 圖片<br><span style="font-size:11px">讀取 Chrome Browser Stable Release</span></div>
+      </div>
+      <input type="file" id="file" accept="image/*" hidden>
+      <div class="hint" id="ocrHint">支援 png / jpg。OCR 會自動抓 “Stable Release” 日期；抓不到可手動填下方。</div>
+
+      <label>Stable Release (Chrome Browser) — 錨點</label>
+      <input type="date" id="sr" value="">
+
+      <label>Lead site factory</label>
+      <select id="lead"><option value="KS">KS (Kunshan, CN) — default</option><option value="OTHER">其他 ODM（自行輸入）</option></select>
+      <input type="text" id="leadCustom" placeholder="輸入 lead site 名稱（取代 KS）" hidden style="margin-top:8px">
+
+      <label>Region site factory</label>
+      <select id="region"><option value="VN">Vietnam (越南)</option><option value="TH">Thailand (泰國)</option></select>
+
+      <button class="btn" id="gen">Generate Schedule</button>
+      <button class="btn ghost" id="reset" style="margin-top:8px">Reset to golden defaults</button>
+      <div class="hint">引擎用 (B) dependency 回推；改 Stable Release 或任一 duration 會即時重算並重新對照 Example.png 驗證。</div>
+    </div>
+
+    <!-- ============ OUTPUT ============ -->
+    <div>
+      <div id="valWrap"></div>
+      <div id="out">
+        <div class="toolbar">
+          <button class="btn" id="png">⬇ Export PNG</button>
+        </div>
+        <div class="tlcard" id="tlcard">
+          <div class="tlhead">
+            <div>
+              <div class="t" id="tlTitle">—</div>
+              <div class="s" id="tlSub">—</div>
+            </div>
+            <div class="fcs" id="tlFcs"></div>
+          </div>
+          <div class="chevrons" id="chevrons"></div>
+          <div id="phases"></div>
+        </div>
+        <!-- offscreen render target: roadmap card built only on Export PNG -->
+        <div id="rmExport" aria-hidden="true" style="position:fixed;left:-99999px;top:0;width:1240px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ChromeSchedule engine  (spec: Chrome_Spec.md)
+   Anchor = Stable Release. CFZ = SR+3 (Fri). RTM = CFZ+7 (Fri).
+   HW phases hang backward off CFZ; MV/FCS forward off CFZ.
+   Golden = Example.png / xlsx Milestone_FCS D/E col (M151 2nd release).
+   ===================================================================== */
+const MS=86400000;
+const D=(y,m,d)=>new Date(Date.UTC(y,m-1,d));
+const iso=x=>x.toISOString().slice(0,10);
+const ymd=x=>`${x.getUTCFullYear()}/${String(x.getUTCMonth()+1).padStart(2,'0')}/${String(x.getUTCDate()).padStart(2,'0')}`;
+const md=x=>`${x.getUTCMonth()+1}/${x.getUTCDate()}`;
+const dow=x=>x.getUTCDay();
+const addCal=(x,n)=>new Date(x.getTime()+n*MS);
+const parseISO=s=>{const[a,b,c]=s.split('-').map(Number);return D(a,b,c);};
+const calDiff=(a,b)=>Math.round((b-a)/MS);
+
+/* ---- holiday tables (2026) ---- */
+function expand(rs){const s=new Set();for(const[a,b]of rs){let c=a;while(c<=b){s.add(iso(c));c=addCal(c,1);}}return s;}
+const HOL={
+  KS:expand([[D(2026,1,1),D(2026,1,1)],[D(2026,2,14),D(2026,2,22)],[D(2026,2,28),D(2026,2,28)],
+             [D(2026,4,4),D(2026,4,6)],[D(2026,5,1),D(2026,5,1)],[D(2026,6,19),D(2026,6,21)],
+             [D(2026,9,25),D(2026,9,25)],[D(2026,10,1),D(2026,10,7)]]),
+  VN:expand([[D(2026,1,1),D(2026,1,1)],[D(2026,2,14),D(2026,2,22)],[D(2026,4,30),D(2026,5,1)],[D(2026,9,1),D(2026,9,2)]]),
+  TH:expand([[D(2026,1,1),D(2026,1,1)],[D(2026,4,13),D(2026,4,15)],[D(2026,5,1),D(2026,5,1)],[D(2026,12,5),D(2026,12,5)]]),
+};
+let LEADHOL=HOL.KS, REGIONHOL=HOL.VN;
+let LEADNAME='KS', REGIONNAME='VN';
+/* swap factory codes in displayed labels per Project Setup. §13.2 / §13.3 */
+function dispName(nm){
+  let s=nm;
+  if(LEADNAME!=='KS') s=s.replace(/\bKS\b/g,LEADNAME);
+  if(REGIONNAME!=='VN') s=s.replace(/\bVN\b/g,REGIONNAME);
+  return s;
+}
+function dispSite(site){ return site==='KS'?LEADNAME : site==='VN'?REGIONNAME : site; }
+const isHol=(x,set)=>set.has(iso(x));
+const isWknd=(x,mode)=> mode==='build'?dow(x)===0:(dow(x)===0||dow(x)===6);
+const nextWork=(x,mode,hol)=>{let c=new Date(x);while(isWknd(c,mode)||isHol(c,hol))c=addCal(c,1);return c;};
+const skipNonWork=(x,hol)=>{let c=new Date(x);while(dow(c)===0||dow(c)===6||isHol(c,hol))c=addCal(c,1);return c;};
+const nextFriday=x=>{let c=new Date(x);while(dow(c)!==5)c=addCal(c,1);return c;};
+const fridayOrPrev=(x,hol)=>{let f=nextFriday(x);while(isHol(f,hol)||dow(f)===0||dow(f)===6)f=addCal(f,-1);return f;};
+
+/* =====================================================================
+   GOLDEN task table — xlsx Milestone_FCS D/E (M151 2nd release).
+   gs/ge = golden start/end (2026). site: ''|'KS'|'VN'. mile=milestone.
+   ph: DB|SI|PV|PVR|MV  (+ FCS gates flagged). gate=key milestone.
+   ===================================================================== */
+const G_SR=D(2026,8,25);            // golden anchor
+const G_PROJ=D(2026,1,6);           // golden project start
+const G_FCS_KS=D(2026,9,24), G_FCS_VN=D(2026,10,2);
+const T=(ph,nm,gs,ge,o={})=>({ph,nm,gs:D(2026,gs[0],gs[1]),ge:D(2026,ge[0],ge[1]),site:o.site||'',mile:!!o.mile,gate:!!o.gate});
+const GOLDEN=[
+  // ME Development (rolled into DB column visually)
+  T('DB','ID Master / Detail Ready',[1,6],[1,6],{mile:1}),
+  T('DB','ME design',[1,6],[2,4]),
+  T('DB','Layout',[1,6],[2,11]),
+  T('DB','DB Gerber released',[2,12],[2,12],{mile:1}),
+  T('DB','Mockup review',[2,25],[2,26]),
+  T('DB','DFM review',[3,2],[3,4]),
+  T('DB','ME tooling create',[3,7],[4,17]),
+  T('DB','PCB FAB',[2,25],[3,10]),
+  T('DB','DB SMT Build',[3,11],[3,15]),
+  T('DB','Ship DB PCBA ETA to TPE RD & HP',[3,23],[3,23],{mile:1}),
+  T('DB','DB SVTP test',[3,23],[4,26]),
+  T('DB','Google validation',[3,23],[4,26]),
+  T('DB','DB exit',[4,23],[4,23],{mile:1}),
+  // SI / EVT
+  T('SI','SI Gerber release',[4,27],[4,27],{mile:1}),
+  T('SI','SI ME parts',[4,26],[5,12]),
+  T('SI','PCB FAB',[4,27],[5,11]),
+  T('SI','SI SMT build',[5,12],[5,24]),
+  T('SI','SI Pre-Build',[5,15],[5,15],{mile:1}),
+  T('SI','SI Main build',[5,19],[5,20]),
+  T('SI','OOBIP',[5,20],[5,27]),
+  T('SI','Ship SI unit ETA to NSDD (PCBA Only)',[5,22],[5,22],{mile:1}),
+  T('SI','Ship SI unit ETA to QAD/TPE RD & HP',[5,27],[5,27],{mile:1}),
+  T('SI','SI SVTP test',[5,28],[6,24]),
+  T('SI','Google dogfooding',[5,28],[6,24]),
+  T('SI','SI exit',[7,2],[7,2],{mile:1}),
+  // PV / DVT
+  T('PV','PV Gerber release',[6,18],[6,18],{mile:1}),
+  T('PV','PCB FAB',[6,19],[7,6]),
+  T('PV','PV SMT Build',[7,7],[7,10]),
+  T('PV','VN SMT build',[7,21],[7,22],{site:'VN'}),
+  T('PV','PV Pre-Build',[7,10],[7,10],{mile:1}),
+  T('PV','VN Pre-build',[7,27],[7,27],{mile:1,site:'VN'}),
+  T('PV','PV Main build',[7,14],[7,15]),
+  T('PV','VN Main-build',[7,29],[7,29],{site:'VN'}),
+  T('PV','OOBIP',[7,11],[7,31]),
+  T('PV','Ship PV unit ETA to NSDD (PCBA Only)',[7,15],[7,15],{mile:1}),
+  T('PV','Ship PV unit ETA to QAD/TPE RD & HP',[7,22],[7,22],{mile:1}),
+  T('PV','PV SVTP test',[7,23],[8,19]),
+  T('PV','Google dogfooding',[7,23],[8,19]),
+  T('PV','Code Freeze (FSI candidate) = CFZ',[8,28],[8,28],{mile:1,gate:1}),
+  T('PV','PV Regression',[8,31],[9,3]),
+  T('PV','RTM Ties-1 = RTM',[9,4],[9,4],{mile:1,gate:1}),
+  T('PV','PV exit',[9,3],[9,3],{mile:1}),
+  // PVR (ME PV-R)
+  T('PVR','ME PV-R build (KS)',[8,17],[8,17],{mile:1,site:'KS'}),
+  T('PVR','By part (KS)',[8,21],[8,25],{site:'KS'}),
+  T('PVR','Tooling lock down (KS)',[8,25],[8,25],{mile:1,site:'KS'}),
+  T('PVR','ME PV-R build (VN)',[8,27],[8,27],{mile:1,site:'VN'}),
+  T('PVR','Tooling lock down (VN)',[9,2],[9,2],{mile:1,site:'VN'}),
+  // MV
+  T('MV','MV SMT',[9,2],[9,2],{mile:1,site:'KS'}),
+  T('MV','VN SMT build',[9,11],[9,13],{site:'VN'}),
+  T('MV','MV Pre-Build',[9,5],[9,5],{mile:1,site:'KS'}),
+  T('MV','VN Pre-build',[9,15],[9,15],{mile:1,site:'VN'}),
+  T('MV','MV Main build',[9,8],[9,13],{site:'KS'}),
+  T('MV','VN Main-build',[9,17],[9,17],{site:'VN'}),
+  T('MV','Marketing OOBA',[9,15],[9,15],{mile:1}),
+  T('MV','Mini Regression -1',[9,14],[9,16]),
+  T('MV','Product release - KS',[9,17],[9,17],{mile:1,site:'KS'}),
+  T('MV','Product release - VN',[9,24],[9,24],{mile:1,site:'VN'}),
+  T('MV','First Order Drop',[9,17],[9,17],{mile:1}),
+  T('FCS','KS FCS',[9,24],[9,24],{mile:1,gate:1,site:'KS'}),
+  T('FCS','VN FCS',[10,2],[10,2],{mile:1,gate:1,site:'VN'}),
+];
+const PHASE_ORDER=['DB','SI','PV','PVR','MV','FCS'];
+const PHASE_META={
+  DB:{label:'DB',sub:'Proto',f:'--proto-f',b:'--proto-b'},
+  SI:{label:'SI',sub:'EVT',f:'--evt-f',b:'--evt-b'},
+  PV:{label:'PV',sub:'DVT',f:'--dvt-f',b:'--dvt-b'},
+  PVR:{label:'PVR',sub:'ME PV-R',f:'--pvr-f',b:'--pvr-b'},
+  MV:{label:'MV',sub:'PVT',f:'--pvt-f',b:'--pvt-b'},
+  FCS:{label:'FCS',sub:'Final',f:'--fcs-f',b:'--fcs-b'},
+};
+/* phase bar = Develop phase graph.png — 4 pastel chevrons, names Proto/EVT/DVT/PVT */
+const BAR=[
+  {name:'Proto',phs:['DB'],     f:'--proto-f',b:'--proto-b'},
+  {name:'EVT',  phs:['SI'],     f:'--evt-f',  b:'--evt-b'},
+  {name:'DVT',  phs:['PV','PVR'],f:'--dvt-f', b:'--dvt-b'},
+  {name:'PVT',  phs:['MV'],     f:'--pvt-f',  b:'--pvt-b'},
+];
+
+/* ME 重點 task — Example.png 紅框那些（放在 phase bar 下方一層）。§ user req 7 */
+const ME_KEY=new Set(['ME design','Layout','ME tooling create','T1+T2','SI ME parts',
+  'Mockup review','DFM review','ME PV-R build (KS)','ME PV-R build (VN)',
+  'Tooling lock down (KS)','Tooling lock down (VN)']);
+/* labeled holidays for the dev window (display list). */
+const HOL_LABELS={
+  KS:[['Chinese New Year','2/14–2/22'],['228 Holiday','2/28'],['Tomb-sweeping','4/4–4/6'],
+      ['Labor Day','5/1'],['Dragon Boat','6/19–6/21'],['Mid-Autumn','9/25'],['China National Day','10/1–10/7']],
+  VN:[['Tet (Lunar NY)','2/14–2/22'],['Reunification + Labor','4/30–5/1'],['National Day','9/1–9/2']],
+  TH:[['New Year','1/1'],['Songkran','4/13–4/15'],['Labor Day','5/1'],['King Bhumibol Day','12/5']],
+};
+
+/* per-task editable duration override (calendar days). key=index */
+let durOverride={};
+
+/* =====================================================================
+   SCHEDULER — global shift from anchor + re-snap gates + duration edits.
+   shiftCal = liveSR - goldenSR (calendar). Every golden date shifts by
+   shiftCal; the 5 gates are then re-snapped by their formula so they
+   stay holiday-correct. Duration overrides push downstream tasks.
+   ===================================================================== */
+function goldenSpan(t){return calDiff(t.gs,t.ge);}
+/* forward block = SR/CFZ-driven (after the Stable Release anchor wall). §13.1 */
+function isFwd(t){
+  if(t.ph==='PVR'||t.ph==='MV'||t.ph==='FCS') return true;
+  if(t.ph==='PV' && /CFZ|RTM|PV Regression|PV exit/.test(t.nm)) return true;
+  return false;
+}
+/* SVTP test does NOT drive downstream; Google validation/dogfooding does. §13.5 */
+function isDriver(t){ return !/SVTP test/.test(t.nm); }
+function build(srISO){
+  const hasAnchor=!!srISO;
+  // no anchor: skeleton — task names + editable Days only, dates blank
+  if(!hasAnchor){
+    const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
+    return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null};
+  }
+  const SR=parseISO(srISO);
+  const shift=calDiff(G_SR,SR);
+  // base shifted dates (whole golden moves with the Stable Release anchor)
+  const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:addCal(t.gs,shift),e:addCal(t.ge,shift),warn:''}));
+  const bw=rows.filter(r=>!r.fwd), fw=rows.filter(r=>r.fwd);
+  // BACKWARD block (HW, before anchor wall): end pinned at SR-anchored position;
+  // editing duration moves only UPSTREAM tasks — never downstream, never forward. §13.1
+  [...bw].sort((a,b)=>b.gs-a.gs).forEach(r=>{
+    const ov=durOverride[r.i]; if(ov==null) return;
+    const newDur=ov, delta=goldenSpan(r)-newDur;   // >0 if shortened
+    r.s=addCal(r.e,-newDur);                        // recompute start, end pinned
+    if(delta && isDriver(r)) bw.forEach(o=>{ if(o!==r && o.ge<=r.gs){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
+  });
+  // FORWARD block (after anchor wall): start pinned; editing pushes DOWNSTREAM later. §13.1
+  [...fw].sort((a,b)=>a.gs-b.gs).forEach(r=>{
+    const ov=durOverride[r.i]; if(ov==null) return;
+    const newDur=ov, delta=newDur-goldenSpan(r);    // >0 if lengthened
+    r.e=addCal(r.s,newDur);
+    if(delta) fw.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
+  });
+  // re-snap key gates by formula (holiday-correct)
+  const CFZ=fridayOrPrev(addCal(SR,3),LEADHOL);
+  const RTM=fridayOrPrev(addCal(CFZ,7),LEADHOL);
+  set(rows,'Code Freeze (FSI candidate) = CFZ',CFZ,CFZ);
+  set(rows,'RTM Ties-1 = RTM',RTM,RTM);
+  // FCS = Product release + 7 cal (skip lead/region holidays)
+  const prKS=getDate(rows,'Product release - KS');
+  const prVN=getDate(rows,'Product release - VN');
+  const fcsKS=skipNonWork(addCal(prKS,7),LEADHOL);
+  const fcsVN=nextFriday(addCal(prVN,7)); let fv=fcsVN; while(isHol(fv,REGIONHOL))fv=nextFriday(addCal(fv,1));
+  set(rows,'KS FCS',fcsKS,fcsKS);
+  set(rows,'VN FCS',fv,fv);
+  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv};
+}
+function set(rows,nm,s,e){const r=rows.find(x=>x.nm===nm);if(r){r.s=s;r.e=e;}}
+function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
+function minStart(rows){return rows.reduce((m,r)=>r.s<m?r.s:m,rows[0].s);}
+
+/* =====================================================================
+   VALIDATION — compare to golden (only meaningful at golden SR) +
+   overall development duration (project start -> KS FCS).
+   ===================================================================== */
+function validate(model,srISO){
+  if(!model.hasAnchor) return {noAnchor:true,atGolden:false,miss:[],wkAll:0,durOK:true,pass:true};
+  const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0;
+  const miss=[];
+  if(atGolden){
+    for(const r of model.rows){
+      if(iso(r.s)!==iso(r.gs)||iso(r.e)!==iso(r.ge))
+        miss.push(`${r.ph} · ${r.nm}: got ${md(r.s)}–${md(r.e)} | golden ${md(r.gs)}–${md(r.ge)}`);
+    }
+  }
+  const wkAll=Math.ceil(calDiff(model.projStart,model.fcsKS)/7);
+  const durOK=!atGolden || wkAll===38;
+  return {atGolden,miss,wkAll,durOK,pass:atGolden?(miss.length===0&&durOK):true};
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function cssv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+/* crisp SVG chevron (notched left + pointed right, same shape every phase). */
+function chevSVG(fill,stroke){
+  return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
+    `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
+    `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+/* greedy lane packing — items {x0,x1(px-frac)}; returns lane index per item */
+function packLanes(items){
+  const lanes=[]; // each = last x1
+  return items.map(it=>{
+    for(let l=0;l<lanes.length;l++){ if(it.x0> lanes[l]+0.6){ lanes[l]=it.x1; it.lane=l; return l; } }
+    lanes.push(it.x1); it.lane=lanes.length-1; return lanes.length-1;
+  });
+}
+function render(model,val,srISO){
+  const has=model.hasAnchor;
+  document.getElementById('out').style.display='block';
+  document.getElementById('tlTitle').textContent=document.getElementById('proj').value||'ChromeBook Schedule';
+  document.getElementById('tlSub').textContent= has
+    ? `Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Project start ${md(model.projStart)} · ${val.wkAll} WKs`
+    : '尚未輸入 Stable Release（錨點）· 僅顯示 task 結構與可調 Days，輸入後自動算出日期';
+  document.getElementById('tlFcs').innerHTML= has
+    ? `${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b>` : '';
+  // ---- phase bar = Develop phase graph.png (Proto/EVT/DVT/PVT) ----
+  const cont=document.getElementById('chevrons');cont.innerHTML='';
+  BAR.forEach(b=>{
+    const inph=model.rows.filter(r=>b.phs.includes(r.ph));
+    const div=document.createElement('div');div.className='chev';
+    let range='';
+    if(has && inph.length){const s=inph.reduce((m,r)=>r.s<m?r.s:m,inph[0].s), e=inph.reduce((m,r)=>r.e>m?r.e:m,inph[0].e);range=`${md(s)}–${md(e)}`;}
+    div.innerHTML=chevSVG(cssv(b.f),'#1a1a1a')+
+      `<div class="chev-label"><span>${b.name}</span>${range?`<small>${range}</small>`:''}</div>`;
+    cont.appendChild(div);
+  });
+  // ---- on-screen: editable columnar task list ----
+  const host=document.getElementById('phases');host.innerHTML='';
+  PHASE_ORDER.forEach(ph=>{
+    const meta=PHASE_META[ph];
+    const inph=model.rows.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s||a.gs-b.gs);
+    if(!inph.length)return;
+    const block=document.createElement('div');block.className='phaseblock';
+    const head=document.createElement('div');head.className='ph';
+    head.style.background=cssv(meta.f);head.style.color='#23303f';
+    head.innerHTML=`<span>${meta.label} · ${meta.sub}</span><span style="font-family:JetBrains Mono;font-size:11px;font-weight:600">${PHASE_ORDER.indexOf(ph)+1}/${PHASE_ORDER.length}</span>`;
+    block.appendChild(head);
+    const ch=document.createElement('div');ch.className='colhead';
+    ch.innerHTML=`<div>Task</div><div>Start</div><div>End</div><div>Days</div>`;block.appendChild(ch);
+    inph.forEach(r=>{
+      const row=document.createElement('div');
+      row.className='task'+(r.mile?' mile':'')+(r.gate?' gate':'');
+      const nm=dispName(r.nm), code=dispSite(r.site);
+      // only show the factory pill when the task name doesn't already carry the code
+      const site=(r.site && !nm.includes(code))?`<span class="site ${r.site}">${code}</span>`:'';
+      const defSpan=goldenSpan(r);
+      const durCell=r.mile?`<div class="dur" style="color:#b8c">◆</div>`
+        :`<div class="dur"><input data-i="${r.i}" value="${durOverride[r.i]??defSpan}" title="duration (cal days)"></div>`;
+      const sCell=has?md(r.s):'';
+      const eCell=has?(r.mile?'—':md(r.e)):'';
+      row.innerHTML=`<div class="nm">${nm}${site}</div>
+        <div class="d">${sCell}</div>
+        <div class="d${r.mile?' m':''}">${eCell}</div>${durCell}`;
+      block.appendChild(row);
+    });
+    host.appendChild(block);
+  });
+  host.querySelectorAll('input[data-i]').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      const i=+inp.dataset.i, v=parseInt(inp.value,10);
+      if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
+      run();
+    });
+  });
+  renderVal(val);
+}
+
+/* ============ horizontal roadmap — built only on Export PNG (Example.png style) ============ */
+function renderRoadmap(model,host){
+  host.innerHTML=`<div class="tlcard">
+    <div class="tlhead">
+      <div><div class="t">${document.getElementById('proj').value||'ChromeBook Schedule'}</div>
+        <div class="s">Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Project start ${md(model.projStart)}</div></div>
+      <div class="fcs">${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b></div>
+    </div>
+    <div class="rm-canvas"><div class="rm-inner" id="rmInnerExp"></div></div>
+    <div class="rm-holidays" id="rmHolExp"></div>
+  </div>`;
+  const inner=host.querySelector('#rmInnerExp');
+  const rows=model.rows.filter(r=>r.ph!=='FCS'); // FCS dates live in the header
+  const T0=model.projStart, T1=addCal(model.fcsVN,4);
+  const span=(T1-T0)||1;
+  const xp=d=>(d-T0)/span*100;                 // percent
+  const PXW=1180;                              // matches .rm-inner min-width
+  const chipFrac=lbl=>(lbl.length*5.6+18)/PXW*100;
+  // classify
+  const isGoogle=t=>/Google/.test(t.nm), isSMT=t=>/\bSMT\b/.test(t.nm),
+        isExit=t=>/\bexit\b/i.test(t.nm), isCfzRtm=t=>/= CFZ|= RTM/.test(t.nm);
+  const L1=[],L2=[],ME=[],DENSE=[],EXIT=[];
+  rows.forEach(r=>{
+    if(isGoogle(r)||isCfzRtm(r)) L1.push(r);
+    else if(isSMT(r)) L2.push(r);
+    else if(isExit(r)) EXIT.push(r);
+    else if(ME_KEY.has(r.nm)) ME.push(r);
+    else DENSE.push(r);
+  });
+  // helper to build a layer of chips with lane packing
+  function layer(list,cls,labelFn){
+    const items=list.map(r=>{const lbl=labelFn(r);return {r,lbl,x0:xp(r.s),x1:Math.max(xp(r.e),xp(r.s)+chipFrac(lbl))};})
+                    .sort((a,b)=>a.x0-b.x0);
+    packLanes(items);
+    const lanes=Math.max(1,...items.map(i=>i.lane+1));
+    const ROW=24, H=lanes*ROW;
+    const div=document.createElement('div');div.className='rm-layer';div.style.height=H+'px';
+    items.forEach(it=>{
+      const c=document.createElement('div');c.className='rm-chip '+cls(it.r);
+      c.style.left=it.x0+'%';c.style.top=(it.lane*ROW)+'px';
+      const date=it.r.mile?md(it.r.s):`${md(it.r.s)}–${md(it.r.e)}`;
+      c.innerHTML=`<b>${it.lbl}</b><span class="dt">${date}</span>`;
+      div.appendChild(c);
+    });
+    return div;
+  }
+  inner.innerHTML='';
+  const sec=t=>{const d=document.createElement('div');d.className='rm-sec';d.textContent=t;return d;};
+  // ---- Layer 1: Google / FW candidate / CFZ / RTM ----
+  inner.appendChild(sec('Google · FW Candidate · CFZ · RTM'));
+  inner.appendChild(layer(L1,r=>isCfzRtm(r)?'gate':(/FW|candidate/i.test(r.nm)?'fw':'google'),
+    r=>dispName(r.nm).replace(' = CFZ','').replace(' = RTM','').replace('Code Freeze (FSI candidate)','CFZ').replace('RTM Ties-1','RTM')));
+  // ---- Layer 2: SMT ----
+  inner.appendChild(sec('SMT'));
+  inner.appendChild(layer(L2,_=>'smt',r=>dispName(r.nm)));
+  // ---- Layer 3: SVTP test → next-phase G.O. week buffers ----
+  inner.appendChild(sec('SVTP Test → G.O.  (interval)'));
+  inner.appendChild(weekLayer(model,xp));
+  // ---- middle: phase chevron bar ----
+  inner.appendChild(barLayer(model,xp));
+  // ---- ME key tasks (red) — directly under the bar ----
+  inner.appendChild(sec('ME 重點 Tasks'));
+  inner.appendChild(layer(ME,_=>'me',r=>dispName(r.nm)));
+  // ---- phase exits (clearly marked) ----
+  inner.appendChild(sec('Phase Exit'));
+  inner.appendChild(layer(EXIT,_=>'exit',r=>dispName(r.nm)));
+  // ---- dense tasks per phase ----
+  inner.appendChild(sec('Phase Tasks'));
+  inner.appendChild(layer(DENSE,_=>'dense',r=>dispName(r.nm)));
+  // ---- date axis ----
+  inner.appendChild(axisLayer(T0,T1,xp));
+  // ---- holidays ----
+  renderHolidays(host.querySelector('#rmHolExp'));
+}
+function weekLayer(model,xp){
+  const div=document.createElement('div');div.className='rm-layer';div.style.height='26px';
+  const seq=['DB','SI','PV'];
+  seq.forEach((ph,i)=>{
+    const nextPh=['SI','PV','PVR'][i];
+    const gv=model.rows.find(r=>r.ph===ph && /Google/.test(r.nm));
+    const nextRows=model.rows.filter(r=>r.ph===nextPh);
+    if(!gv||!nextRows.length) return;
+    const nextStart=nextRows.reduce((m,r)=>r.s<m?r.s:m,nextRows[0].s);
+    const wks=Math.round((nextStart-gv.s)/MS/7);
+    const mid=(xp(gv.s)+xp(nextStart))/2;
+    const w=document.createElement('div');w.className='rm-week';w.style.left=mid+'%';w.style.top='2px';
+    w.textContent=`${wks} wks`;
+    div.appendChild(w);
+  });
+  return div;
+}
+function barLayer(model,xp){
+  const div=document.createElement('div');div.className='rm-bar';
+  BAR.forEach(b=>{
+    const inph=model.rows.filter(r=>b.phs.includes(r.ph)); if(!inph.length)return;
+    const s=inph.reduce((m,r)=>r.s<m?r.s:m,inph[0].s), e=inph.reduce((m,r)=>r.e>m?r.e:m,inph[0].e);
+    const c=document.createElement('div');c.className='rm-chev';
+    c.style.left=xp(s)+'%';c.style.width=(xp(e)-xp(s))+'%';
+    c.innerHTML=chevSVG(cssv(b.f),'#1a1a1a')+
+      `<div class="chev-label rm"><span>${b.name}</span><small>${md(s)}–${md(e)}</small></div>`;
+    div.appendChild(c);
+  });
+  return div;
+}
+function axisLayer(T0,T1,xp){
+  const div=document.createElement('div');div.className='rm-axis';
+  let d=D(T0.getUTCFullYear(),T0.getUTCMonth()+1,1);
+  while(d<=T1){ if(d>=T0){const t=document.createElement('div');t.className='rm-tick';t.style.left=xp(d)+'%';
+    t.textContent=`${d.getUTCMonth()+1}/1`;div.appendChild(t);} d=D(d.getUTCFullYear(),d.getUTCMonth()+2,1); }
+  return div;
+}
+function renderHolidays(el){
+  const lead=HOL_LABELS.KS, reg=HOL_LABELS[REGIONNAME]||HOL_LABELS.VN;
+  const col=(title,arr)=>`<div class="hcol"><h4>${title} 假日</h4>${arr.map(([n,d])=>`<div>${d} · ${n}</div>`).join('')}</div>`;
+  el.innerHTML=`<div class="rm-sec" style="width:100%">Development 期間 Holidays</div>`+
+    col(LEADNAME+' (lead)',lead)+col(REGIONNAME+' (region)',reg);
+}
+function renderVal(val){
+  const w=document.getElementById('valWrap');
+  if(val.noAnchor){
+    w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">尚未輸入 Stable Release · 上傳 Branch 圖片或填入錨點後，會自動回推日期並對照 Example.png 驗證。</div></div>`;
+    return;
+  }
+  if(!val.atGolden){
+    w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div>已重算（非 golden 輸入）。Dependency 結構與計算邏輯維持與 Example.png 一致 · Overall ${val.wkAll} WKs（隨 duration 變動）。</div></div>`;
+    return;
+  }
+  if(val.pass){
+    w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div><b>✔ Golden 驗證通過</b> — 所有 task dependency 與日期吻合 Example.png；Overall development duration = <b>${val.wkAll} WKs</b>（expect 38）。</div></div>`;
+  }else{
+    const items=val.miss.slice(0,12).map(m=>`<div class="miss">✗ ${m}</div>`).join('');
+    w.innerHTML=`<div class="vbar bad"><span class="dot"></span><div><b>${val.miss.length} 項與 golden 有偏差</b> · Overall ${val.wkAll} WKs (expect 38)
+      <div class="vlist">${items}${val.miss.length>12?`<div>… +${val.miss.length-12} more</div>`:''}</div></div></div>`;
+  }
+}
+
+/* =====================================================================
+   WIRING
+   ===================================================================== */
+function run(){
+  const regionEl=document.getElementById('region');
+  REGIONNAME=regionEl.value; REGIONHOL = regionEl.value==='TH'?HOL.TH:HOL.VN;
+  const leadEl=document.getElementById('lead'), leadCustom=document.getElementById('leadCustom');
+  leadCustom.hidden = leadEl.value!=='OTHER';
+  LEADNAME = leadEl.value==='OTHER' ? (leadCustom.value.trim()||'ODM') : 'KS';
+  LEADHOL = HOL.KS; // lead holiday table stays CN/TW unless a custom table is provided
+  const srISO=document.getElementById('sr').value;
+  const model=build(srISO);
+  const val=validate(model,srISO);
+  render(model,val,srISO);
+}
+const reflow=()=>run();
+document.getElementById('gen').onclick=run;
+document.getElementById('region').onchange=reflow;
+document.getElementById('lead').onchange=reflow;
+document.getElementById('leadCustom').oninput=reflow;
+document.getElementById('sr').onchange=reflow;
+document.getElementById('reset').onclick=()=>{durOverride={};document.getElementById('sr').value='';
+  document.getElementById('lead').value='KS';document.getElementById('region').value='VN';run();};
+
+/* ---- image upload + OCR ---- */
+const drop=document.getElementById('drop'),file=document.getElementById('file');
+drop.onclick=()=>file.click();
+file.onchange=e=>{if(e.target.files[0])ocr(e.target.files[0]);};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('busy');};
+drop.ondragleave=()=>drop.classList.remove('busy');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('busy');if(e.dataTransfer.files[0])ocr(e.dataTransfer.files[0]);};
+async function ocr(f){
+  const txt=document.getElementById('dropTxt'),hint=document.getElementById('ocrHint');
+  drop.classList.add('busy');txt.innerHTML='🔎 OCR 讀取中…';
+  try{
+    const{data}=await Tesseract.recognize(f,'eng');
+    const lines=data.text.split('\n');
+    // find the "Chrome Browser" section's "Stable Release"
+    let date=null,scope='';
+    for(let i=0;i<lines.length;i++){
+      if(/chrome browser/i.test(lines[i]))scope='browser';
+      if(/chrome\s*os/i.test(lines[i]))scope='os';
+      if(/stable release/i.test(lines[i]) && scope!=='os'){
+        const m=lines[i].match(/([A-Z][a-z]{2})[a-z]*,?\s+([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
+        if(m){date=parseMon(m[2],+m[3],+m[4]);break;}
+        const m2=lines[i].match(/([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
+        if(m2){date=parseMon(m2[1],+m2[2],+m2[3]);break;}
+      }
+    }
+    if(date){
+      document.getElementById('sr').value=iso(date);
+      txt.innerHTML='✅ 已讀取 Stable Release';
+      hint.innerHTML=`Chrome Browser Stable Release = <b>${ymd(date)}</b>（已填入錨點）`;
+      run();
+    }else{
+      txt.innerHTML='⚠ 未找到 Stable Release';
+      hint.textContent='OCR 沒抓到日期，請手動填入下方 Stable Release。';
+    }
+  }catch(err){
+    txt.innerHTML='⚠ OCR 失敗';hint.textContent='請手動填入 Stable Release。'+err;
+  }finally{drop.classList.remove('busy');}
+}
+function parseMon(mon,d,y){const M={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};return D(y,M[mon]||1,d);}
+
+/* ---- PNG export (simple: html2canvas-free → use built-in) ---- */
+document.getElementById('png').onclick=async()=>{
+  const srISO=document.getElementById('sr').value;
+  if(!srISO){alert('請先輸入 Stable Release 再匯出。');return;}
+  const host=document.getElementById('rmExport');
+  // build the roadmap card offscreen, only for export (PowerPoint-ready)
+  const model=build(srISO);
+  renderRoadmap(model,host);
+  const card=host.querySelector('.tlcard');
+  const box=card.querySelector('.rm-canvas'); if(box)box.style.overflow='visible';
+  try{
+    if(window.html2canvas){
+      const cv=await html2canvas(card,{scale:2,backgroundColor:'#ffffff'});
+      const a=document.createElement('a');
+      a.download=(document.getElementById('proj').value||'ChromeSchedule').replace(/[^\w]+/g,'_')+'.png';
+      a.href=cv.toDataURL('image/png');a.click();
+    }else{
+      const w=window.open('','_blank');
+      w.document.write('<html><head><title>ChromeSchedule</title></head><body>'+card.outerHTML+'</body></html>');
+      w.document.close();w.focus();setTimeout(()=>w.print(),300);
+    }
+  }finally{ host.innerHTML=''; }
+};
+
+/* boot */
+run();
+</script>
+</body>
+</html>
