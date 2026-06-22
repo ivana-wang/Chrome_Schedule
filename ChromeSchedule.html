@@ -89,6 +89,20 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .vlist .miss{color:var(--bad)}
 .toolbar{display:flex;gap:8px;margin-bottom:14px}
 .toolbar .btn{width:auto;margin:0;padding:9px 16px;font-size:13px}
+/* branch info card — built from chromiumdash OCR (Example: M151 release card) */
+#branchCard{margin-bottom:14px}
+.brcard{max-width:300px;background:#fff;border:1px solid #e3e6f0;border-radius:13px;overflow:hidden;
+  color:#2a3142;box-shadow:0 8px 26px rgba(20,30,70,.30)}
+.brcard .bt{background:#fff;text-align:center;padding:12px 8px;line-height:1;border-bottom:1px solid #e3e6f0}
+.brcard .bt b{font-size:40px;font-weight:800;letter-spacing:1px;color:#4456b3}
+.brcard .bt .mnum{display:block;margin:0 auto;height:44px;width:auto;max-width:92%;object-fit:contain}
+.brcard .br{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 14px;
+  font-size:13px;border-top:1px solid #eef0f6}
+.brcard .br .k{color:#3a4253}
+.brcard .br .v{font-family:'JetBrains Mono';font-weight:600;color:#2a3142}
+.brcard .br.gate{background:#f4f6fd}
+.brcard .br.gate .k{color:#3f51b5;font-weight:600}
+.brcard .br.gate .v{color:#3f51b5}
 @media(max-width:980px){.grid{grid-template-columns:1fr}}
 
 /* ======== horizontal roadmap (export card, like Example.png) ======== */
@@ -155,13 +169,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <label>Region site factory</label>
       <select id="region"><option value="VN">Vietnam (越南)</option><option value="TH">Thailand (泰國)</option></select>
 
-      <button class="btn" id="gen">Generate Schedule</button>
-      <button class="btn ghost" id="reset" style="margin-top:8px">Reset to golden defaults</button>
-      <div class="hint">引擎用 (B) dependency 回推；改 Stable Release 或任一 duration 會即時重算並重新對照 Example.png 驗證。</div>
+      <button class="btn ghost" id="reset">Reset to defaults</button>
+      <div class="hint">改 Stable Release、工廠或任一 duration 都會即時自動重算排程。</div>
     </div>
 
     <!-- ============ OUTPUT ============ -->
     <div>
+      <div id="branchCard"></div>
       <div id="valWrap"></div>
       <div id="out">
         <div class="toolbar">
@@ -213,11 +227,18 @@ const HOL={
 };
 let LEADHOL=HOL.KS, REGIONHOL=HOL.VN;
 let LEADNAME='KS', REGIONNAME='VN';
-/* swap factory codes in displayed labels per Project Setup. §13.2 / §13.3 */
+/* swap factory codes in displayed labels per Project Setup. §13.2 / §13.3
+   + display-only phase rename: DB→Proto, SI→EVT, PV→DVT (internal ph/nm keys
+   stay unchanged so scheduling logic is untouched). PV(?!-R) leaves PVR tasks
+   like "ME PV-R build" alone. */
 function dispName(nm){
   let s=nm;
   if(LEADNAME!=='KS') s=s.replace(/\bKS\b/g,LEADNAME);
   if(REGIONNAME!=='VN') s=s.replace(/\bVN\b/g,REGIONNAME);
+  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT');
+  // gate label rename (display only — internal nm/keys keep "= CFZ"/"= RTM").
+  s=s.replace('Code Freeze (FSI candidate) = CFZ','FSI Candidate (CFZ)')
+     .replace('RTM Ties-1 = RTM','FSI Sign-off (RTM)');
   return s;
 }
 function dispSite(site){ return site==='KS'?LEADNAME : site==='VN'?REGIONNAME : site; }
@@ -239,7 +260,7 @@ const G_FCS_KS=D(2026,9,24), G_FCS_VN=D(2026,10,2);
 const T=(ph,nm,gs,ge,o={})=>({ph,nm,gs:D(2026,gs[0],gs[1]),ge:D(2026,ge[0],ge[1]),site:o.site||'',mile:!!o.mile,gate:!!o.gate});
 const GOLDEN=[
   // ME Development (rolled into DB column visually)
-  T('DB','ID Master / Detail Ready',[1,6],[1,6],{mile:1}),
+  T('DB','ID Lock',[1,6],[1,6],{mile:1}),
   T('DB','ME design',[1,6],[2,4]),
   T('DB','Layout',[1,6],[2,11]),
   T('DB','DB Gerber released',[2,12],[2,12],{mile:1}),
@@ -251,18 +272,21 @@ const GOLDEN=[
   T('DB','Ship DB PCBA ETA to TPE RD & HP',[3,23],[3,23],{mile:1}),
   T('DB','DB SVTP test',[3,23],[4,26]),
   T('DB','Google validation',[3,23],[4,26]),
+  T('DB','Google prototype',[3,23],[3,23],{mile:1}),
   T('DB','DB exit',[4,23],[4,23],{mile:1}),
   // SI / EVT
   T('SI','SI Gerber release',[4,27],[4,27],{mile:1}),
   T('SI','SI ME parts',[4,26],[5,12]),
   T('SI','PCB FAB',[4,27],[5,11]),
-  T('SI','SI SMT build',[5,12],[5,24]),
+  T('SI','SI SMT build',[5,12],[5,15]),
   T('SI','SI Pre-Build',[5,15],[5,15],{mile:1}),
   T('SI','SI Main build',[5,19],[5,20]),
   T('SI','OOBIP',[5,20],[5,27]),
   T('SI','Ship SI unit ETA to NSDD (PCBA Only)',[5,22],[5,22],{mile:1}),
   T('SI','Ship SI unit ETA to QAD/TPE RD & HP',[5,27],[5,27],{mile:1}),
   T('SI','SI SVTP test',[5,28],[6,24]),
+  T('SI','Google release SI image',[5,7],[5,7],{mile:1}),
+  T('SI','Google EVT unit',[5,27],[5,27],{mile:1}),
   T('SI','Google dogfooding',[5,28],[6,24]),
   T('SI','SI exit',[7,2],[7,2],{mile:1}),
   // PV / DVT
@@ -278,7 +302,13 @@ const GOLDEN=[
   T('PV','Ship PV unit ETA to NSDD (PCBA Only)',[7,15],[7,15],{mile:1}),
   T('PV','Ship PV unit ETA to QAD/TPE RD & HP',[7,22],[7,22],{mile:1}),
   T('PV','PV SVTP test',[7,23],[8,19]),
+  T('PV','Google release PV image',[7,2],[7,2],{mile:1}),
+  T('PV','Google DVT unit',[7,22],[7,22],{mile:1}),
   T('PV','Google dogfooding',[7,23],[8,19]),
+  // FW gates — driven by Early Stable Cut (chromiumdash). golden ESC = Aug 11:
+  //   FW Lock Down = ESC-7 (Aug 4); FW Candidate Testing = lock+1 .. ESC-1 (Aug 5–10). §user req
+  T('PV','FW Lock Down',[8,4],[8,4],{mile:1}),
+  T('PV','FW Candidate Testing',[8,5],[8,10]),
   T('PV','Code Freeze (FSI candidate) = CFZ',[8,28],[8,28],{mile:1,gate:1}),
   T('PV','PV Regression',[8,31],[9,3]),
   T('PV','RTM Ties-1 = RTM',[9,4],[9,4],{mile:1,gate:1}),
@@ -306,9 +336,9 @@ const GOLDEN=[
 ];
 const PHASE_ORDER=['DB','SI','PV','PVR','MV','FCS'];
 const PHASE_META={
-  DB:{label:'DB',sub:'Proto',f:'--proto-f',b:'--proto-b'},
-  SI:{label:'SI',sub:'EVT',f:'--evt-f',b:'--evt-b'},
-  PV:{label:'PV',sub:'DVT',f:'--dvt-f',b:'--dvt-b'},
+  DB:{label:'Proto',sub:'Proto',f:'--proto-f',b:'--proto-b'},
+  SI:{label:'EVT',sub:'EVT',f:'--evt-f',b:'--evt-b'},
+  PV:{label:'DVT',sub:'DVT',f:'--dvt-f',b:'--dvt-b'},
   PVR:{label:'PVR',sub:'ME PV-R',f:'--pvr-f',b:'--pvr-b'},
   MV:{label:'MV',sub:'PVT',f:'--pvt-f',b:'--pvt-b'},
   FCS:{label:'FCS',sub:'Final',f:'--fcs-f',b:'--fcs-b'},
@@ -335,6 +365,11 @@ const HOL_LABELS={
 
 /* per-task editable duration override (calendar days). key=index */
 let durOverride={};
+/* user-adjustable gate gaps (calendar days). null = use default formula.
+   cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM. */
+let cfzDaysOverride=null, rtmDaysOverride=null;
+/* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
+let BRANCH_INFO=null;
 
 /* =====================================================================
    SCHEDULER — global shift from anchor + re-snap gates + duration edits.
@@ -356,7 +391,8 @@ function build(srISO){
   // no anchor: skeleton — task names + editable Days only, dates blank
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
-    return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null};
+    return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null,
+            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7)};
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
@@ -378,9 +414,27 @@ function build(srISO){
     r.e=addCal(r.s,newDur);
     if(delta) fw.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
   });
-  // re-snap key gates by formula (holiday-correct)
-  const CFZ=fridayOrPrev(addCal(SR,3),LEADHOL);
-  const RTM=fridayOrPrev(addCal(CFZ,7),LEADHOL);
+  // key gates — both gaps are user-adjustable (Days); default = formula (Friday-snapped,
+  // holiday-correct). Pushing a gate later shifts the forward (downstream) tasks. §user req
+  const defCFZ=fridayOrPrev(addCal(SR,3),LEADHOL);
+  const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:calDiff(SR,defCFZ);
+  const CFZ=addCal(SR,cfzDays);
+  const defRTM=fridayOrPrev(addCal(CFZ,7),LEADHOL);          // next Friday from (maybe moved) CFZ
+  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:calDiff(CFZ,defRTM);
+  const RTM=addCal(CFZ,rtmDays);
+  // how far each gate slipped vs its un-adjusted default position
+  const dCFZ=calDiff(defCFZ,CFZ);
+  const baseRTM=fridayOrPrev(addCal(defCFZ,7),LEADHOL);      // default RTM (from default CFZ)
+  const dRTM=calDiff(baseRTM,RTM);
+  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions
+  rows.forEach(r=>{
+    if(!r.fwd) return;
+    if(r.nm==='Code Freeze (FSI candidate) = CFZ'||r.nm==='RTM Ties-1 = RTM') return; // set below
+    let extra=0;
+    if(r.gs>=gCFZ) extra+=dCFZ;            // tasks at/after CFZ ride the CFZ slip
+    if(r.gs>=gRTM) extra+=(dRTM-dCFZ);     // tasks at/after RTM additionally ride the RTM slip
+    if(extra){ r.s=addCal(r.s,extra); r.e=addCal(r.e,extra); }
+  });
   set(rows,'Code Freeze (FSI candidate) = CFZ',CFZ,CFZ);
   set(rows,'RTM Ties-1 = RTM',RTM,RTM);
   // FCS = Product release + 7 cal (skip lead/region holidays)
@@ -390,7 +444,12 @@ function build(srISO){
   const fcsVN=nextFriday(addCal(prVN,7)); let fv=fcsVN; while(isHol(fv,REGIONHOL))fv=nextFriday(addCal(fv,1));
   set(rows,'KS FCS',fcsKS,fcsKS);
   set(rows,'VN FCS',fv,fv);
-  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv};
+  // FW gates — Early Stable Cut (chromiumdash if read, else SR-14) drives them. §user req
+  const earlyCut=(BRANCH_INFO&&BRANCH_INFO.earlyCut)?BRANCH_INFO.earlyCut:addCal(SR,-14);
+  const fwLock=addCal(earlyCut,-7);
+  set(rows,'FW Lock Down',fwLock,fwLock);
+  set(rows,'FW Candidate Testing',addCal(fwLock,1),addCal(earlyCut,-1));
+  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays};
 }
 function set(rows,nm,s,e){const r=rows.find(x=>x.nm===nm);if(r){r.s=s;r.e=e;}}
 function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
@@ -433,8 +492,24 @@ function packLanes(items){
     lanes.push(it.x1); it.lane=lanes.length-1; return lanes.length-1;
   });
 }
+/* branch info card — chromiumdash number/dates (OCR) + engine CFZ/RTM. */
+function renderBranchCard(model){
+  const el=document.getElementById('branchCard');
+  if(!model.hasAnchor){el.innerHTML='';return;}
+  const b=BRANCH_INFO||{};
+  const fmt=d=>d?`${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}`:'—';
+  el.innerHTML=`<div class="brcard">
+    <div class="bt">${b.numImg?`<img class="mnum" src="${b.numImg}" alt="${b.num||'milestone'}">`:`<b${b.color?` style="color:${b.color}"`:''}>${b.num||'—'}</b>`}</div>
+    <div class="br"><span class="k">Branch</span><span class="v">${fmt(b.branch)}</span></div>
+    <div class="br"><span class="k">Early Stable Cut</span><span class="v">${fmt(b.earlyCut)}</span></div>
+    <div class="br"><span class="k">Stable Release</span><span class="v">${fmt(model.SR)}</span></div>
+    <div class="br gate"><span class="k">FSI Candidate (CFZ)</span><span class="v">${fmt(model.CFZ)}</span></div>
+    <div class="br gate"><span class="k">FSI Sign-off (RTM)</span><span class="v">${fmt(model.RTM)}</span></div>
+  </div>`;
+}
 function render(model,val,srISO){
   const has=model.hasAnchor;
+  renderBranchCard(model);
   document.getElementById('out').style.display='block';
   document.getElementById('tlTitle').textContent=document.getElementById('proj').value||'ChromeBook Schedule';
   document.getElementById('tlSub').textContent= has
@@ -462,7 +537,7 @@ function render(model,val,srISO){
     const block=document.createElement('div');block.className='phaseblock';
     const head=document.createElement('div');head.className='ph';
     head.style.background=cssv(meta.f);head.style.color='#23303f';
-    head.innerHTML=`<span>${meta.label} · ${meta.sub}</span><span style="font-family:JetBrains Mono;font-size:11px;font-weight:600">${PHASE_ORDER.indexOf(ph)+1}/${PHASE_ORDER.length}</span>`;
+    head.innerHTML=`<span>${meta.label}${meta.sub&&meta.sub!==meta.label?' · '+meta.sub:''}</span>`;
     block.appendChild(head);
     const ch=document.createElement('div');ch.className='colhead';
     ch.innerHTML=`<div>Task</div><div>Start</div><div>End</div><div>Days</div>`;block.appendChild(ch);
@@ -473,8 +548,15 @@ function render(model,val,srISO){
       // only show the factory pill when the task name doesn't already carry the code
       const site=(r.site && !nm.includes(code))?`<span class="site ${r.site}">${code}</span>`:'';
       const defSpan=goldenSpan(r);
-      const durCell=r.mile?`<div class="dur" style="color:#b8c">◆</div>`
-        :`<div class="dur"><input data-i="${r.i}" value="${durOverride[r.i]??defSpan}" title="duration (cal days)"></div>`;
+      let durCell;
+      if(r.nm==='Code Freeze (FSI candidate) = CFZ')
+        durCell=`<div class="dur"><input data-gate="cfz" value="${model.cfzDays}" title="Stable Release → CFZ (cal days) — adjustable"></div>`;
+      else if(r.nm==='RTM Ties-1 = RTM')
+        durCell=`<div class="dur"><input data-gate="rtm" value="${model.rtmDays}" title="CFZ → RTM (cal days) — adjustable"></div>`;
+      else if(r.mile)
+        durCell=`<div class="dur" style="color:#b8c">◆</div>`;
+      else
+        durCell=`<div class="dur"><input data-i="${r.i}" value="${durOverride[r.i]??defSpan}" title="duration (cal days)"></div>`;
       const sCell=has?md(r.s):'';
       const eCell=has?(r.mile?'—':md(r.e)):'';
       row.innerHTML=`<div class="nm">${nm}${site}</div>
@@ -488,6 +570,14 @@ function render(model,val,srISO){
     inp.addEventListener('change',()=>{
       const i=+inp.dataset.i, v=parseInt(inp.value,10);
       if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
+      run();
+    });
+  });
+  host.querySelectorAll('input[data-gate]').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
+      if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
+      else rtmDaysOverride=ok?v:null;
       run();
     });
   });
@@ -545,7 +635,7 @@ function renderRoadmap(model,host){
   // ---- Layer 1: Google / FW candidate / CFZ / RTM ----
   inner.appendChild(sec('Google · FW Candidate · CFZ · RTM'));
   inner.appendChild(layer(L1,r=>isCfzRtm(r)?'gate':(/FW|candidate/i.test(r.nm)?'fw':'google'),
-    r=>dispName(r.nm).replace(' = CFZ','').replace(' = RTM','').replace('Code Freeze (FSI candidate)','CFZ').replace('RTM Ties-1','RTM')));
+    r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM')));
   // ---- Layer 2: SMT ----
   inner.appendChild(sec('SMT'));
   inner.appendChild(layer(L2,_=>'smt',r=>dispName(r.nm)));
@@ -573,7 +663,7 @@ function weekLayer(model,xp){
   const seq=['DB','SI','PV'];
   seq.forEach((ph,i)=>{
     const nextPh=['SI','PV','PVR'][i];
-    const gv=model.rows.find(r=>r.ph===ph && /Google/.test(r.nm));
+    const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm));
     const nextRows=model.rows.filter(r=>r.ph===nextPh);
     if(!gv||!nextRows.length) return;
     const nextStart=nextRows.reduce((m,r)=>r.s<m?r.s:m,nextRows[0].s);
@@ -614,20 +704,21 @@ function renderHolidays(el){
 function renderVal(val){
   const w=document.getElementById('valWrap');
   if(val.noAnchor){
-    w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">尚未輸入 Stable Release · 上傳 Branch 圖片或填入錨點後，會自動回推日期並對照 Example.png 驗證。</div></div>`;
+    w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">尚未輸入 Stable Release · 上傳 Branch 圖片或填入錨點後，會自動回推日期並算出排程。</div></div>`;
     return;
   }
-  if(!val.atGolden){
-    w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div>已重算（非 golden 輸入）。Dependency 結構與計算邏輯維持與 Example.png 一致 · Overall ${val.wkAll} WKs（隨 duration 變動）。</div></div>`;
-    return;
+  // §4.2 self-validation still runs on every recompute, but the golden / Example.png
+  // comparison is a developer concern — it goes to the console, not the user-facing UI.
+  if(val.atGolden){
+    if(val.pass){
+      console.info(`[self-validation] PASS — all tasks match golden · Overall ${val.wkAll} WKs (expect 38).`);
+    }else{
+      console.warn(`[self-validation] ${val.miss.length} deviation(s) vs golden · Overall ${val.wkAll} WKs (expect 38):`);
+      val.miss.forEach(m=>console.warn('  ✗ '+m));
+    }
   }
-  if(val.pass){
-    w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div><b>✔ Golden 驗證通過</b> — 所有 task dependency 與日期吻合 Example.png；Overall development duration = <b>${val.wkAll} WKs</b>（expect 38）。</div></div>`;
-  }else{
-    const items=val.miss.slice(0,12).map(m=>`<div class="miss">✗ ${m}</div>`).join('');
-    w.innerHTML=`<div class="vbar bad"><span class="dot"></span><div><b>${val.miss.length} 項與 golden 有偏差</b> · Overall ${val.wkAll} WKs (expect 38)
-      <div class="vlist">${items}${val.miss.length>12?`<div>… +${val.miss.length-12} more</div>`:''}</div></div></div>`;
-  }
+  // user-facing: only the overall development duration — a key metric to keep.
+  w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div>整體開發週數 <b>${val.wkAll} WKs</b>（Project start → ${LEADNAME} FCS）。</div></div>`;
 }
 
 /* =====================================================================
@@ -646,12 +737,11 @@ function run(){
   render(model,val,srISO);
 }
 const reflow=()=>run();
-document.getElementById('gen').onclick=run;
 document.getElementById('region').onchange=reflow;
 document.getElementById('lead').onchange=reflow;
 document.getElementById('leadCustom').oninput=reflow;
 document.getElementById('sr').onchange=reflow;
-document.getElementById('reset').onclick=()=>{durOverride={};document.getElementById('sr').value='';
+document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;BRANCH_INFO=null;document.getElementById('sr').value='';
   document.getElementById('lead').value='KS';document.getElementById('region').value='VN';run();};
 
 /* ---- image upload + OCR ---- */
@@ -666,33 +756,169 @@ async function ocr(f){
   drop.classList.add('busy');txt.innerHTML='🔎 OCR 讀取中…';
   try{
     const{data}=await Tesseract.recognize(f,'eng');
-    const lines=data.text.split('\n');
-    // find the "Chrome Browser" section's "Stable Release"
-    let date=null,scope='';
-    for(let i=0;i<lines.length;i++){
-      if(/chrome browser/i.test(lines[i]))scope='browser';
-      if(/chrome\s*os/i.test(lines[i]))scope='os';
-      if(/stable release/i.test(lines[i]) && scope!=='os'){
-        const m=lines[i].match(/([A-Z][a-z]{2})[a-z]*,?\s+([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
-        if(m){date=parseMon(m[2],+m[3],+m[4]);break;}
-        const m2=lines[i].match(/([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
-        if(m2){date=parseMon(m2[1],+m2[2],+m2[3]);break;}
-      }
-    }
+    console.log('[OCR raw text]\n'+data.text);              // inspect real OCR output here
+    const info=parseBranch(data.text);
+    // milestone # lives in the coloured header band, which the full-image pass
+    // mangles — re-read just that band, and grab the band colour for the card.
+    const header=await analyzeHeaderNumber(f);
+    if(header.num) info.num=header.num;
+    info.color=header.color;
+    info.numImg=header.numImg;
+    console.log('[parseBranch]',info,'header',header);
+    BRANCH_INFO=info;
+    const date=info.stableRel;
     if(date){
       document.getElementById('sr').value=iso(date);
-      txt.innerHTML='✅ 已讀取 Stable Release';
-      hint.innerHTML=`Chrome Browser Stable Release = <b>${ymd(date)}</b>（已填入錨點）`;
+      txt.innerHTML='✅ 已讀取 Branch 資訊';
+      hint.innerHTML=`Chrome <b>${info.num||'?'}</b> · Stable Release <b>${ymd(date)}</b>（已填入錨點）`;
       run();
     }else{
       txt.innerHTML='⚠ 未找到 Stable Release';
-      hint.textContent='OCR 沒抓到日期，請手動填入下方 Stable Release。';
+      hint.textContent='OCR 沒抓到 Stable Release 日期，請手動填入下方錨點。';
     }
   }catch(err){
-    txt.innerHTML='⚠ OCR 失敗';hint.textContent='請手動填入 Stable Release。'+err;
+    console.error('[OCR error]',err);
+    const fileOrigin=location.protocol==='file:';
+    txt.innerHTML='⚠ OCR 失敗';
+    hint.innerHTML=fileOrigin
+      ? '⚠ 偵測到從 <b>file://</b> 開啟 — Tesseract OCR 無法在 file:// 執行（安全限制）。請改用本機伺服器開啟（例如 <code>http://localhost</code>），或手動填入下方 Stable Release。'
+      : '請手動填入 Stable Release。'+err;
   }finally{drop.classList.remove('busy');}
 }
+/* Read the milestone number (1xx) AND the header band colour from the image.
+   chromiumdash shows the number as white text on a coloured band; the full-image
+   OCR pass mangles it. We auto-detect that coloured band (rows that are clearly
+   saturated, not near-white/near-black), sample its colour (used for the card's
+   number colour), then OCR just that band — isolated number, white text turned to
+   black-on-white, single-line + digit whitelist. Returns {num, color}. */
+async function analyzeHeaderNumber(f){
+  let worker=null;
+  try{
+    const img=await createImageBitmap(f);
+    const W=img.width, H=img.height;
+    const c=document.createElement('canvas'); c.width=W; c.height=H;
+    const cx=c.getContext('2d',{willReadFrequently:true});
+    cx.drawImage(img,0,0);
+    const px=cx.getImageData(0,0,W,H).data;
+    const at=(x,y)=>{const i=(y*W+x)*4;return [px[i],px[i+1],px[i+2]];};
+    const sat=p=>Math.max(p[0],p[1],p[2])-Math.min(p[0],p[1],p[2]);
+    const lum=p=>0.299*p[0]+0.587*p[1]+0.114*p[2];
+    const step=Math.max(1,Math.round(W/200));
+    const cols=Math.ceil(W/step);
+    // locate the top contiguous coloured band (the header)
+    let started=false, top=0, bot=0;
+    for(let y=0;y<Math.round(H*0.45);y++){
+      let colored=0;
+      for(let x=0;x<W;x+=step){const p=at(x,y); if(sat(p)>40 && lum(p)>30 && lum(p)<235) colored++;}
+      if(colored/cols>0.5){ if(!started){started=true;top=y;} bot=y; }
+      else if(started) break;
+    }
+    if(!started){ console.warn('[milestone] no coloured header band found'); return {num:'',color:''}; }
+    // band background colour (average of the saturated pixels) -> used as number colour
+    let sr=0,sg=0,sb=0,n=0;
+    for(let y=top;y<=bot;y++) for(let x=0;x<W;x+=2){const p=at(x,y); if(sat(p)>40 && lum(p)<235){sr+=p[0];sg+=p[1];sb+=p[2];n++;}}
+    const color = n? `rgb(${Math.round(sr/n)},${Math.round(sg/n)},${Math.round(sb/n)})` : '';
+    const bgLum = n? (0.299*sr+0.587*sg+0.114*sb)/n : 120;
+    // build a clean OCR image of just the band: bright (white number) -> black on white.
+    // adaptive threshold just above the band's own brightness, so thin strokes (the
+    // "5" was being eroded by a fixed cut) survive.
+    const thr=Math.min(210,bgLum+25), s=4, bh=bot-top+1;
+    const oc=document.createElement('canvas'); oc.width=W*s; oc.height=bh*s;
+    const ox=oc.getContext('2d',{willReadFrequently:true});
+    ox.fillStyle='#fff'; ox.fillRect(0,0,oc.width,oc.height);
+    ox.drawImage(img,0,top,W,bh,0,0,oc.width,oc.height);
+    const od=ox.getImageData(0,0,oc.width,oc.height), dd=od.data;
+    for(let i=0;i<dd.length;i+=4){const l=0.299*dd[i]+0.587*dd[i+1]+0.114*dd[i+2]; const v=l>thr?0:255; dd[i]=dd[i+1]=dd[i+2]=v;}
+    ox.putImageData(od,0,0);
+    const url=oc.toDataURL('image/png');
+    // Build a recoloured cut-out of the number itself (white bg, digits in the band
+    // colour). THIS is what the card shows — the exact number always appears because
+    // it's the real pixels from the upload, not OCR. OCR below is only for the hint.
+    let numImg='';
+    if(n){
+      const cr=Math.round(sr/n),cg=Math.round(sg/n),cb=Math.round(sb/n);
+      let minX=W,maxX=-1,minY=bot,maxY=top;
+      for(let y=top;y<=bot;y++)for(let x=0;x<W;x++){const p=at(x,y);
+        if(0.299*p[0]+0.587*p[1]+0.114*p[2]>thr){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}}
+      if(maxX>=minX){
+        const pad=Math.max(2,Math.round((maxY-minY+1)*0.3));
+        minX=Math.max(0,minX-pad); maxX=Math.min(W-1,maxX+pad);
+        minY=Math.max(top,minY-pad); maxY=Math.min(bot,maxY+pad);   // stay inside the band
+        const bw2=maxX-minX+1, bh2=maxY-minY+1;
+        const nc=document.createElement('canvas'); nc.width=bw2; nc.height=bh2;
+        const nx=nc.getContext('2d',{willReadFrequently:true});
+        const out=nx.createImageData(bw2,bh2), o=out.data;
+        for(let y=0;y<bh2;y++)for(let x=0;x<bw2;x++){
+          const p=at(minX+x,minY+y), text=0.299*p[0]+0.587*p[1]+0.114*p[2]>thr, j=(y*bw2+x)*4;
+          o[j]=text?cr:255; o[j+1]=text?cg:255; o[j+2]=text?cb:255; o[j+3]=255;
+        }
+        nx.putImageData(out,0,0);
+        numImg=nc.toDataURL('image/png');
+      }
+    }
+    // try several page-seg modes (and a confusion-tolerant non-whitelist pass);
+    // a lone number is finicky and the best mode varies by glyph.
+    try{ worker=await Tesseract.createWorker('eng'); }
+    catch(e){ console.warn('[milestone] worker init failed',e); worker=null; }
+    const cfgs=[{wl:'0123456789',psm:'7'},{wl:'0123456789',psm:'8'},
+                {wl:'0123456789',psm:'13'},{wl:'',psm:'7'}];
+    let num='';
+    for(const cfg of cfgs){
+      let t='';
+      try{
+        if(worker){ await worker.setParameters({tessedit_char_whitelist:cfg.wl,tessedit_pageseg_mode:cfg.psm});
+                    t=(await worker.recognize(url)).data.text; }
+        else t=(await Tesseract.recognize(url,'eng')).data.text;
+      }catch(e){ console.warn('[milestone] cfg failed',cfg,e); continue; }
+      // map the usual OCR confusions back to digits before matching.
+      const norm=(t||'').replace(/[lI|!]/g,'1').replace(/[sS]/g,'5').replace(/[bB]/g,'8')
+                        .replace(/[oOdD]/g,'0').replace(/[gqG]/g,'9').replace(/[zZ]/g,'2').replace(/[tT]/g,'7');
+      console.log('[milestone] psm',cfg.psm,'wl',!!cfg.wl,'raw',JSON.stringify(t),'norm',JSON.stringify(norm));
+      const m=norm.match(/1\d{2}/);
+      if(m){ num=m[0]; break; }
+    }
+    console.log('[milestone] band rows',top,'..',bot,'| color',color,'| num',num,'| numImg',numImg?'yes':'no');
+    return {num, color, numImg};
+  }catch(err){console.warn('[analyzeHeaderNumber]',err);return {num:'',color:''};}
+  finally{ if(worker) try{await worker.terminate();}catch(e){} }
+}
 function parseMon(mon,d,y){const M={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};return D(y,M[mon]||1,d);}
+/* pull a date out of one OCR line — handles "Mon, Jul 27, 2026" and "Jul 27, 2026". */
+function extractDate(line){
+  let m=line.match(/([A-Z][a-z]{2})[a-z]*,?\s+([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
+  if(m)return parseMon(m[2],+m[3],+m[4]);
+  m=line.match(/([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/);
+  if(m)return parseMon(m[1],+m[2],+m[3]);
+  return null;
+}
+/* parse chromiumdash screenshot → {num, branch, earlyCut, stableRel}.
+   stableRel = Chrome Browser Stable Release (NOT ChromeOS, NOT Early Stable Release).
+   Robust to two-column OCR: a label and its date may land on separate lines, so each
+   label takes its own-line date, else the date on the immediately following pure-date line. */
+function parseBranch(text){
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const dates=lines.map(extractDate);
+  const isLabel=l=>/branch|stable|beta|feature|freeze|promotion|extended|chrome|cut|release/i.test(l);
+  // scope (browser vs os) carried down the lines
+  let sc=''; const scopes=lines.map(l=>{
+    if(/chrome browser/i.test(l))sc='browser'; else if(/chrome\s*os/i.test(l))sc='os'; return sc;
+  });
+  const info={num:'',branch:null,earlyCut:null,stableRel:null};
+  for(const l of lines){const m=l.match(/\b(1\d{2})\b/);if(m){info.num=m[1];break;}} // milestone # (1xx)
+  const findDate=pred=>{
+    for(let i=0;i<lines.length;i++){
+      if(!pred(lines[i],scopes[i])) continue;
+      if(dates[i]) return dates[i];                                   // date on the label line
+      if(i+1<lines.length && dates[i+1] && !isLabel(lines[i+1]))      // date on the next (pure-date) line
+        return dates[i+1];
+    }
+    return null;
+  };
+  info.branch   = findDate(l=>/\bbranch\b/i.test(l));
+  info.earlyCut = findDate(l=>/early\s+stable\s+cut/i.test(l));
+  info.stableRel= findDate((l,scope)=>/stable\s+release/i.test(l)&&!/early/i.test(l)&&scope!=='os');
+  return info;
+}
 
 /* ---- PNG export (simple: html2canvas-free → use built-in) ---- */
 document.getElementById('png').onclick=async()=>{

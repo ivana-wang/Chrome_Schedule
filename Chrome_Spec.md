@@ -56,6 +56,22 @@
 - 範例圖 `152 chromiumdash.png` 內含兩個 Stable Release：
   - ✅ **錨點 = Chrome Browser → Stable Release = Tue, Aug 25, 2026**（已確認，對應 Example.png "Stable rel 8/25"）。
   - ChromeOS 的 Stable Release (Sep 8) **不用**當錨點。
+  - ⚠️ 也要避開 **Early Stable Release**（Aug 12）— 只抓 Chrome Browser 那條純 `Stable Release`。
+
+### 3.1.1 Branch 資訊圖卡 ✅（OCR 後呈現）
+
+OCR 讀到 Branch 圖後，呈現一張資訊圖卡（**配色對齊上傳的 chromiumdash 圖：靛藍標題列 + 白底列**），共 6 列：
+
+| 列 | 內容 | 來源 |
+|---|---|---|
+| 1 | Chrome milestone 號碼（例 `152` / `155`，標題黃底） | OCR（圖頂 1xx 數字） |
+| 2 | Branch: date | OCR（`Branch` 那行，例 7/27） |
+| 3 | Early Stable Cut: date | OCR（`Early Stable Cut`，例 8/11） |
+| 4 | Stable Release: date | OCR（Chrome Browser `Stable Release` = 錨點，例 8/25） |
+| 5 | FSI Candidate: date（**= CFZ**） | 引擎計算（`SR+3 → 週五`，例 8/28） |
+| 6 | FSI Sign-off: date（**= RTM**） | 引擎計算（`CFZ+7 → 週五`，例 9/4） |
+
+- 第 1–4 列由 OCR 抓；第 5–6 列由引擎用錨點算出（隨 Stable Release 連動）。
 
 ### 3.2 其他輸入（暫定，待確認）
 - Project Name / 機種代號（例：M151）。
@@ -459,8 +475,31 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
 
 - 驗證已在每次重算時自動執行，該按鈕無額外用途 → **刪除**。
 
+### 13.7 移除「Generate Schedule」按鈕 + 驗證文案改走 console（HARD）
+
+- 整個 app 已是 **reactive 即時重算**：Branch 圖片 OCR、Stable Release、lead/region、任一 task duration
+  的 change 事件都直接觸發 `run()` 重算。**`Generate Schedule` 按鈕無任何獨佔功能 → 刪除**
+  （避免 User 誤以為「要按了才生效」）。保留 `Reset to defaults`。
+- phase 標題列右邊的 `x/6` 序號（DB 1/6 … FCS 6/6）為純裝飾、且把 FCS 當成第 6 個 phase 有誤導性
+  → **刪除**。
+- §4.2 的 golden / Example.png 自我驗證**邏輯保留並照常每次重算執行**，但**比對結果改輸出到 console**
+  （developer 用）。**UI 上不再出現 `golden` / `Example.png` 等內部用語**——User 不知道那是什麼。
+  畫面只保留對 User 有意義的 **整體開發週數 (Overall WKs)**（Project start → lead site FCS）。
+
 ### 13.5 Google Validation 與 SVTP Test 平行，且以 Google Validation 定錨下游（HARD）
 
 - `Google validation`（DB/SI/PV 為 `Google validation`，PV 另有 `Google dogfooding`）與 `SVTP test` **平行**。
 - **下游時間以 `Google validation` 為定錨關鍵**：當兩者時間不一致時，後段 task 一律以
   **Google validation** 的時間往下算，**SVTP test 不驅動下游**（編輯 SVTP test 只改自己那條 bar）。
+- **另有 5 個 Google 里程碑（Example.png 綠框）已加入 task list**（皆 milestone，落在 8/25 anchor 前的 backward block）：
+
+  | Task | 日期 | Phase | 對應現有錨點 |
+  |---|---|---|---|
+  | Google prototype | 3/23 ETA | DB | = `Ship DB PCBA ETA` / `Google validation` start |
+  | Google release SI image | 5/7 | SI | SI SW image（PCB FAB 期間，早於 SMT） |
+  | Google EVT unit | 5/27 ETA | SI | = `Ship SI unit ETA to QAD/TPE RD & HP` |
+  | Google release PV image | 7/2 | PV | PV SW image（PCB FAB 期間，早於 SMT） |
+  | Google DVT unit | 7/22 ETA | PV | = `Ship PV unit ETA to QAD/TPE RD & HP` |
+
+  ⚠️ §13.5 的「下游定錨」仍只認 `Google validation` / `Google dogfooding`（roadmap 的 SVTP→G.O.
+  週數計算用 `/Google (validation|dogfooding)/` 精準匹配），新增的 Google 里程碑**不**參與下游定錨。

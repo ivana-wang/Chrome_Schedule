@@ -1,0 +1,5 @@
+# Claude Code local tooling / settings / memory
+.claude/
+
+# Office temp lock files
+~$*
