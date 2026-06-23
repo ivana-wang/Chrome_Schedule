@@ -248,6 +248,8 @@ const nextWork=(x,mode,hol)=>{let c=new Date(x);while(isWknd(c,mode)||isHol(c,ho
 const skipNonWork=(x,hol)=>{let c=new Date(x);while(dow(c)===0||dow(c)===6||isHol(c,hol))c=addCal(c,1);return c;};
 const nextFriday=x=>{let c=new Date(x);while(dow(c)!==5)c=addCal(c,1);return c;};
 const fridayOrPrev=(x,hol)=>{let f=nextFriday(x);while(isHol(f,hol)||dow(f)===0||dow(f)===6)f=addCal(f,-1);return f;};
+/* earliest (on-or-before) Friday, then back off holidays — used for CFZ/RTM gate snap. */
+const prevFriday=(x,hol)=>{let f=new Date(x);while(dow(f)!==5)f=addCal(f,-1);while(isHol(f,hol)||dow(f)===0||dow(f)===6)f=addCal(f,-1);return f;};
 
 /* =====================================================================
    GOLDEN task table — xlsx Milestone_FCS D/E (M151 2nd release).
@@ -392,7 +394,7 @@ function build(srISO){
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
     return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null,
-            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7)};
+            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??10)};
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
@@ -414,19 +416,21 @@ function build(srISO){
     r.e=addCal(r.s,newDur);
     if(delta) fw.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
   });
-  // key gates — both gaps are user-adjustable (Days); default = formula (Friday-snapped,
-  // holiday-correct). Pushing a gate later shifts the forward (downstream) tasks. §user req
-  const defCFZ=fridayOrPrev(addCal(SR,3),LEADHOL);
-  const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:calDiff(SR,defCFZ);
-  const CFZ=addCal(SR,cfzDays);
-  const defRTM=fridayOrPrev(addCal(CFZ,7),LEADHOL);          // next Friday from (maybe moved) CFZ
-  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:calDiff(CFZ,defRTM);
-  const RTM=addCal(CFZ,rtmDays);
-  // how far each gate slipped vs its un-adjusted default position
+  // key gates — anchored at D = Stable Release (ChromeOS). §spec 6
+  //   CFZ (FSI Candidate) = D + 3 ; RTM (FSI Sign-off) = FSI qual complete(CFZ+7) + 3 = CFZ + 10.
+  // Each gate is a Friday milestone → snap to the EARLIEST (on-or-before) Friday. When that
+  // Friday is earlier than the rule date it's a PULL-IN (sign-off before the rule allows) → red flag.
+  const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:3;    // D + 3 days
+  const cfzRule=addCal(SR,cfzDays), CFZ=prevFriday(cfzRule,LEADHOL);
+  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:10;   // CFZ + 10 days
+  const rtmRule=addCal(CFZ,rtmDays), RTM=prevFriday(rtmRule,LEADHOL);
+  const cfzPullIn=calDiff(CFZ,cfzRule), rtmPullIn=calDiff(RTM,rtmRule); // >0 = pulled in (earlier than rule)
+  // default (un-adjusted) gate positions, for measuring downstream slip
+  const defCFZ=prevFriday(addCal(SR,3),LEADHOL);
+  const baseRTM=prevFriday(addCal(defCFZ,10),LEADHOL);
   const dCFZ=calDiff(defCFZ,CFZ);
-  const baseRTM=fridayOrPrev(addCal(defCFZ,7),LEADHOL);      // default RTM (from default CFZ)
   const dRTM=calDiff(baseRTM,RTM);
-  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions
+  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions (RTM = CFZ+10 → prev Fri)
   rows.forEach(r=>{
     if(!r.fwd) return;
     if(r.nm==='Code Freeze (FSI candidate) = CFZ'||r.nm==='RTM Ties-1 = RTM') return; // set below
@@ -449,7 +453,8 @@ function build(srISO){
   const fwLock=addCal(earlyCut,-7);
   set(rows,'FW Lock Down',fwLock,fwLock);
   set(rows,'FW Candidate Testing',addCal(fwLock,1),addCal(earlyCut,-1));
-  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays};
+  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,
+          cfzRule,rtmRule,cfzPullIn,rtmPullIn};
 }
 function set(rows,nm,s,e){const r=rows.find(x=>x.nm===nm);if(r){r.s=s;r.e=e;}}
 function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
@@ -461,7 +466,8 @@ function minStart(rows){return rows.reduce((m,r)=>r.s<m?r.s:m,rows[0].s);}
    ===================================================================== */
 function validate(model,srISO){
   if(!model.hasAnchor) return {noAnchor:true,atGolden:false,miss:[],wkAll:0,durOK:true,pass:true};
-  const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0;
+  const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0
+    && cfzDaysOverride==null && rtmDaysOverride==null;
   const miss=[];
   if(atGolden){
     for(const r of model.rows){
@@ -581,7 +587,7 @@ function render(model,val,srISO){
       run();
     });
   });
-  renderVal(val);
+  renderVal(val,model);
 }
 
 /* ============ horizontal roadmap — built only on Export PNG (Example.png style) ============ */
@@ -701,12 +707,22 @@ function renderHolidays(el){
   el.innerHTML=`<div class="rm-sec" style="width:100%">Development 期間 Holidays</div>`+
     col(LEADNAME+' (lead)',lead)+col(REGIONNAME+' (region)',reg);
 }
-function renderVal(val){
+function renderVal(val,model){
   const w=document.getElementById('valWrap');
   if(val.noAnchor){
     w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">尚未輸入 Stable Release · 上傳 Branch 圖片或填入錨點後，會自動回推日期並算出排程。</div></div>`;
     return;
   }
+  // PULL-IN flag (red): a gate's Friday lands earlier than its rule date → sign-off before the
+  // rule allows. It's a pull-in opportunity that needs extra communication. §user req
+  const pull=[];
+  if(model){
+    if(model.rtmPullIn>0) pull.push(`<b>RTM</b> 落在 <b>${md(model.RTM)}</b>（最早的週五），比規則 CFZ+${model.rtmDays}（${md(model.rtmRule)}）<b>早 ${model.rtmPullIn} 天</b>`);
+    if(model.cfzPullIn>0) pull.push(`<b>CFZ</b> 落在 <b>${md(model.CFZ)}</b>，比規則 D+${model.cfzDays}（${md(model.cfzRule)}）<b>早 ${model.cfzPullIn} 天</b>`);
+  }
+  const pullBar = pull.length
+    ? `<div class="vbar bad"><span class="dot"></span><div>⚠ <b>Pull-in opportunity（需額外溝通確認）</b>：${pull.join('；')}。此為提前 sign-off 的機會，建議與相關方溝通；若不 pull-in，閘門應落在規則日期。</div></div>`
+    : '';
   // §4.2 self-validation still runs on every recompute, but the golden / Example.png
   // comparison is a developer concern — it goes to the console, not the user-facing UI.
   if(val.atGolden){
@@ -717,8 +733,8 @@ function renderVal(val){
       val.miss.forEach(m=>console.warn('  ✗ '+m));
     }
   }
-  // user-facing: only the overall development duration — a key metric to keep.
-  w.innerHTML=`<div class="vbar ok"><span class="dot"></span><div>整體開發週數 <b>${val.wkAll} WKs</b>（Project start → ${LEADNAME} FCS）。</div></div>`;
+  // user-facing: pull-in flag (if any) + the overall development duration.
+  w.innerHTML=pullBar+`<div class="vbar ok"><span class="dot"></span><div>整體開發週數 <b>${val.wkAll} WKs</b>（Project start → ${LEADNAME} FCS）。</div></div>`;
 }
 
 /* =====================================================================
@@ -916,7 +932,8 @@ function parseBranch(text){
   };
   info.branch   = findDate(l=>/\bbranch\b/i.test(l));
   info.earlyCut = findDate(l=>/early\s+stable\s+cut/i.test(l));
-  info.stableRel= findDate((l,scope)=>/stable\s+release/i.test(l)&&!/early/i.test(l)&&scope!=='os');
+  // anchor D = ChromeOS Stable Release (NOT Chrome Browser). §spec 3.1/4
+  info.stableRel= findDate((l,scope)=>/stable\s+release/i.test(l)&&!/early/i.test(l)&&scope==='os');
   return info;
 }
 
