@@ -394,7 +394,7 @@ function build(srISO){
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
     return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null,
-            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??10)};
+            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7)};
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
@@ -417,20 +417,20 @@ function build(srISO){
     if(delta) fw.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
   });
   // key gates — anchored at D = Stable Release (ChromeOS). §spec 6
-  //   CFZ (FSI Candidate) = D + 3 ; RTM (FSI Sign-off) = FSI qual complete(CFZ+7) + 3 = CFZ + 10.
-  // Each gate is a Friday milestone → snap to the EARLIEST (on-or-before) Friday. When that
-  // Friday is earlier than the rule date it's a PULL-IN (sign-off before the rule allows) → red flag.
+  //   CFZ (FSI Candidate) = D + 3 ; RTM (FSI Sign-off) = CFZ + 7 (one week — both Fridays).
+  // Each gate snaps to the EARLIEST (on-or-before) Friday. If a user-adjusted gap makes the
+  // Friday land earlier than the rule date, it's a PULL-IN (sign-off before the rule) → red flag.
   const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:3;    // D + 3 days
   const cfzRule=addCal(SR,cfzDays), CFZ=prevFriday(cfzRule,LEADHOL);
-  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:10;   // CFZ + 10 days
+  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:7;    // CFZ + 7 days (one week)
   const rtmRule=addCal(CFZ,rtmDays), RTM=prevFriday(rtmRule,LEADHOL);
   const cfzPullIn=calDiff(CFZ,cfzRule), rtmPullIn=calDiff(RTM,rtmRule); // >0 = pulled in (earlier than rule)
   // default (un-adjusted) gate positions, for measuring downstream slip
   const defCFZ=prevFriday(addCal(SR,3),LEADHOL);
-  const baseRTM=prevFriday(addCal(defCFZ,10),LEADHOL);
+  const baseRTM=prevFriday(addCal(defCFZ,7),LEADHOL);
   const dCFZ=calDiff(defCFZ,CFZ);
   const dRTM=calDiff(baseRTM,RTM);
-  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions (RTM = CFZ+10 → prev Fri)
+  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions (RTM = CFZ+7 = Fri)
   rows.forEach(r=>{
     if(!r.fwd) return;
     if(r.nm==='Code Freeze (FSI candidate) = CFZ'||r.nm==='RTM Ties-1 = RTM') return; // set below
