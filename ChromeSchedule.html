@@ -49,11 +49,18 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 /* timeline card (export-ready, white) */
 #out{display:none}
 .tlcard{background:#fff;color:#1f2430;border-radius:16px;padding:26px 26px 30px;box-shadow:0 14px 50px rgba(0,0,0,.4)}
-.tlhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #eef1f6;padding-bottom:14px;margin-bottom:18px}
+.tlhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #eef1f6;padding-bottom:14px;margin-bottom:18px}
 .tlhead .t{font-size:19px;font-weight:700;color:#1a1f2b}
 .tlhead .s{font-size:12px;color:#6b7385;margin-top:3px;font-family:'JetBrains Mono'}
 .tlhead .fcs{text-align:right;font-family:'JetBrains Mono'}
 .tlhead .fcs b{color:#3f9142}
+/* shrunk branch card inside the roadmap header */
+.brcard.mini{max-width:230px;border-radius:9px;font-size:9px}
+.brcard.mini .bt{padding:4px 6px;border-bottom:1px solid #e3e6f0}
+.brcard.mini .bt b{font-size:17px;letter-spacing:.3px}
+.brcard.mini .bt .mnum{height:18px}
+.brcard.mini .br{padding:2px 8px;font-size:9px;border-top:1px solid #f1f3f8}
+.brcard.mini .br .v{font-size:9px}
 .chevrons{display:flex;gap:0;margin:8px 0 24px}
 /* SVG chevrons — crisp colored vector border, identical shape (incl. first); nested point→notch */
 .chev{position:relative;flex:1;min-width:90px;height:50px;margin-left:-9px}
@@ -109,10 +116,11 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rm-canvas{position:relative;width:100%;overflow-x:auto}
 .rm-inner{position:relative;min-width:1180px}
 .rm-layer{position:relative;width:100%}
-.rm-chip{position:absolute;transform:translateX(-2px);background:#fff;border:1px solid #d7deea;border-radius:7px;
-  padding:3px 7px;font-size:10.5px;line-height:1.25;color:#2a3142;white-space:nowrap;box-shadow:0 1px 2px rgba(20,30,60,.06)}
-.rm-chip b{font-family:'JetBrains Mono';font-weight:600;font-size:10px;color:#1a1f2b}
-.rm-chip .dt{font-family:'JetBrains Mono';font-size:9.5px;color:#6b7385;display:block}
+.rm-chip{position:absolute;background:#fff;border:1px solid #d7deea;border-radius:7px;
+  padding:3px 9px;font-size:9.5px;line-height:1.3;color:#2a3142;white-space:nowrap;text-align:center;
+  box-shadow:0 1px 2px rgba(20,30,60,.06)}
+.rm-chip b{font-family:'JetBrains Mono';font-weight:700;font-size:9.5px;color:#1a1f2b}
+.rm-chip .dt{font-family:'JetBrains Mono';font-size:9px;color:#6b7385}
 .rm-chip.google{border-color:#bcd9b8;background:#f1f8ef}
 .rm-chip.fw{border-color:#cdbbe6;background:#f4f0fb}
 .rm-chip.gate{border-color:#e7c14a;background:#fff7df;font-weight:700}
@@ -131,6 +139,54 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rm-holidays .hcol{font-size:11px;color:#566076}
 .rm-holidays .hcol h4{font-size:11px;color:#1a1f2b;margin-bottom:4px;font-family:'JetBrains Mono'}
 .rm-holidays .hcol div{font-family:'JetBrains Mono';font-size:10px;line-height:1.7}
+/* ===== roadmap v2 (two styles: A airy / B boxed) ===== */
+.rmprev{margin-top:18px}
+.rmprev-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rmprev-head .t{font-size:13px;font-weight:600;color:var(--txt)}
+.rmprev-tg{display:flex;gap:6px}
+.rmprev-tg .btn{width:auto;margin:0;padding:6px 14px;font-size:12px}
+.rmprev-tg .btn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121f;box-shadow:0 4px 14px var(--glow)}
+.rm-tint{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none}
+.rm-test{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:9px;font-weight:600;
+  color:#2f7d4f;text-align:center;line-height:1.2}
+.rm-test .tk{display:block;color:#2f7d4f;font-size:13px;line-height:.7}
+.rm-dur{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:10.5px;font-weight:700;color:#3a4660;
+  background:#eef1f7;border:1px solid #d7deea;border-radius:100px;padding:1px 9px;white-space:nowrap}
+.rm-chip.go{border-color:#9ab0d8;background:#eef2fb;font-weight:700;color:#2b3a63}
+.rm-chip.wrap{white-space:normal;max-width:132px;line-height:1.2}
+.rm-chip.wrap b{white-space:normal;word-break:break-word}
+/* boxless columnar list per phase (layer 6) */
+.rm-collist{display:flex;gap:16px;margin-top:10px;border-top:1px solid #eef1f6;padding-top:12px}
+.rm-col{flex:1;min-width:0}
+.rm-colh{font-family:'JetBrains Mono';font-weight:700;font-size:11px;letter-spacing:.6px;padding-bottom:5px;
+  margin-bottom:7px;border-bottom:2px solid}
+.rm-li{display:flex;align-items:flex-start;gap:6px;font-size:10.5px;line-height:1.35;margin-bottom:6px}
+.rm-li .bu{flex:0 0 auto;width:5px;height:5px;border-radius:50%;margin-top:5px}
+.rm-li .d{font-family:'JetBrains Mono';font-size:9px;color:#7b8497;white-space:nowrap;flex:0 0 auto}
+.rm-li .n{color:#2a3142}
+/* middle stack — bar + markers with dashed connectors + duration arrows + exit boxes */
+.rm-mid{position:relative}
+.rm-conn{position:absolute;width:0;border-left:1.5px dashed currentColor;opacity:.8;z-index:0}
+.rm-mk{position:absolute;transform:translateX(-50%);text-align:center;font-family:'JetBrains Mono';white-space:nowrap;z-index:2}
+.rm-mk b{font-weight:700;font-size:10px;display:block;line-height:1.1}
+.rm-mk .dt{font-size:9px;color:#7b8497}
+.rm-arrow{position:absolute;height:0;border-top:1.5px solid #33405a;z-index:1}
+.rm-arrow::before,.rm-arrow::after{content:'';position:absolute;top:-3.5px;width:0;height:0;border:4px solid transparent}
+.rm-arrow::before{left:-2px;border-right-color:#33405a;border-left-width:0}
+.rm-arrow::after{right:-2px;border-left-color:#33405a;border-right-width:0}
+.rm-arlbl{position:absolute;transform:translateX(-50%);background:#ffe761;border:1px solid #d8b62a;border-radius:4px;
+  padding:2px 8px;font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:#3a2f00;white-space:nowrap;z-index:3}
+.rm-exitbox{position:absolute;transform:translateX(-50%);background:#ffcf3f;border:1px solid #d8a52a;border-radius:5px;
+  padding:3px 10px;font-family:'JetBrains Mono';font-size:10.5px;font-weight:700;color:#3a2c00;white-space:nowrap;z-index:2}
+/* style B — boxed labeled bands */
+.rmB .rm-band{position:relative;border:1px solid #e7ebf2;border-radius:9px;background:#fbfcfe;margin:0 0 6px;padding-left:84px}
+.rmB .rm-band>.rm-sec{position:absolute;left:10px;top:9px;margin:0;color:#6b7385}
+.rmB .rm-chip{box-shadow:none;border-left-width:3px}
+.rmB .rm-layer{padding:5px 8px}
+.rmB .rm-bar{margin:4px 8px}
+/* style A — airy (faint tints, thin chips) */
+.rmA .rm-chip{box-shadow:none}
+.rmA .rm-band{position:relative;padding-left:0;margin-bottom:2px}
 .editpanel{margin-top:16px}
 .editpanel summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:8px 0}
 </style>
@@ -182,9 +238,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <div id="branchCard"></div>
       <div id="valWrap"></div>
       <div id="out">
-        <div class="toolbar">
-          <button class="btn" id="png">⬇ Export PNG</button>
-        </div>
         <div class="tlcard" id="tlcard">
           <div class="tlhead">
             <div>
@@ -196,8 +249,11 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
           <div class="chevrons" id="chevrons"></div>
           <div id="phases"></div>
         </div>
-        <!-- offscreen render target: roadmap card built only on Export PNG -->
-        <div id="rmExport" aria-hidden="true" style="position:fixed;left:-99999px;top:0;width:1240px"></div>
+        <!-- roadmap (refined) — rendered on-page below the list -->
+        <div class="rmprev" id="rmprev">
+          <div class="rmprev-head"><div class="t">Roadmap</div></div>
+          <div id="rmPreview"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -252,9 +308,17 @@ function dispName(nm){
   if(LEADNAME!=='KS') s=s.replace(/\bKS\b/g,LEADNAME);
   if(REGIONNAME!=='VN') s=s.replace(/\bVN\b/g,REGIONNAME);
   s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT');
+  // "<phase> Gerber release(d)" -> "<phase> G.O." (keep the phase prefix). §user req
+  s=s.replace(/Gerber\s+release\w*/i,'G.O.');
+  // "... SMT Build" -> "... SMT" (narrower chip). §user req
+  s=s.replace(/SMT\s+Build/i,'SMT');
   // gate label rename (display only — internal nm/keys keep "= CFZ"/"= RTM").
   s=s.replace('Code Freeze (FSI candidate) = CFZ','FSI Candidate (CFZ)')
      .replace('RTM Ties-1 = RTM','FSI Sign-off (RTM)');
+  // Google unit/prototype → add "ETA" suffix. §user req
+  s=s.replace(/^Google prototype$/i,'Google Prototype ETA')
+     .replace(/^Google EVT unit$/i,'Google EVT unit ETA')
+     .replace(/^Google DVT unit$/i,'Google DVT unit ETA');
   return s;
 }
 function dispSite(site){ return site==='KS'?LEADNAME : site==='VN'?REGIONNAME : site; }
@@ -323,10 +387,11 @@ const GOLDEN=[
   T('PV','Google release PV image',[7,2],[7,2],{mile:1}),
   T('PV','Google DVT unit',[7,22],[7,22],{mile:1}),
   T('PV','Google dogfooding',[7,23],[8,19]),
-  // FW gates — driven by Early Stable Cut (chromiumdash). golden ESC = Aug 11:
-  //   PLD (FW Lock Down) = ESC-7 (Aug 4); FW Candidate Testing = lock+1 .. ESC-1 (Aug 5–10). §user req
+  // FW chain — golden: FW Lock Down(PLD)=8/4; FW Candidate = lock-1wk = 7/28 (single day);
+  //   FW Candidate Testing = cand+1 .. lock-1 = 7/29–8/3; lock = test end + 1. §user req
+  T('PV','FW Candidate',[7,28],[7,28],{mile:1}),
+  T('PV','FW Candidate Testing',[7,29],[8,3]),
   T('PV','PLD',[8,4],[8,4],{mile:1}),
-  T('PV','FW Candidate Testing',[8,5],[8,10]),
   T('PV','Code Freeze (FSI candidate) = CFZ',[8,28],[8,28],{mile:1,gate:1}),
   T('PV','PV Regression',[8,31],[9,3]),
   T('PV','RTM Ties-1 = RTM',[9,4],[9,4],{mile:1,gate:1}),
@@ -338,6 +403,7 @@ const GOLDEN=[
   T('PVR','ME PV-R build (VN)',[8,27],[8,27],{mile:1,site:'VN'}),
   T('PVR','Tooling lock down (VN)',[9,2],[9,2],{mile:1,site:'VN'}),
   // MV
+  T('MV','MV Gerber release',[8,20],[8,20],{mile:1}),   // MV G.O. = DVT Test Start + 4wk (editable)
   T('MV','MV SMT',[9,2],[9,2],{mile:1,site:'KS'}),
   T('MV','VN SMT build',[9,11],[9,13],{site:'VN'}),
   T('MV','MV Pre-Build',[9,5],[9,5],{mile:1,site:'KS'}),
@@ -384,8 +450,9 @@ const HOL_LABELS={
 /* per-task editable duration override (calendar days). key=index */
 let durOverride={};
 /* user-adjustable gate gaps (calendar days). null = use default formula.
-   cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM. */
-let cfzDaysOverride=null, rtmDaysOverride=null;
+   cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM ;
+   mvGoDaysOverride = DVT Test Start → MV G.O. (default 28 = 4 weeks). */
+let cfzDaysOverride=null, rtmDaysOverride=null, mvGoDaysOverride=null;
 /* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
 let BRANCH_INFO=null;
 let lastValidSrISO='';
@@ -411,7 +478,7 @@ function build(srISO){
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
     return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null,
-            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7)};
+            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7),mvGoDays:(mvGoDaysOverride??28)};
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
@@ -467,11 +534,18 @@ function build(srISO){
   set(rows,'VN FCS',fv,fv);
   // FW gates — Early Stable Cut (chromiumdash if read, else SR-14) drives them. §user req
   const earlyCut=(BRANCH_INFO&&BRANCH_INFO.earlyCut)?BRANCH_INFO.earlyCut:addCal(SR,-14);
-  const fwLock=addCal(earlyCut,-7);
+  const fwLock=addCal(earlyCut,-7);          // FW Lock Down (= PLD)
+  const fwCand=addCal(fwLock,-7);            // FW Candidate = FW Lock Down - 1 week (single day)
   set(rows,'PLD',fwLock,fwLock);
   set(rows,'FW Lock Down',fwLock,fwLock);
-  set(rows,'FW Candidate Testing',addCal(fwLock,1),addCal(earlyCut,-1));
-  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,
+  set(rows,'FW Candidate',fwCand,fwCand);
+  // FW Candidate Testing = day after FW Candidate .. day before FW Lock Down; lock = test end + 1
+  set(rows,'FW Candidate Testing',addCal(fwCand,1),addCal(fwLock,-1));
+  // MV G.O. = DVT (PV) Test Start + N days (default 28 = 4wk), user-editable. §user req
+  const pvTest=(rows.find(r=>r.ph==='PV' && /Google (validation|dogfooding)/.test(r.nm))||{}).s;
+  const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:28;
+  if(pvTest) set(rows,'MV Gerber release',addCal(pvTest,mvGoDays),addCal(pvTest,mvGoDays));
+  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,mvGoDays,
           cfzRule,rtmRule,cfzPullIn,rtmPullIn};
 }
 function set(rows,nm,s,e){const r=rows.find(x=>x.nm===nm);if(r){r.s=s;r.e=e;}}
@@ -485,7 +559,7 @@ function minStart(rows){return rows.reduce((m,r)=>r.s<m?r.s:m,rows[0].s);}
 function validate(model,srISO){
   if(!model.hasAnchor) return {noAnchor:true,atGolden:false,miss:[],wkAll:0,durOK:true,pass:true};
   const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0
-    && cfzDaysOverride==null && rtmDaysOverride==null;
+    && cfzDaysOverride==null && rtmDaysOverride==null && mvGoDaysOverride==null;
   const miss=[];
   if(atGolden){
     for(const r of model.rows){
@@ -516,10 +590,10 @@ function packLanes(items){
     lanes.push(it.x1); it.lane=lanes.length-1; return lanes.length-1;
   });
 }
-/* branch info card — chromiumdash number/dates (OCR) + engine CFZ/RTM. */
-function renderBranchCard(model){
-  const el=document.getElementById('branchCard');
-  if(!model.hasAnchor){el.innerHTML='';return;}
+/* branch info card HTML — chromiumdash number/dates (OCR) + engine CFZ/RTM. extra = extra
+   class on the brcard (e.g. 'mini' for the shrunk copy in the roadmap header). */
+function branchCardHTML(model,extra){
+  if(!model.hasAnchor) return '';
   const b=BRANCH_INFO||{};
   const fmt=d=>{
     if(!d) return '—';
@@ -527,29 +601,27 @@ function renderBranchCard(model){
     if(d instanceof Date) return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}`;
     return '—';
   };
-  const rangeFmt=(s,e)=>{ if(!s && !e) return '—'; if(s&&e) return `${fmt(s)} – ${fmt(e)}`; if(s) return fmt(s); return fmt(e); };
   const branchInput=document.getElementById('branch')?.value||'';
-  // display the user's branch input first (e.g. "151 2nd"); fallback to OCR'd number
   const chromiumBranch = branchInput||b.num||'—';
-  // Branch Date: only show when OCR provided a parsed Date object
   const branchDateHtml = (b.branch instanceof Date) ? `<div class="br"><span class="k">Branch Date</span><span class="v">${fmt(b.branch)}</span></div>` : '';
-  // FW Candidate: find FW Candidate Testing row
-  const fwCandidateRow = model.rows.find(r=>r.nm==='FW Candidate Testing');
-  const fwCandidateHtml = fwCandidateRow ? `<div class="br"><span class="k">FW Candidate</span><span class="v">${rangeFmt(fwCandidateRow.s,fwCandidateRow.e)}</span></div>` : `<div class="br"><span class="k">FW Candidate</span><span class="v">—</span></div>`;
-  // FW Lock Down (PLD) — use PLD or FW Lock Down row
+  const fwCandDate = getDate(model.rows,'FW Candidate');
   const pldDate = getDate(model.rows,'PLD')||getDate(model.rows,'FW Lock Down');
   const stableCutDate = model.earlyCut || getDate(model.rows,'Early Stable Cut');
-  el.innerHTML=`<div class="brcard">
+  return `<div class="brcard${extra?' '+extra:''}">
     <div class="bt"><b${b.color?` style="color:${b.color}"`:''}>Br ${chromiumBranch}</b></div>
     <div class="br"><span class="k">Chromiumdash Branch</span><span class="v">${chromiumBranch}</span></div>
     ${branchDateHtml}
-    ${fwCandidateHtml}
+    <div class="br"><span class="k">FW Candidate</span><span class="v">${fmt(fwCandDate)}</span></div>
     <div class="br"><span class="k">FW Lock Down</span><span class="v">${fmt(pldDate)}</span></div>
     <div class="br"><span class="k">Stable Cut</span><span class="v">${fmt(stableCutDate)}</span></div>
     <div class="br"><span class="k">Stable Release</span><span class="v">${fmt(model.SR)}</span></div>
     <div class="br gate"><span class="k">FSI Candidate (CFZ)</span><span class="v">${fmt(model.CFZ)}</span></div>
     <div class="br gate"><span class="k">FSI Sign-off (RTM)</span><span class="v">${fmt(model.RTM)}</span></div>
   </div>`;
+}
+function renderBranchCard(model){
+  const el=document.getElementById('branchCard');
+  el.innerHTML=branchCardHTML(model);
 }
 function render(model,val,srISO){
   const has=model.hasAnchor;
@@ -597,6 +669,8 @@ function render(model,val,srISO){
         durCell=`<div class="dur"><input data-gate="cfz" value="${model.cfzDays}" title="Stable Release → CFZ (cal days) — adjustable"></div>`;
       else if(r.nm==='RTM Ties-1 = RTM')
         durCell=`<div class="dur"><input data-gate="rtm" value="${model.rtmDays}" title="CFZ → RTM (cal days) — adjustable"></div>`;
+      else if(r.nm==='MV Gerber release')
+        durCell=`<div class="dur"><input data-gate="mvgo" value="${model.mvGoDays}" title="DVT Test Start → MV G.O. (cal days, 28=4wk) — adjustable"></div>`;
       else if(r.mile)
         durCell=`<div class="dur" style="color:#b8c">◆</div>`;
       else
@@ -621,6 +695,7 @@ function render(model,val,srISO){
     inp.addEventListener('change',()=>{
       const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
       if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
+      else if(inp.dataset.gate==='mvgo') mvGoDaysOverride=ok?v:null;
       else rtmDaysOverride=ok?v:null;
       run();
     });
@@ -628,108 +703,158 @@ function render(model,val,srISO){
   renderVal(val,model);
 }
 
-/* ============ horizontal roadmap — built only on Export PNG (Example.png style) ============ */
-function renderRoadmap(model,host){
+/* ============ horizontal roadmap (refined, 6-layer, 2 styles) — preview + Export PNG ============ */
+let roadmapStyle='A';   // 'A' airy | 'B' boxed
+function rmCategorize(rows){
+  const isGoogleTest=t=>/Google (validation|dogfooding)/i.test(t.nm); // → Test Start tick only
+  const isGoogleChip=t=>/Google/.test(t.nm)&&!isGoogleTest(t);
+  const isGate=t=>/= CFZ|= RTM/.test(t.nm), isSMT=t=>/\bSMT\b/i.test(t.nm),
+        isGO=t=>/Gerber/i.test(t.nm), isExit=t=>/\bexit\b/i.test(t.nm);
+  const L1=[],L2=[],GO=[],EXIT=[],OTHER=[];
+  rows.forEach(r=>{
+    if(isGoogleTest(r)) return;                       // not a chip anywhere (only layer-4 Test tick)
+    if(isGoogleChip(r)||isGate(r)) L1.push(r);        // 1: Google (non val/dogfood) + CFZ/RTM
+    else if(isSMT(r)) L2.push(r);                     // 2: SMT
+    else if(isGO(r)) GO.push(r);                      // 4: G.O. (Gerber)
+    else if(isExit(r)) EXIT.push(r);                  // 5: phase exit
+    else OTHER.push(r);                              // 6: everything else (no repeats)
+  });
+  return {L1,L2,GO,EXIT,OTHER};
+}
+function renderRoadmap2(model,host,style){
+  const cls=style==='B'?'rmB':'rmA';
   host.innerHTML=`<div class="tlcard">
     <div class="tlhead">
-      <div><div class="t">${document.getElementById('proj').value||'ChromeBook Schedule'}</div>
-        <div class="s">Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Project start ${md(model.projStart)}</div></div>
+      <div class="t">${document.getElementById('proj').value||'ChromeBook Schedule'}</div>
+      ${branchCardHTML(model,'mini')}
       <div class="fcs">${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b></div>
     </div>
-    <div class="rm-canvas"><div class="rm-inner" id="rmInnerExp"></div></div>
+    <div class="rm-canvas"><div class="rm-inner ${cls}" id="rmInnerExp"></div></div>
     <div class="rm-holidays" id="rmHolExp"></div>
   </div>`;
-  const inner=host.querySelector('#rmInnerExp');
-  const rows=model.rows.filter(r=>r.ph!=='FCS'); // FCS dates live in the header
-  const T0=model.projStart, T1=addCal(model.fcsVN,4);
-  const span=(T1-T0)||1;
-  const xp=d=>(d-T0)/span*100;                 // percent
-  const PXW=1180;                              // matches .rm-inner min-width
-  const chipFrac=lbl=>(lbl.length*5.6+18)/PXW*100;
-  // classify
-  const isGoogle=t=>/Google/.test(t.nm), isSMT=t=>/\bSMT\b/.test(t.nm),
-        isExit=t=>/\bexit\b/i.test(t.nm), isCfzRtm=t=>/= CFZ|= RTM/.test(t.nm);
-  const L1=[],L2=[],ME=[],DENSE=[],EXIT=[];
-  rows.forEach(r=>{
-    if(isGoogle(r)||isCfzRtm(r)) L1.push(r);
-    else if(isSMT(r)) L2.push(r);
-    else if(isExit(r)) EXIT.push(r);
-    else if(ME_KEY.has(r.nm)) ME.push(r);
-    else DENSE.push(r);
-  });
-  // helper to build a layer of chips with lane packing
-  function layer(list,cls,labelFn){
-    const items=list.map(r=>{const lbl=labelFn(r);return {r,lbl,x0:xp(r.s),x1:Math.max(xp(r.e),xp(r.s)+chipFrac(lbl))};})
-                    .sort((a,b)=>a.x0-b.x0);
-    packLanes(items);
-    const lanes=Math.max(1,...items.map(i=>i.lane+1));
-    const ROW=24, H=lanes*ROW;
-    const div=document.createElement('div');div.className='rm-layer';div.style.height=H+'px';
-    items.forEach(it=>{
-      const c=document.createElement('div');c.className='rm-chip '+cls(it.r);
-      c.style.left=it.x0+'%';c.style.top=(it.lane*ROW)+'px';
-      const date=it.r.mile?md(it.r.s):`${md(it.r.s)}–${md(it.r.e)}`;
-      c.innerHTML=`<b>${it.lbl}</b><span class="dt">${date}</span>`;
-      div.appendChild(c);
+  const inner=host.querySelector('#rmInnerExp'); inner.style.position='relative';
+  const rows=model.rows.filter(r=>r.ph!=='FCS');
+  const T0=model.projStart, T1=addCal(model.fcsVN,4), span=(T1-T0)||1;
+  const xp=d=>(d-T0)/span*100;
+  const PXW=1180, chipFrac=lbl=>(lbl.length*5.6+18)/PXW*100;
+  const {L1,L2,GO,EXIT,OTHER}=rmCategorize(rows);
+  // PHASE-SEGMENT coordinate system: x is driven by the (decorative) phase bar segments,
+  // NOT raw date — so every chip/marker sits above its OWN phase. Within a phase, position
+  // is the task's date mapped into that phase's segment. §user req (align to phase bar)
+  const PHSEG=[['DB',1],['SI',1],['PV',1],['PVR',.5],['MV',1]], totW=4.5;
+  const seg={}; let acc=0; PHSEG.forEach(([ph,w])=>{seg[ph]={x0:acc/totW*100,x1:(acc+w)/totW*100};acc+=w;});
+  const phRange={};
+  PHSEG.forEach(([ph])=>{const ip=rows.filter(r=>r.ph===ph);
+    if(ip.length)phRange[ph]={s:ip.reduce((m,r)=>+r.s<m?+r.s:m,+ip[0].s),e:ip.reduce((m,r)=>+r.e>m?+r.e:m,+ip[0].e)};});
+  const segX=(ph,date)=>{const sg=seg[ph],pr=phRange[ph]; if(!sg)return 0;
+    if(!pr||pr.e<=pr.s)return (sg.x0+sg.x1)/2;
+    const f=Math.max(0,Math.min(1,(+date-pr.s)/(pr.e-pr.s)));return sg.x0+f*(sg.x1-sg.x0);};
+  // force a 2-line break for the long Google chips (name on line 1, "<rest> date" on line 2).
+  const twoLine=s=>s.replace(/^(Google \w+) (unit ETA)$/,'$1<br>$2')
+                    .replace(/^(Google release) (.+)$/,'$1<br>$2')
+                    .replace(/^(Google Prototype) (ETA)$/,'$1<br>$2');
+  const chipNode=(r,ph,cx,clsFn,labelFn)=>{
+    const c=document.createElement('div');c.className='rm-chip '+clsFn(r);
+    c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
+    if(/Google/.test(r.nm)){c.style.background='#90bc72';c.style.borderColor='#4e7a35';} // Google tasks → deeper green (distinct from EVT)
+    else{const m=PHASE_META[ph]; if(m){c.style.background=cssv(m.f);c.style.borderColor=cssv(m.b);}}
+    const date=(r.mile||/\bSMT\b/i.test(r.nm))?md(r.s):`${md(r.s)}–${md(r.e)}`; // SMT: start only
+    c.innerHTML=`<b>${twoLine(labelFn(r))}</b> <span class="dt">${date}</span>`;return c;
+  };
+  // chip layer — ONE row; within each phase the chips sit side-by-side (date-ordered).
+  // CFZ/RTM are pulled out and placed over the PVR→PVT area. §user req
+  function chipLayer(list,clsFn,labelFn){
+    const div=document.createElement('div');div.className='rm-layer';div.style.height='46px';
+    const isGate=r=>/= CFZ|= RTM/.test(r.nm);
+    PHSEG.forEach(([ph])=>{
+      const sg=seg[ph]; if(!sg)return;
+      const items=list.filter(r=>r.ph===ph&&!isGate(r)).sort((a,b)=>+a.s-+b.s), n=items.length; if(!n)return;
+      const segW=sg.x1-sg.x0;
+      items.forEach((r,k)=>div.appendChild(chipNode(r,ph,sg.x0+segW*(k+0.5)/n,clsFn,labelFn)));
+    });
+    // gates → span the PVR..PVT-start region
+    const gates=list.filter(isGate).sort((a,b)=>+a.s-+b.s);
+    if(gates.length&&seg.PVR&&seg.MV){const a=seg.PVR.x0, b=seg.MV.x0+(seg.MV.x1-seg.MV.x0)*0.45;
+      gates.forEach((r,k)=>div.appendChild(chipNode(r,'PV',a+(b-a)*(k+0.5)/gates.length,clsFn,labelFn)));}
+    return div;
+  }
+  // boxless columnar list per phase (like the reference): date + name, no frames.
+  function phaseColList(list){
+    const div=document.createElement('div');div.className='rm-collist';
+    [['DB','Proto','--proto-b'],['SI','EVT','--evt-b'],['PV','DVT','--dvt-b'],
+     ['PVR','PVR','--pvr-b'],['MV','PVT','--pvt-b']].forEach(([ph,name,bv])=>{
+      const items=list.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s);
+      const col=document.createElement('div');col.className='rm-col';col.style.flex=ph==='PVR'?'0.55':'1';
+      col.innerHTML=`<div class="rm-colh" style="color:${cssv(bv)};border-color:${cssv(bv)}">${name}</div>`+
+        items.map(r=>`<div class="rm-li"><span class="bu" style="background:${cssv(bv)}"></span><span class="d">${r.mile?md(r.s):md(r.s)+'–'+md(r.e)}</span><span class="n">${dispName(r.nm)}</span></div>`).join('');
+      div.appendChild(col);
     });
     return div;
   }
-  inner.innerHTML='';
-  const sec=t=>{const d=document.createElement('div');d.className='rm-sec';d.textContent=t;return d;};
-  // ---- Layer 1: Google / FW candidate / CFZ / RTM ----
-  inner.appendChild(sec('Google · FW Candidate · CFZ · RTM'));
-  inner.appendChild(layer(L1,r=>isCfzRtm(r)?'gate':(/FW|candidate/i.test(r.nm)?'fw':'google'),
+  // faint phase tints behind content — aligned to the phase segments
+  [['DB','--proto-f'],['SI','--evt-f'],['PV','--dvt-f'],['PVR','--pvr-f'],['MV','--pvt-f']].forEach(([ph,v])=>{
+    const sg=seg[ph]; if(!sg)return;
+    const t=document.createElement('div');t.className='rm-tint';
+    t.style.left=sg.x0+'%';t.style.width=(sg.x1-sg.x0)+'%';t.style.background=cssv(v);t.style.opacity='.12';
+    inner.appendChild(t);});
+  const content=document.createElement('div');content.style.position='relative';content.style.zIndex='1';
+  // 1. Google (excl. validation/dogfooding) + CFZ/RTM — one row, phase-aligned
+  content.appendChild(chipLayer(L1,r=>/= CFZ|= RTM/.test(r.nm)?'gate':'google',
     r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM')));
-  // ---- Layer 2: SMT ----
-  inner.appendChild(sec('SMT'));
-  inner.appendChild(layer(L2,_=>'smt',r=>dispName(r.nm)));
-  // ---- Layer 3: SVTP test → next-phase G.O. week buffers ----
-  inner.appendChild(sec('SVTP Test → G.O.  (interval)'));
-  inner.appendChild(weekLayer(model,xp));
-  // ---- middle: phase chevron bar ----
-  inner.appendChild(barLayer(model,xp));
-  // ---- ME key tasks (red) — directly under the bar ----
-  inner.appendChild(sec('ME 重點 Tasks'));
-  inner.appendChild(layer(ME,_=>'me',r=>dispName(r.nm)));
-  // ---- phase exits (clearly marked) ----
-  inner.appendChild(sec('Phase Exit'));
-  inner.appendChild(layer(EXIT,_=>'exit',r=>dispName(r.nm)));
-  // ---- dense tasks per phase ----
-  inner.appendChild(sec('Phase Tasks'));
-  inner.appendChild(layer(DENSE,_=>'dense',r=>dispName(r.nm)));
-  // ---- date axis ----
-  inner.appendChild(axisLayer(T0,T1,xp));
-  // ---- holidays ----
+  // 2. SMT
+  content.appendChild(chipLayer(L2,_=>'smt',r=>dispName(r.nm)));
+  // 3+4+5. chevron bar + G.O./Test Start/Duration + Phase Exit (dashed connectors to bar)
+  content.appendChild(middleStack(model,segX,barLayer2(model,seg,phRange),GO,EXIT));
+  // 6. other tasks — boxless columnar list per phase
+  content.appendChild(phaseColList(OTHER));
+  inner.appendChild(content);
   renderHolidays(host.querySelector('#rmHolExp'));
 }
-function weekLayer(model,xp){
-  const div=document.createElement('div');div.className='rm-layer';div.style.height='26px';
-  const seq=['DB','SI','PV'];
-  seq.forEach((ph,i)=>{
-    const nextPh=['SI','PV','PVR'][i];
-    const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm));
-    const nextRows=model.rows.filter(r=>r.ph===nextPh);
-    if(!gv||!nextRows.length) return;
-    const nextStart=nextRows.reduce((m,r)=>r.s<m?r.s:m,nextRows[0].s);
-    const wks=Math.round((nextStart-gv.s)/MS/7);
-    const mid=(xp(gv.s)+xp(nextStart))/2;
-    const w=document.createElement('div');w.className='rm-week';w.style.left=mid+'%';w.style.top='2px';
-    w.textContent=`${wks} wks`;
-    div.appendChild(w);
+/* phase chevron bar — Proto/EVT/DVT/[PVR half]/PVT, positioned by phase segments (% of bar)
+   so chips/markers above & below line up with their phase. */
+function barLayer2(model,seg,phRange){
+  const div=document.createElement('div');div.className='rm-bar';div.style.position='relative';
+  [['DB','Proto','--proto-f'],['SI','EVT','--evt-f'],['PV','DVT','--dvt-f'],
+   ['PVR','PVR','--pvr-f'],['MV','PVT','--pvt-f']].forEach(([ph,name,v])=>{
+    const sg=seg[ph]; if(!sg)return;
+    const c=document.createElement('div');c.className='rm-chev';
+    c.style.position='absolute';c.style.top='0';c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';c.style.height='46px';
+    const pr=phRange[ph], dr=pr?`${md(new Date(pr.s))}–${md(new Date(pr.e))}`:'';
+    c.innerHTML=chevSVG(cssv(v),'#1a1a1a')+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
+    div.appendChild(c);
   });
   return div;
 }
-function barLayer(model,xp){
-  const div=document.createElement('div');div.className='rm-bar';
-  BAR.forEach(b=>{
-    const inph=model.rows.filter(r=>b.phs.includes(r.ph)); if(!inph.length)return;
-    const s=inph.reduce((m,r)=>r.s<m?r.s:m,inph[0].s), e=inph.reduce((m,r)=>r.e>m?r.e:m,inph[0].e);
-    const c=document.createElement('div');c.className='rm-chev';
-    c.style.left=xp(s)+'%';c.style.width=(xp(e)-xp(s))+'%';
-    c.innerHTML=chevSVG(cssv(b.f),'#1a1a1a')+
-      `<div class="chev-label rm"><span>${b.name}</span><small>${md(s)}–${md(e)}</small></div>`;
-    div.appendChild(c);
+/* Middle stack — chevron bar + (below it) G.O. markers, Test Start markers, Testing→G.O.
+   duration arrows, and Phase Exit boxes, each with a dashed connector up to the bar.
+   One shared coordinate space so the dashed lines can reach the bar. §user req (ref img 2) */
+function middleStack(model,segX,bar,GO,EXIT){
+  const BARH=46, GOY=118, EXY=156, H=190;
+  const div=document.createElement('div');div.className='rm-mid';div.style.position='relative';div.style.height=H+'px';div.style.margin='6px 0';
+  bar.style.position='absolute';bar.style.left='0';bar.style.right='0';bar.style.top='0';div.appendChild(bar);
+  const conn=(x,toY,color)=>{const l=document.createElement('div');l.className='rm-conn';
+    l.style.left=x+'%';l.style.top=BARH+'px';l.style.height=Math.max(0,toY-BARH)+'px';l.style.color=color;div.appendChild(l);};
+  const mk=(x,y,html,color)=>{const m=document.createElement('div');m.className='rm-mk';
+    m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=html;div.appendChild(m);};
+  // G.O. markers (Gerber, renamed) — blue dashed up to bar
+  GO.forEach(r=>{const x=segX(r.ph,r.s);conn(x,GOY,'#2f6fd0');
+    mk(x,GOY+3,`<b>${dispName(r.nm)}</b><span class="dt">${md(r.s)}</span>`,'#1f4e9c');});
+  // Test Start markers (Google validation/dogfooding start) + Testing→next-G.O. duration arrows
+  ['DB','SI','PV'].forEach((ph,i)=>{
+    const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm)); if(!gv)return;
+    const tx=segX(ph,gv.s);conn(tx,GOY,'#b3402f');
+    mk(tx,GOY+3,`<b>${dispName(ph)} Test Start</b><span class="dt">${md(gv.s)}</span>`,'#b3402f');
+    const ng=model.rows.find(r=>r.ph===['SI','PV','MV'][i] && /G\.O\.|Gerber/i.test(dispName(r.nm)+r.nm));
+    if(ng){const gx=segX(ng.ph,ng.s),wks=Math.round((ng.s-gv.s)/MS/7);
+      const a=document.createElement('div');a.className='rm-arrow';
+      a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top='92px';div.appendChild(a);
+      const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top='73px';
+      lb.textContent=`${wks} wks`;div.appendChild(lb);}
   });
+  // Phase Exit — yellow boxes (with date) + orange dashed connector up to bar
+  EXIT.forEach(r=>{const x=segX(r.ph,r.s);conn(x,EXY,'#e08a2b');
+    const b=document.createElement('div');b.className='rm-exitbox';b.style.left=x+'%';b.style.top=EXY+'px';
+    b.innerHTML=`${dispName(r.nm).replace(/exit/i,'Phase Exit')} <span style="opacity:.7">${md(r.s)}</span>`;div.appendChild(b);});
   return div;
 }
 function axisLayer(T0,T1,xp){
@@ -813,6 +938,12 @@ function run(){
   const model=build(srISO);
   const val=validate(model,srISO);
   render(model,val,srISO);
+  renderRoadmapPreview(model);
+}
+function renderRoadmapPreview(model){
+  const host=document.getElementById('rmPreview'); if(!host)return;
+  if(!model.hasAnchor){host.innerHTML='<div class="hint" style="padding:6px 2px">輸入 Stable Release 後顯示 roadmap。</div>';return;}
+  renderRoadmap2(model,host,'A');
 }
 const reflow=()=>run();
 const generateBtn=document.getElementById('generate');
@@ -833,7 +964,7 @@ srInput.addEventListener('blur',()=>{
     run();
   }
 });
-document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;BRANCH_INFO=null;lastValidSrISO='';document.getElementById('branch').value='';srInput.value='';
+document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;BRANCH_INFO=null;lastValidSrISO='';document.getElementById('branch').value='';srInput.value='';
   document.getElementById('lead').value='KS';document.getElementById('region').value='VN';run();};
 
 /* ---- image upload + OCR ---- */
@@ -1038,30 +1169,6 @@ function parseBranch(text){
   info.stableRel= findDate((l,scope)=>isStableRel(l)&&scope==='os') || findDateLast(isStableRel);
   return info;
 }
-
-/* ---- PNG export (simple: html2canvas-free → use built-in) ---- */
-document.getElementById('png').onclick=async()=>{
-  const srISO=document.getElementById('sr').value;
-  if(!srISO){alert('請先輸入 Stable Release 再匯出。');return;}
-  const host=document.getElementById('rmExport');
-  // build the roadmap card offscreen, only for export (PowerPoint-ready)
-  const model=build(srISO);
-  renderRoadmap(model,host);
-  const card=host.querySelector('.tlcard');
-  const box=card.querySelector('.rm-canvas'); if(box)box.style.overflow='visible';
-  try{
-    if(window.html2canvas){
-      const cv=await html2canvas(card,{scale:2,backgroundColor:'#ffffff'});
-      const a=document.createElement('a');
-      a.download=(document.getElementById('proj').value||'ChromeSchedule').replace(/[^\w]+/g,'_')+'.png';
-      a.href=cv.toDataURL('image/png');a.click();
-    }else{
-      const w=window.open('','_blank');
-      w.document.write('<html><head><title>ChromeSchedule</title></head><body>'+card.outerHTML+'</body></html>');
-      w.document.close();w.focus();setTimeout(()=>w.print(),300);
-    }
-  }finally{ host.innerHTML=''; }
-};
 
 /* boot */
 run();
