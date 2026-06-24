@@ -152,15 +152,18 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <label>Project Name</label>
       <input type="text" id="proj" value="" placeholder="例：Education Azul (MTK8189) — M151 2nd release">
 
+      <label>Chromiumdash Branch</label>
+      <input type="text" id="branch" value="" placeholder="例：152 或 155">
+
       <label>Branch image (chromiumdash screenshot)</label>
       <div class="drop" id="drop">
-        <div id="dropTxt">📷 點此上傳 Branch 圖片<br><span style="font-size:11px">讀取 Chrome Browser Stable Release</span></div>
+        <div id="dropTxt">📷 點此上傳 Branch 圖片<br><span style="font-size:11px">或手動輸入下方 ChromeOS Stable Release</span></div>
       </div>
       <input type="file" id="file" accept="image/*" hidden>
-      <div class="hint" id="ocrHint">支援 png / jpg。OCR 會自動抓 “Stable Release” 日期；抓不到可手動填下方。</div>
+      <div class="hint" id="ocrHint">支援 png / jpg。OCR 會自動抓 ChromeOS Stable Release；若失敗，請手動填入下方。任一種方式皆可觸發排程。</div>
 
-      <label>Stable Release (Chrome Browser) — 錨點</label>
-      <input type="date" id="sr" value="">
+      <label>Stable Release (ChromeOS) — 錨點</label>
+      <input type="text" id="sr" value="" placeholder="YYYY-MM-DD 或 MM/DD/YYYY">
 
       <label>Lead site factory</label>
       <select id="lead"><option value="KS">KS (Kunshan, CN) — default</option><option value="OTHER">其他 ODM（自行輸入）</option></select>
@@ -169,8 +172,9 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <label>Region site factory</label>
       <select id="region"><option value="VN">Vietnam (越南)</option><option value="TH">Thailand (泰國)</option></select>
 
+      <button class="btn" id="generate">⚙ Generate Schedule</button>
       <button class="btn ghost" id="reset">Reset to defaults</button>
-      <div class="hint">改 Stable Release、工廠或任一 duration 都會即時自動重算排程。</div>
+      <div class="hint">改 Project Name / Branch / Stable Release / 工廠都會即時自動重算排程。</div>
     </div>
 
     <!-- ============ OUTPUT ============ -->
@@ -214,6 +218,18 @@ const md=x=>`${x.getUTCMonth()+1}/${x.getUTCDate()}`;
 const dow=x=>x.getUTCDay();
 const addCal=(x,n)=>new Date(x.getTime()+n*MS);
 const parseISO=s=>{const[a,b,c]=s.split('-').map(Number);return D(a,b,c);};
+const parseInputDate=s=>{
+  if(!s||typeof s!=='string')return null;
+  const trimmed=s.trim();
+  if(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(trimmed)) return parseISO(trimmed);
+  let m=trimmed.match(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/);
+  if(m) return D(+m[3],+m[1],+m[2]);
+  m=trimmed.match(/^([0-9]{1,2})-([0-9]{1,2})-([0-9]{4})$/);
+  if(m) return D(+m[3],+m[1],+m[2]);
+  m=trimmed.match(/^([0-9]{4})\/([0-9]{1,2})\/([0-9]{1,2})$/);
+  if(m) return D(+m[1],+m[2],+m[3]);
+  return extractDate(trimmed);
+};
 const calDiff=(a,b)=>Math.round((b-a)/MS);
 
 /* ---- holiday tables (2026) ---- */
@@ -308,8 +324,8 @@ const GOLDEN=[
   T('PV','Google DVT unit',[7,22],[7,22],{mile:1}),
   T('PV','Google dogfooding',[7,23],[8,19]),
   // FW gates — driven by Early Stable Cut (chromiumdash). golden ESC = Aug 11:
-  //   FW Lock Down = ESC-7 (Aug 4); FW Candidate Testing = lock+1 .. ESC-1 (Aug 5–10). §user req
-  T('PV','FW Lock Down',[8,4],[8,4],{mile:1}),
+  //   PLD (FW Lock Down) = ESC-7 (Aug 4); FW Candidate Testing = lock+1 .. ESC-1 (Aug 5–10). §user req
+  T('PV','PLD',[8,4],[8,4],{mile:1}),
   T('PV','FW Candidate Testing',[8,5],[8,10]),
   T('PV','Code Freeze (FSI candidate) = CFZ',[8,28],[8,28],{mile:1,gate:1}),
   T('PV','PV Regression',[8,31],[9,3]),
@@ -372,6 +388,7 @@ let durOverride={};
 let cfzDaysOverride=null, rtmDaysOverride=null;
 /* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
 let BRANCH_INFO=null;
+let lastValidSrISO='';
 
 /* =====================================================================
    SCHEDULER — global shift from anchor + re-snap gates + duration edits.
@@ -451,6 +468,7 @@ function build(srISO){
   // FW gates — Early Stable Cut (chromiumdash if read, else SR-14) drives them. §user req
   const earlyCut=(BRANCH_INFO&&BRANCH_INFO.earlyCut)?BRANCH_INFO.earlyCut:addCal(SR,-14);
   const fwLock=addCal(earlyCut,-7);
+  set(rows,'PLD',fwLock,fwLock);
   set(rows,'FW Lock Down',fwLock,fwLock);
   set(rows,'FW Candidate Testing',addCal(fwLock,1),addCal(earlyCut,-1));
   return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,
@@ -503,11 +521,31 @@ function renderBranchCard(model){
   const el=document.getElementById('branchCard');
   if(!model.hasAnchor){el.innerHTML='';return;}
   const b=BRANCH_INFO||{};
-  const fmt=d=>d?`${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}`:'—';
+  const fmt=d=>{
+    if(!d) return '—';
+    if(typeof d==='string') return d;
+    if(d instanceof Date) return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}`;
+    return '—';
+  };
+  const rangeFmt=(s,e)=>{ if(!s && !e) return '—'; if(s&&e) return `${fmt(s)} – ${fmt(e)}`; if(s) return fmt(s); return fmt(e); };
+  const branchInput=document.getElementById('branch')?.value||'';
+  // display the user's branch input first (e.g. "151 2nd"); fallback to OCR'd number
+  const chromiumBranch = branchInput||b.num||'—';
+  // Branch Date: only show when OCR provided a parsed Date object
+  const branchDateHtml = (b.branch instanceof Date) ? `<div class="br"><span class="k">Branch Date</span><span class="v">${fmt(b.branch)}</span></div>` : '';
+  // FW Candidate: find FW Candidate Testing row
+  const fwCandidateRow = model.rows.find(r=>r.nm==='FW Candidate Testing');
+  const fwCandidateHtml = fwCandidateRow ? `<div class="br"><span class="k">FW Candidate</span><span class="v">${rangeFmt(fwCandidateRow.s,fwCandidateRow.e)}</span></div>` : `<div class="br"><span class="k">FW Candidate</span><span class="v">—</span></div>`;
+  // FW Lock Down (PLD) — use PLD or FW Lock Down row
+  const pldDate = getDate(model.rows,'PLD')||getDate(model.rows,'FW Lock Down');
+  const stableCutDate = model.earlyCut || getDate(model.rows,'Early Stable Cut');
   el.innerHTML=`<div class="brcard">
-    <div class="bt">${b.numImg?`<img class="mnum" src="${b.numImg}" alt="${b.num||'milestone'}">`:`<b${b.color?` style="color:${b.color}"`:''}>${b.num||'—'}</b>`}</div>
-    <div class="br"><span class="k">Branch</span><span class="v">${fmt(b.branch)}</span></div>
-    <div class="br"><span class="k">Early Stable Cut</span><span class="v">${fmt(b.earlyCut)}</span></div>
+    <div class="bt"><b${b.color?` style="color:${b.color}"`:''}>Br ${chromiumBranch}</b></div>
+    <div class="br"><span class="k">Chromiumdash Branch</span><span class="v">${chromiumBranch}</span></div>
+    ${branchDateHtml}
+    ${fwCandidateHtml}
+    <div class="br"><span class="k">FW Lock Down</span><span class="v">${fmt(pldDate)}</span></div>
+    <div class="br"><span class="k">Stable Cut</span><span class="v">${fmt(stableCutDate)}</span></div>
     <div class="br"><span class="k">Stable Release</span><span class="v">${fmt(model.SR)}</span></div>
     <div class="br gate"><span class="k">FSI Candidate (CFZ)</span><span class="v">${fmt(model.CFZ)}</span></div>
     <div class="br gate"><span class="k">FSI Sign-off (RTM)</span><span class="v">${fmt(model.RTM)}</span></div>
@@ -747,17 +785,55 @@ function run(){
   leadCustom.hidden = leadEl.value!=='OTHER';
   LEADNAME = leadEl.value==='OTHER' ? (leadCustom.value.trim()||'ODM') : 'KS';
   LEADHOL = HOL.KS; // lead holiday table stays CN/TW unless a custom table is provided
-  const srISO=document.getElementById('sr').value;
+  const branchManual=document.getElementById('branch').value.trim();
+  if(branchManual){
+    BRANCH_INFO = BRANCH_INFO || {};
+    const m = branchManual.match(/\b(1\d{2})\b/);
+    BRANCH_INFO.num = m? m[1] : branchManual;
+  }
+  const srRaw=document.getElementById('sr').value.trim();
+  const srDate=parseInputDate(srRaw);
+  let srISO='';
+  const hasValidSr=!!srDate;
+  const hasAnyLastValid=!!lastValidSrISO;
+  if(hasValidSr){
+    srISO=iso(srDate);
+    lastValidSrISO=srISO;
+  } else if(srRaw || hasAnyLastValid){
+    srISO=lastValidSrISO; // preserve prior valid schedule while editing or clearing field
+  }
+  const hint=document.getElementById('ocrHint');
+  if(srRaw && !srDate){
+    hint.textContent='日期格式錯誤，請使用 YYYY-MM-DD、MM/DD/YYYY 或 MM-DD-YYYY。保持先前有效日期直到修正完成。';
+  } else if(!srRaw && hasAnyLastValid){
+    hint.textContent='Stable Release 欄位為空，保留先前有效日期供預覽，若要清空請按 Reset。';
+  } else {
+    hint.textContent='支援 png / jpg。OCR 會自動抓 ChromeOS Stable Release 日期；若 OCR 抓不到，可手動填入下方。任一種方式皆可觸發排程。';
+  }
   const model=build(srISO);
   const val=validate(model,srISO);
   render(model,val,srISO);
 }
 const reflow=()=>run();
-document.getElementById('region').onchange=reflow;
-document.getElementById('lead').onchange=reflow;
-document.getElementById('leadCustom').oninput=reflow;
-document.getElementById('sr').onchange=reflow;
-document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;BRANCH_INFO=null;document.getElementById('sr').value='';
+const generateBtn=document.getElementById('generate');
+if(generateBtn) generateBtn.addEventListener('click',run);
+document.getElementById('region').addEventListener('change',reflow);
+document.getElementById('lead').addEventListener('change',reflow);
+document.getElementById('leadCustom').addEventListener('input',reflow);
+document.getElementById('branch').addEventListener('input',reflow);
+const srInput=document.getElementById('sr');
+srInput.addEventListener('input',reflow);
+srInput.addEventListener('change',reflow);
+srInput.addEventListener('blur',()=>{
+  const raw=srInput.value.trim();
+  const d=parseInputDate(raw);
+  if(d){
+    const normalized=iso(d);
+    if(normalized!==raw){ srInput.value=normalized; }
+    run();
+  }
+});
+document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;BRANCH_INFO=null;lastValidSrISO='';document.getElementById('branch').value='';srInput.value='';
   document.getElementById('lead').value='KS';document.getElementById('region').value='VN';run();};
 
 /* ---- image upload + OCR ---- */
@@ -782,23 +858,46 @@ async function ocr(f){
     info.numImg=header.numImg;
     console.log('[parseBranch]',info,'header',header);
     BRANCH_INFO=info;
+    // Populate branch input with branch NUMBER (not the branch date). Keep any manual suffix the user typed.
+    if(info.num){
+      const inp=document.getElementById('branch');
+      const prev=inp.value.trim();
+      // if user previously typed a suffix like "2nd", preserve it when possible
+      const suffix=(prev && prev.startsWith(info.num))? prev.slice(String(info.num).length).trim() : '';
+      inp.value = suffix? `${info.num} ${suffix}` : String(info.num);
+    }
     const date=info.stableRel;
     if(date){
       document.getElementById('sr').value=iso(date);
       txt.innerHTML='✅ 已讀取 Branch 資訊';
-      hint.innerHTML=`Chrome <b>${info.num||'?'}</b> · Stable Release <b>${ymd(date)}</b>（已填入錨點）`;
+      // show branch NUMBER (not the parsed branch date) in the OCR hint
+      hint.innerHTML=`Branch <b>${info.num||'?'}</b> · Stable Release <b>${ymd(date)}</b>（已填入錨點）`;
       run();
     }else{
       txt.innerHTML='⚠ 未找到 Stable Release';
-      hint.textContent='OCR 沒抓到 Stable Release 日期，請手動填入下方錨點。';
+      const srRaw=document.getElementById('sr').value.trim();
+      const srDate=parseInputDate(srRaw);
+      if(srDate){
+        hint.textContent='OCR 未抓到 Stable Release，但已使用手動輸入的日期繼續排程。';
+        run();
+      } else {
+        hint.textContent='OCR 沒抓到 ChromeOS Stable Release 日期，請手動填入下方錨點。';
+      }
     }
   }catch(err){
     console.error('[OCR error]',err);
     const fileOrigin=location.protocol==='file:';
     txt.innerHTML='⚠ OCR 失敗';
-    hint.innerHTML=fileOrigin
-      ? '⚠ 偵測到從 <b>file://</b> 開啟 — Tesseract OCR 無法在 file:// 執行（安全限制）。請改用本機伺服器開啟（例如 <code>http://localhost</code>），或手動填入下方 Stable Release。'
-      : '請手動填入 Stable Release。'+err;
+    const srRaw=document.getElementById('sr').value.trim();
+    const srDate=parseInputDate(srRaw);
+    if(srDate){
+      hint.innerHTML='OCR 失敗，但已使用手動輸入的 Stable Release 繼續排程。';
+      run();
+    } else {
+      hint.innerHTML=fileOrigin
+        ? '⚠ 偵測到從 <b>file://</b> 開啟 — Tesseract OCR 無法在 file:// 執行（安全限制）。請改用本機伺服器開啟（例如 <code>http://localhost</code>），或手動填入下方 Stable Release。'
+        : '請手動填入 Stable Release。'+err;
+    }
   }finally{drop.classList.remove('busy');}
 }
 /* Read the milestone number (1xx) AND the header band colour from the image.
@@ -895,8 +994,8 @@ async function analyzeHeaderNumber(f){
     }
     console.log('[milestone] band rows',top,'..',bot,'| color',color,'| num',num,'| numImg',numImg?'yes':'no');
     return {num, color, numImg};
-  }catch(err){console.warn('[analyzeHeaderNumber]',err);return {num:'',color:''};}
-  finally{ if(worker) try{await worker.terminate();}catch(e){} }
+  }catch(err){console.warn('[analyzeHeaderNumber]',err);if(worker)try{worker.terminate();}catch(e){}return {num:'',color:'',numImg:''};}
+  finally{ if(worker) try{worker.terminate();}catch(e){} }
 }
 function parseMon(mon,d,y){const M={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};return D(y,M[mon]||1,d);}
 /* pull a date out of one OCR line — handles "Mon, Jul 27, 2026" and "Jul 27, 2026". */
@@ -909,7 +1008,7 @@ function extractDate(line){
   return null;
 }
 /* parse chromiumdash screenshot → {num, branch, earlyCut, stableRel}.
-   stableRel = Chrome Browser Stable Release (NOT ChromeOS, NOT Early Stable Release).
+   stableRel = ChromeOS Stable Release (NOT ChromeOS branch header, NOT Early Stable Release).
    Robust to two-column OCR: a label and its date may land on separate lines, so each
    label takes its own-line date, else the date on the immediately following pure-date line. */
 function parseBranch(text){
@@ -932,9 +1031,9 @@ function parseBranch(text){
   const findDateLast=pred=>{ let r=null; for(let i=0;i<lines.length;i++){ if(pred(lines[i],scopes[i])){const d=dateAt(i); if(d)r=d;} } return r; };
   info.branch   = findDate(l=>/\bbranch\b/i.test(l));
   info.earlyCut = findDate(l=>/early\s+stable\s+cut/i.test(l));
-  // anchor D = ChromeOS Stable Release (NOT Chrome Browser). §spec 3.1/4
+  // anchor D = ChromeOS Stable Release (NOT ChromeOS branch header). §spec 3.1/4
   // prefer the line in the 'os' scope; if OCR mangled the "ChromeOS" header so scope wasn't
-  // detected, fall back to the LAST plain "Stable Release" (ChromeOS sits below Chrome Browser).
+  // detected, fall back to the LAST plain "Stable Release" (ChromeOS sits below the browser line).
   const isStableRel=l=>/stable\s+release/i.test(l)&&!/early/i.test(l);
   info.stableRel= findDate((l,scope)=>isStableRel(l)&&scope==='os') || findDateLast(isStableRel);
   return info;

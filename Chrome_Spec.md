@@ -73,7 +73,16 @@ OCR 讀到 Branch 圖後，呈現一張資訊圖卡（**配色對齊上傳的 ch
 
 - 第 1–4 列由 OCR 抓；第 5–6 列由引擎用錨點算出（隨 Stable Release 連動）。
 
-### 3.2 其他輸入（暫定，待確認）
+### 3.2 支援兩種輸入場景（Scenario）
+- **Scenario A：上傳 Chromiumdash Branch 圖片**。
+  - 系統從圖中 OCR 讀出 `Chromiumdash Branch`、`Stable Cut`、`ChromeOS Stable Release` 等關鍵欄位。
+  - 其中 `ChromeOS Stable Release` 直接當作錨點 D，驅動 schedule backward / forward simulation。
+- **Scenario B：使用者手動輸入 Chromiumdash Branch 與 ChromeOS Stable Release date**。
+  - 讓使用者可直接填入 `Branch`（例如 `152` / `155`）和 `ChromeOS Stable Release` 日期。
+  - 手動輸入後，排程引擎同樣應以該日期做為錨點 D，並依相同 dependency 與 working-day 邏輯進行模擬。
+- 兩種 scenario 都必須能驅動同一套 schedule simulation 引擎，結果應一致，僅資料來源不同。
+
+### 3.3 其他輸入（暫定，待確認）
 - Project Name / 機種代號（例：M151）。
 - Release 版次（例：**M151 2nd release**）— ✅ **由圖片/檔案自動偵測**，非 user 手動輸入。
 - ODM 選擇 → 決定 **lead site 工廠**（見 §7）。
