@@ -348,7 +348,8 @@ const GOLDEN=[
   T('DB','DB Gerber released',[2,12],[2,12],{mile:1}),
   T('DB','Mockup review',[2,25],[2,26]),
   T('DB','DFM review',[3,2],[3,4]),
-  T('DB','ME tooling create',[3,7],[4,17]),
+  T('DB','Tooling Release',[3,7],[4,17]),    // was "ME tooling create" (release = end 4/17)
+  T('DB','T1+T2',[4,18],[4,25]),
   T('DB','PCB FAB',[2,25],[3,10]),
   T('DB','DB SMT Build',[3,11],[3,15]),
   T('DB','Ship DB PCBA ETA to TPE RD & HP',[3,23],[3,23],{mile:1}),
@@ -436,7 +437,7 @@ const BAR=[
 ];
 
 /* ME 重點 task — Example.png 紅框那些（放在 phase bar 下方一層）。§ user req 7 */
-const ME_KEY=new Set(['ME design','Layout','ME tooling create','T1+T2','SI ME parts',
+const ME_KEY=new Set(['ME design','Layout','Tooling Release','T1+T2','SI ME parts',
   'Mockup review','DFM review','ME PV-R build (KS)','ME PV-R build (VN)',
   'Tooling lock down (KS)','Tooling lock down (VN)']);
 /* labeled holidays for the dev window (display list). */
@@ -708,18 +709,20 @@ let roadmapStyle='A';   // 'A' airy | 'B' boxed
 function rmCategorize(rows){
   const isGoogleTest=t=>/Google (validation|dogfooding)/i.test(t.nm); // → Test Start tick only
   const isGoogleChip=t=>/Google/.test(t.nm)&&!isGoogleTest(t);
-  const isGate=t=>/= CFZ|= RTM/.test(t.nm), isSMT=t=>/\bSMT\b/i.test(t.nm),
-        isGO=t=>/Gerber/i.test(t.nm), isExit=t=>/\bexit\b/i.test(t.nm);
-  const L1=[],L2=[],GO=[],EXIT=[],OTHER=[];
+  const isGate=t=>/= CFZ|= RTM/.test(t.nm)||t.nm==='PLD', isSMT=t=>/\bSMT\b/i.test(t.nm),
+        isGO=t=>/Gerber/i.test(t.nm), isExit=t=>/\bexit\b/i.test(t.nm),
+        isBuild=t=>/\bT1\b/.test(t.nm)||/Pre-?Build/i.test(t.nm)||/Main.?build/i.test(t.nm)||/Tooling Release/i.test(t.nm)||(/Tooling lock down/i.test(t.nm)&&t.site!=='VN'); // region TLD stays in bottom list
+  const L1=[],L2=[],BUILD=[],GO=[],EXIT=[],OTHER=[];
   rows.forEach(r=>{
     if(isGoogleTest(r)) return;                       // not a chip anywhere (only layer-4 Test tick)
-    if(isGoogleChip(r)||isGate(r)) L1.push(r);        // 1: Google (non val/dogfood) + CFZ/RTM
+    if(isGoogleChip(r)||isGate(r)) L1.push(r);        // 1: Google (non val/dogfood) + CFZ/RTM/PLD
     else if(isSMT(r)) L2.push(r);                     // 2: SMT
-    else if(isGO(r)) GO.push(r);                      // 4: G.O. (Gerber)
-    else if(isExit(r)) EXIT.push(r);                  // 5: phase exit
-    else OTHER.push(r);                              // 6: everything else (no repeats)
+    else if(isBuild(r)) BUILD.push(r);                // 3: T1 / Pre-build / Main build / Tooling
+    else if(isGO(r)) GO.push(r);                      // G.O. (Gerber)
+    else if(isExit(r)) EXIT.push(r);                  // phase exit
+    else OTHER.push(r);                              // everything else (no repeats)
   });
-  return {L1,L2,GO,EXIT,OTHER};
+  return {L1,L2,BUILD,GO,EXIT,OTHER};
 }
 function renderRoadmap2(model,host,style){
   const cls=style==='B'?'rmB':'rmA';
@@ -737,7 +740,7 @@ function renderRoadmap2(model,host,style){
   const T0=model.projStart, T1=addCal(model.fcsVN,4), span=(T1-T0)||1;
   const xp=d=>(d-T0)/span*100;
   const PXW=1180, chipFrac=lbl=>(lbl.length*5.6+18)/PXW*100;
-  const {L1,L2,GO,EXIT,OTHER}=rmCategorize(rows);
+  const {L1,L2,BUILD,GO,EXIT,OTHER}=rmCategorize(rows);
   // PHASE-SEGMENT coordinate system: x is driven by the (decorative) phase bar segments,
   // NOT raw date — so every chip/marker sits above its OWN phase. Within a phase, position
   // is the task's date mapped into that phase's segment. §user req (align to phase bar)
@@ -758,14 +761,16 @@ function renderRoadmap2(model,host,style){
     c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
     if(/Google/.test(r.nm)){c.style.background='#90bc72';c.style.borderColor='#4e7a35';} // Google tasks → deeper green (distinct from EVT)
     else{const m=PHASE_META[ph]; if(m){c.style.background=cssv(m.f);c.style.borderColor=cssv(m.b);}}
-    const date=(r.mile||/\bSMT\b/i.test(r.nm))?md(r.s):`${md(r.s)}–${md(r.e)}`; // SMT: start only
+    const date=/Tooling Release/i.test(r.nm)?md(r.e)                                  // release = end of tooling
+      :(r.mile||/\bSMT\b|Pre-?Build|Main.?build|\bT1\b/i.test(r.nm))?md(r.s)           // SMT/build: start only
+      :`${md(r.s)}–${md(r.e)}`;
     c.innerHTML=`<b>${twoLine(labelFn(r))}</b> <span class="dt">${date}</span>`;return c;
   };
   // chip layer — ONE row; within each phase the chips sit side-by-side (date-ordered).
   // CFZ/RTM are pulled out and placed over the PVR→PVT area. §user req
   function chipLayer(list,clsFn,labelFn){
     const div=document.createElement('div');div.className='rm-layer';div.style.height='46px';
-    const isGate=r=>/= CFZ|= RTM/.test(r.nm);
+    const isGate=r=>/= CFZ|= RTM/.test(r.nm)||r.nm==='PLD';   // PLD sits with the gates (left of CFZ)
     PHSEG.forEach(([ph])=>{
       const sg=seg[ph]; if(!sg)return;
       const items=list.filter(r=>r.ph===ph&&!isGate(r)).sort((a,b)=>+a.s-+b.s), n=items.length; if(!n)return;
@@ -776,6 +781,36 @@ function renderRoadmap2(model,host,style){
     const gates=list.filter(isGate).sort((a,b)=>+a.s-+b.s);
     if(gates.length&&seg.PVR&&seg.MV){const a=seg.PVR.x0, b=seg.MV.x0+(seg.MV.x1-seg.MV.x0)*0.45;
       gates.forEach((r,k)=>div.appendChild(chipNode(r,'PV',a+(b-a)*(k+0.5)/gates.length,clsFn,labelFn)));}
+    return div;
+  }
+  // build layer — Tooling Release / T1 as single chips; Pre-Build + Main build combined per
+  // phase+site into one chip:  "Pre-B: <date>" / "Sys-B: <start>–<end>".  §user req (ref img 1)
+  function buildLayer(list){
+    const div=document.createElement('div');div.className='rm-layer';div.style.height='48px';
+    const place=(ph,cx,html)=>{const c=document.createElement('div');c.className='rm-chip';
+      c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
+      const m=PHASE_META[ph]; if(m){c.style.background=cssv(m.f);c.style.borderColor=cssv(m.b);}
+      c.innerHTML=html;return c;};
+    PHSEG.forEach(([ph])=>{
+      const sg=seg[ph]; if(!sg)return;
+      const inph=list.filter(r=>r.ph===ph); if(!inph.length)return;
+      const chips=[];
+      inph.filter(r=>/Tooling Release/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>Tooling Release</b> <span class="dt">${md(r.e)}</span>`}));
+      inph.filter(r=>/Tooling lock down/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>TLD</b> <span class="dt">${md(r.s)}</span>`})); // display-only "TLD"; real task = Tooling lock down
+      inph.filter(r=>/\bT1\b/.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>${dispName(r.nm)}</b> <span class="dt">${md(r.s)}</span>`}));
+      const pm=inph.filter(r=>/Pre-?Build|Main.?build/i.test(r.nm));
+      [...new Set(pm.map(r=>r.site||''))].forEach(st=>{
+        const pre=pm.find(r=>/Pre-?Build/i.test(r.nm)&&(r.site||'')===st);
+        const main=pm.find(r=>/Main.?build/i.test(r.nm)&&(r.site||'')===st);
+        const pfx=st?dispSite(st)+' ':'', lines=[];
+        if(pre) lines.push(`<div><b>${pfx}Pre-B:</b> ${md(pre.s)}</div>`);
+        if(main) lines.push(`<div><b>${pfx}Sys-B:</b> ${md(main.s)}${(+main.e!==+main.s)?'–'+md(main.e):''}</div>`);
+        if(lines.length) chips.push({s:+((pre||main).s),html:lines.join('')});
+      });
+      chips.sort((a,b)=>a.s-b.s);
+      const segW=sg.x1-sg.x0, n=chips.length;
+      chips.forEach((ch,k)=>div.appendChild(place(ph,sg.x0+segW*(k+0.5)/n,ch.html)));
+    });
     return div;
   }
   // boxless columnar list per phase (like the reference): date + name, no frames.
@@ -798,14 +833,14 @@ function renderRoadmap2(model,host,style){
     t.style.left=sg.x0+'%';t.style.width=(sg.x1-sg.x0)+'%';t.style.background=cssv(v);t.style.opacity='.12';
     inner.appendChild(t);});
   const content=document.createElement('div');content.style.position='relative';content.style.zIndex='1';
-  // 1. Google (excl. validation/dogfooding) + CFZ/RTM — one row, phase-aligned
-  content.appendChild(chipLayer(L1,r=>/= CFZ|= RTM/.test(r.nm)?'gate':'google',
-    r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM')));
-  // 2. SMT
-  content.appendChild(chipLayer(L2,_=>'smt',r=>dispName(r.nm)));
-  // 3+4+5. chevron bar + G.O./Test Start/Duration + Phase Exit (dashed connectors to bar)
-  content.appendChild(middleStack(model,segX,barLayer2(model,seg,phRange),GO,EXIT));
-  // 6. other tasks — boxless columnar list per phase
+  // above-bar chip rows (built, then relocated into the center stack with connectors)
+  const L1div=chipLayer(L1,r=>/= CFZ|= RTM/.test(r.nm)?'gate':'google',
+    r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM'));
+  const L2div=chipLayer(L2,_=>'smt',r=>dispName(r.nm));
+  const BUILDdiv=buildLayer(BUILD);
+  // center: above chips + chevron bar + below markers (all dashed-connected to the bar)
+  content.appendChild(centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT));
+  // other tasks — boxless columnar list per phase
   content.appendChild(phaseColList(OTHER));
   inner.appendChild(content);
   renderHolidays(host.querySelector('#rmHolExp'));
@@ -825,21 +860,33 @@ function barLayer2(model,seg,phRange){
   });
   return div;
 }
-/* Middle stack — chevron bar + (below it) G.O. markers, Test Start markers, Testing→G.O.
-   duration arrows, and Phase Exit boxes, each with a dashed connector up to the bar.
-   One shared coordinate space so the dashed lines can reach the bar. §user req (ref img 2) */
-function middleStack(model,segX,bar,GO,EXIT){
-  const BARH=46, GOY=118, EXY=156, H=190;
+/* Center stack — ALL in one coordinate space so dashed connectors reach the bar:
+   above the bar = chip rows (L1 Google/gates, L2 SMT, BUILD) each with a dashed line DOWN to
+   the bar; the chevron bar; below the bar = G.O./Test Start/Duration + Phase Exit with dashed
+   lines UP to the bar. §user req (coordinate markers both sides) */
+function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
+  // SMT (L2) sits higher/forward with a longer connector; BUILD hugs the bar (minimal gap). §user req
+  const yL1=0,yL2=44,barY=150,yBUILD=barY-40,BARH=46,BELOW=barY+BARH;
+  const GOY=BELOW+62, EXY=BELOW+100, H=EXY+28;
   const div=document.createElement('div');div.className='rm-mid';div.style.position='relative';div.style.height=H+'px';div.style.margin='6px 0';
-  bar.style.position='absolute';bar.style.left='0';bar.style.right='0';bar.style.top='0';div.appendChild(bar);
+  // above-bar: move each layer's chips in at offset oy, with a dashed connector down to the bar
+  const relocate=(layerDiv,oy)=>{[...layerDiv.querySelectorAll('.rm-chip')].forEach(chip=>{
+    const x=parseFloat(chip.style.left)||0;
+    const c=document.createElement('div');c.className='rm-conn';
+    c.style.left=x+'%';c.style.top=(oy+20)+'px';c.style.height=Math.max(0,barY-(oy+20))+'px';c.style.color='#9aa6bd';
+    div.appendChild(c);
+    chip.style.top=oy+'px';chip.style.zIndex='2';div.appendChild(chip);
+  });};
+  relocate(L1div,yL1);relocate(L2div,yL2);relocate(BUILDdiv,yBUILD);
+  // chevron bar
+  const bar=barLayer2(model,seg,phRange);bar.style.position='absolute';bar.style.left='0';bar.style.right='0';bar.style.top=barY+'px';bar.style.zIndex='1';div.appendChild(bar);
+  // below-bar markers
   const conn=(x,toY,color)=>{const l=document.createElement('div');l.className='rm-conn';
-    l.style.left=x+'%';l.style.top=BARH+'px';l.style.height=Math.max(0,toY-BARH)+'px';l.style.color=color;div.appendChild(l);};
+    l.style.left=x+'%';l.style.top=BELOW+'px';l.style.height=Math.max(0,toY-BELOW)+'px';l.style.color=color;div.appendChild(l);};
   const mk=(x,y,html,color)=>{const m=document.createElement('div');m.className='rm-mk';
     m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=html;div.appendChild(m);};
-  // G.O. markers (Gerber, renamed) — blue dashed up to bar
   GO.forEach(r=>{const x=segX(r.ph,r.s);conn(x,GOY,'#2f6fd0');
     mk(x,GOY+3,`<b>${dispName(r.nm)}</b><span class="dt">${md(r.s)}</span>`,'#1f4e9c');});
-  // Test Start markers (Google validation/dogfooding start) + Testing→next-G.O. duration arrows
   ['DB','SI','PV'].forEach((ph,i)=>{
     const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm)); if(!gv)return;
     const tx=segX(ph,gv.s);conn(tx,GOY,'#b3402f');
@@ -847,11 +894,10 @@ function middleStack(model,segX,bar,GO,EXIT){
     const ng=model.rows.find(r=>r.ph===['SI','PV','MV'][i] && /G\.O\.|Gerber/i.test(dispName(r.nm)+r.nm));
     if(ng){const gx=segX(ng.ph,ng.s),wks=Math.round((ng.s-gv.s)/MS/7);
       const a=document.createElement('div');a.className='rm-arrow';
-      a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top='92px';div.appendChild(a);
-      const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top='73px';
+      a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top=(BELOW+38)+'px';div.appendChild(a);
+      const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top=(BELOW+19)+'px';
       lb.textContent=`${wks} wks`;div.appendChild(lb);}
   });
-  // Phase Exit — yellow boxes (with date) + orange dashed connector up to bar
   EXIT.forEach(r=>{const x=segX(r.ph,r.s);conn(x,EXY,'#e08a2b');
     const b=document.createElement('div');b.className='rm-exitbox';b.style.left=x+'%';b.style.top=EXY+'px';
     b.innerHTML=`${dispName(r.nm).replace(/exit/i,'Phase Exit')} <span style="opacity:.7">${md(r.s)}</span>`;div.appendChild(b);});
