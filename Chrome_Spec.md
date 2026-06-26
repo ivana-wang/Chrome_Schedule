@@ -579,6 +579,8 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
 3. **SMT ↔ build 左右錯開（時間先後）**：每個 phase 內 **SMT chip 置於該 phase 區段的左帶
    （fraction ≈ 0.04–0.46）**、**build chip 置於右帶（≈ 0.45–0.92）**，使 `SMT → build` 由左至右
    讀起來有時間先後感，不再上下直接疊在同一 x。（build 已合併為單一方塊，見第 2 點。）
+   ⚠️ 採 **phase-segment 座標**（chip 落在「被指派的 phase」區段內，依日期在段內排序），
+   **非全域真實日期座標**（曾試過 `dateToX` 全域時間定位，視覺效果不佳，已回退）。
 4. **連線**：chip↔bar 用**實線**（非虛線），並在**碰到 bar 的那一端加實心圓點**（`.rm-conn.barbot/.bartop`）。
 5. **版面間距**：**SMT 層比 Google 層下移**（與第一層 Google chip 在垂直空間上錯開，避免擁擠）；
    **build 層上移、與 phase bar 之間保留間隙**（4 行的合併 build chip 不可壓到 / 蓋到 bar）；
@@ -594,8 +596,13 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
    見 §3.1.1）。Branch date 一律顯示該列（OCR 有值則填，純手動無來源時為 `—`）。
    ⚠️ **頁面最上方原本的獨立完整 Branch 卡（`#branchCard`）已移除**，資訊只保留在 roadmap 卡右上 mini。
 7. **header 排版**：roadmap 卡標題列為 title 靠左、**FCS 日期 + Branch mini 卡靠右上一欄**（`.tlhead-right`）。
-8. **整張 roadmap 必須 fit-to-window、可直接截圖（HARD）**：roadmap 圖卡放在 **2-column grid 之外、
-   橫跨整個 `.wrap` 寬度**（不再被右欄壓窄）。並以 `fitRoadmap()` 維持固定設計寬度（1180px），
+8. **版面 = sidebar dashboard（主流「設定常駐 + 結果主畫布」模式，HARD）**：
+   - **左側為 sticky 輸入側欄**（Project Setup：name / branch / 上傳 / Stable Release / lead / region），
+     `position:sticky` 捲動時恆常可見（`.card`）。
+   - **右側主欄(canvas)由上而下 = Roadmap(hero) → 驗證列(Overall WKs) → 螢幕 TASK 表**。
+     Roadmap 為主角、置於主欄頂端先被看到（§user req：Roadmap 與 TASK 表對調順序）。
+   - 頁面加寬（`.wrap` ≈ 1540px）使主欄 ≈ 1180px，Roadmap 維持足夠寬度。
+   - **整張 roadmap 必須 fit-to-window、可直接截圖**：以 `fitRoadmap()` 維持固定設計寬度（1180px），
    **當視窗比設計寬度窄時用 CSS `transform: scale()` 等比縮小**、reflow 卡片高度，
    **永遠不出現水平捲軸、不需 user 手動拉**（render 後與 `window.resize` 皆觸發）。
    目的：整張圖隨時完整可見，可直接截圖貼進報告。

@@ -24,12 +24,13 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(1200px 700px at 70% -10%,#16223f 0%,var(--bg) 55%);color:var(--ink);min-height:100vh;padding:24px;font-size:14px}
 h1,h2,h3{font-weight:600;letter-spacing:.2px}
-.wrap{max-width:1320px;margin:0 auto}
+.wrap{max-width:1540px;margin:0 auto}
 header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
 .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#04121f;box-shadow:0 0 24px var(--glow)}
 header .sub{color:var(--mut);font-size:12.5px;margin-top:2px}
 .grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
-.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+/* input panel = sticky left sidebar (dashboard layout): stays visible while scrolling the canvas */
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.35);position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto}
 .card h2{font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .card h2 .n{width:20px;height:20px;border-radius:6px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--accent2);font-family:'JetBrains Mono'}
 label{display:block;font-size:11.5px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
@@ -58,10 +59,8 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .tlhead-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 /* shrunk branch card inside the roadmap header */
 .brcard.mini{max-width:230px;border-radius:9px;font-size:9px;box-shadow:0 4px 14px rgba(20,30,70,.18)}
-.brcard.mini .bt{padding:5px 10px}
-.brcard.mini .bt .mnum-txt{font-size:24px;font-weight:800}
-.brcard.mini .bt .msuffix{font-size:10.5px}
-.brcard.mini .bt .mnum{height:24px}
+.brcard.mini .mnum-txt{font-size:28px}
+.brcard.mini .msuffix{font-size:10.5px}
 .brcard.mini .br{padding:2px 8px;font-size:9px;border-top:1px solid #f1f3f8}
 .brcard.mini .br .v{font-size:9px}
 .chevrons{display:flex;gap:0;margin:8px 0 24px}
@@ -103,12 +102,11 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 #branchCard{margin-bottom:14px}
 .brcard{max-width:300px;background:#fff;border:1px solid #e3e6f0;border-radius:13px;overflow:hidden;
   color:#2a3142;box-shadow:0 8px 26px rgba(20,30,70,.30)}
-.brcard .bt{background:#3730a3;color:#fff;text-align:left;padding:8px 13px;line-height:1.05;
-  font-weight:700;letter-spacing:.3px;display:flex;align-items:baseline;gap:2px}
-.brcard .bt b{font-weight:700;color:#fff}
-.brcard .bt .mnum-txt{font-size:27px;font-weight:800;letter-spacing:.5px}
-.brcard .bt .msuffix{font-size:12px;font-weight:600;opacity:.88}
-.brcard .bt .mnum{display:block;height:34px;width:auto;max-width:92%;object-fit:contain}
+/* milestone number now shows as a normal card row (no indigo header). §user req */
+.brcard .mile{align-items:baseline}
+.brcard .mile .v{display:flex;align-items:baseline;gap:5px;justify-content:flex-end;flex-wrap:wrap}
+.brcard .mnum-txt{font-size:31px;font-weight:800;letter-spacing:.5px;color:#3730a3;font-family:'JetBrains Mono'}
+.brcard .msuffix{font-size:12px;font-weight:600;color:#6b7385}
 .brcard .br{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 14px;
   font-size:13px;border-top:1px solid #eef0f6}
 .brcard .br .k{color:#3a4253}
@@ -246,8 +244,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <div class="hint">改 Project Name / Branch / Stable Release / 工廠都會即時自動重算排程。</div>
     </div>
 
-    <!-- ============ OUTPUT ============ -->
+    <!-- ============ OUTPUT (main canvas) ============ -->
     <div>
+      <!-- Roadmap = hero, top of the main column (sidebar dashboard layout). §user req -->
+      <div class="rmprev" id="rmprev" style="margin-top:0;margin-bottom:18px">
+        <div class="rmprev-head"><div class="t">Roadmap</div></div>
+        <div id="rmPreview"></div>
+      </div>
       <div id="valWrap"></div>
       <div id="out">
         <div class="tlcard" id="tlcard">
@@ -263,12 +266,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
         </div>
       </div>
     </div>
-  </div>
-  <!-- roadmap (refined) — FULL-WIDTH below the grid so it fits the window (no manual scroll) and
-       is screenshot-ready for reports. §user req -->
-  <div class="rmprev" id="rmprev">
-    <div class="rmprev-head"><div class="t">Roadmap</div></div>
-    <div id="rmPreview"></div>
   </div>
 </div>
 
@@ -617,22 +614,21 @@ function branchCardHTML(model,extra){
   };
   const branchInput=document.getElementById('branch')?.value||'';
   const projInput=document.getElementById('proj')?.value||'';
-  // header (indigo bar, Example.png style): milestone number "M1xx" + release suffix.
-  // number priority: user-typed 1xx → OCR text → cropped OCR image (robust) → —.
+  // milestone number "M1xx" (+ release suffix). TEXT only — no indigo header, no OCR image crop
+  // (the crop looked ugly). priority: user-typed 1xx → OCR text → —. §user req
   const typedNum = (branchInput.match(/1\d{2}/)||[])[0];
   const num = typedNum || b.num || '';
   const suffix = ((branchInput+' '+projInput).match(/\d(?:st|nd|rd|th)\s+release/i)||[])[0]||'';
   const numTxt = num?`M${num}`:'—';
-  const titleHTML = (!num && b.numImg)
-    ? `<img class="mnum" src="${b.numImg}" alt="milestone">`
-    : `<span class="mnum-txt">${numTxt}</span>${suffix?`<span class="msuffix"> · ${suffix}</span>`:''}`;
+  // milestone shows as a normal row (with the other dates) — enlarged number, no header. §user req
+  const mileRow = `<div class="br mile"><span class="k">Milestone</span><span class="v"><span class="mnum-txt">${numTxt}</span>${suffix?` <span class="msuffix">${suffix}</span>`:''}</span></div>`;
   // Branch date — always show the row (§3.1.1). Date comes from chromiumdash OCR; '—' if manual.
   const branchDateHtml = `<div class="br"><span class="k">Branch</span><span class="v">${fmt(b.branch)}</span></div>`;
   const fwCandDate = getDate(model.rows,'FW Candidate');
   const pldDate = getDate(model.rows,'PLD')||getDate(model.rows,'FW Lock Down');
   const stableCutDate = model.earlyCut || getDate(model.rows,'Early Stable Cut');
   return `<div class="brcard${extra?' '+extra:''}">
-    <div class="bt">${titleHTML}</div>
+    ${mileRow}
     ${branchDateHtml}
     <div class="br"><span class="k">FW Candidate</span><span class="v">${fmt(fwCandDate)}</span></div>
     <div class="br"><span class="k">FW Lock Down</span><span class="v">${fmt(pldDate)}</span></div>
@@ -865,7 +861,7 @@ function renderRoadmap2(model,host,style){
     r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM'));
   const L2div=chipLayer(L2,_=>'smt',r=>dispName(r.nm),[0.04,0.46]);  // SMT → left band (before build)
   const BUILDdiv=buildLayer(BUILD);
-  // center: above chips + chevron bar + below markers (all dashed-connected to the bar)
+  // center: above chips + chevron bar + below markers (all connected to the bar)
   content.appendChild(centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT));
   // other tasks — boxless columnar list per phase
   content.appendChild(phaseColList(OTHER));
