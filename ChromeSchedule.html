@@ -54,11 +54,14 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .tlhead .s{font-size:12px;color:#6b7385;margin-top:3px;font-family:'JetBrains Mono'}
 .tlhead .fcs{text-align:right;font-family:'JetBrains Mono'}
 .tlhead .fcs b{color:#3f9142}
+/* roadmap header: title left, FCS + branch card stacked top-right (Example.png layout) */
+.tlhead-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 /* shrunk branch card inside the roadmap header */
-.brcard.mini{max-width:230px;border-radius:9px;font-size:9px}
-.brcard.mini .bt{padding:4px 6px;border-bottom:1px solid #e3e6f0}
-.brcard.mini .bt b{font-size:17px;letter-spacing:.3px}
-.brcard.mini .bt .mnum{height:18px}
+.brcard.mini{max-width:230px;border-radius:9px;font-size:9px;box-shadow:0 4px 14px rgba(20,30,70,.18)}
+.brcard.mini .bt{padding:5px 10px}
+.brcard.mini .bt .mnum-txt{font-size:24px;font-weight:800}
+.brcard.mini .bt .msuffix{font-size:10.5px}
+.brcard.mini .bt .mnum{height:24px}
 .brcard.mini .br{padding:2px 8px;font-size:9px;border-top:1px solid #f1f3f8}
 .brcard.mini .br .v{font-size:9px}
 .chevrons{display:flex;gap:0;margin:8px 0 24px}
@@ -100,9 +103,12 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 #branchCard{margin-bottom:14px}
 .brcard{max-width:300px;background:#fff;border:1px solid #e3e6f0;border-radius:13px;overflow:hidden;
   color:#2a3142;box-shadow:0 8px 26px rgba(20,30,70,.30)}
-.brcard .bt{background:#fff;text-align:center;padding:12px 8px;line-height:1;border-bottom:1px solid #e3e6f0}
-.brcard .bt b{font-size:40px;font-weight:800;letter-spacing:1px;color:#4456b3}
-.brcard .bt .mnum{display:block;margin:0 auto;height:44px;width:auto;max-width:92%;object-fit:contain}
+.brcard .bt{background:#3730a3;color:#fff;text-align:left;padding:8px 13px;line-height:1.05;
+  font-weight:700;letter-spacing:.3px;display:flex;align-items:baseline;gap:2px}
+.brcard .bt b{font-weight:700;color:#fff}
+.brcard .bt .mnum-txt{font-size:27px;font-weight:800;letter-spacing:.5px}
+.brcard .bt .msuffix{font-size:12px;font-weight:600;opacity:.88}
+.brcard .bt .mnum{display:block;height:34px;width:auto;max-width:92%;object-fit:contain}
 .brcard .br{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 14px;
   font-size:13px;border-top:1px solid #eef0f6}
 .brcard .br .k{color:#3a4253}
@@ -116,22 +122,26 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rm-canvas{position:relative;width:100%;overflow-x:auto}
 .rm-inner{position:relative;min-width:1180px}
 .rm-layer{position:relative;width:100%}
-.rm-chip{position:absolute;background:#fff;border:1px solid #d7deea;border-radius:7px;
-  padding:3px 9px;font-size:9.5px;line-height:1.3;color:#2a3142;white-space:nowrap;text-align:center;
-  box-shadow:0 1px 2px rgba(20,30,60,.06)}
-.rm-chip b{font-family:'JetBrains Mono';font-weight:700;font-size:9.5px;color:#1a1f2b}
-.rm-chip .dt{font-family:'JetBrains Mono';font-size:9px;color:#6b7385}
-.rm-chip.google{border-color:#bcd9b8;background:#f1f8ef}
-.rm-chip.fw{border-color:#cdbbe6;background:#f4f0fb}
-.rm-chip.gate{border-color:#e7c14a;background:#fff7df;font-weight:700}
-.rm-chip.smt{border-color:#9fc0e8;background:#eef5fd}
+/* Demo-D box style: solid semantic colours, name on line 1 + date on line 2, soft shadow */
+.rm-chip{position:absolute;background:#fff;border:1px solid #cfd7e3;border-radius:6px;
+  padding:4px 9px;font-size:10px;line-height:1.3;color:#2a3142;white-space:nowrap;text-align:center;
+  box-shadow:0 1px 3px rgba(20,30,60,.16)}
+.rm-chip b{font-family:'JetBrains Mono';font-weight:700;font-size:10px;color:inherit}
+.rm-chip .dt{font-family:'JetBrains Mono';font-size:9px;opacity:.8;display:block}
+.rm-chip.google{border-color:#7fae4e;background:#e6f1d8;color:#33510f}
+.rm-chip.fw{border-color:#9d7ec9;background:#efe8fa;color:#4a2d78}
+.rm-chip.gate{border-color:#d35c5c;background:#fbe0e0;color:#8a1c1c;font-weight:700}
+.rm-chip.smt{border-color:#94a3b4;background:#eef1f5;color:#3a4757}
+.rm-chip.build{border-color:#b0a48f;background:#f3efe6;color:#5a4d35;text-align:left}
+.rm-chip.build.wide{min-width:104px}   /* only Pre-B/Sys-B chips get the wide box */
+.rm-chip.build .dt{display:inline}
 .rm-chip.me{border:1.5px solid #d9485f;background:#fdeef0;color:#8f1f30;font-weight:600}
 .rm-chip.dense{border-color:#e3e8f0;background:#fafbfd;color:#566076;font-size:10px}
-.rm-chip.exit{border:1.5px solid #e08a2b;background:#fff3e2;color:#9a5a10;font-weight:700}
+.rm-chip.exit{border:1.5px solid #e0962f;background:#fdeacf;color:#8a4b08;font-weight:700}
 .rm-week{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#3a4660;
   background:#eef1f7;border:1px solid #d7deea;border-radius:100px;padding:2px 10px}
-.rm-bar{position:relative;width:100%;height:46px;margin:4px 0}
-.rm-chev{position:absolute;top:0;height:46px}
+.rm-bar{position:relative;width:100%;height:54px;margin:4px 0}
+.rm-chev{position:absolute;top:0;height:54px}
 .rm-axis{position:relative;width:100%;height:18px;border-top:1px dashed #dde3ec;margin-top:2px}
 .rm-tick{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:9.5px;color:#9aa3b5;top:3px}
 .rm-sec{font-size:10px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:.6px;margin:0 0 3px}
@@ -156,7 +166,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rm-chip.wrap{white-space:normal;max-width:132px;line-height:1.2}
 .rm-chip.wrap b{white-space:normal;word-break:break-word}
 /* boxless columnar list per phase (layer 6) */
-.rm-collist{display:flex;gap:16px;margin-top:10px;border-top:1px solid #eef1f6;padding-top:12px}
+.rm-collist{display:flex;gap:16px;margin-top:0;padding-top:2px}  /* hug the Phase Exit row above. §user req */
 .rm-col{flex:1;min-width:0}
 .rm-colh{font-family:'JetBrains Mono';font-weight:700;font-size:11px;letter-spacing:.6px;padding-bottom:5px;
   margin-bottom:7px;border-bottom:2px solid}
@@ -166,7 +176,10 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rm-li .n{color:#2a3142}
 /* middle stack — bar + markers with dashed connectors + duration arrows + exit boxes */
 .rm-mid{position:relative}
-.rm-conn{position:absolute;width:0;border-left:1.5px dashed currentColor;opacity:.8;z-index:0}
+.rm-conn{position:absolute;width:0;border-left:1.4px solid currentColor;opacity:.55;z-index:0}
+.rm-conn::after{content:'';position:absolute;left:-3px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:1}
+.rm-conn.barbot::after{bottom:-2px}
+.rm-conn.bartop::after{top:-2px}
 .rm-mk{position:absolute;transform:translateX(-50%);text-align:center;font-family:'JetBrains Mono';white-space:nowrap;z-index:2}
 .rm-mk b{font-weight:700;font-size:10px;display:block;line-height:1.1}
 .rm-mk .dt{font-size:9px;color:#7b8497}
@@ -235,7 +248,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 
     <!-- ============ OUTPUT ============ -->
     <div>
-      <div id="branchCard"></div>
       <div id="valWrap"></div>
       <div id="out">
         <div class="tlcard" id="tlcard">
@@ -249,13 +261,14 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
           <div class="chevrons" id="chevrons"></div>
           <div id="phases"></div>
         </div>
-        <!-- roadmap (refined) — rendered on-page below the list -->
-        <div class="rmprev" id="rmprev">
-          <div class="rmprev-head"><div class="t">Roadmap</div></div>
-          <div id="rmPreview"></div>
-        </div>
       </div>
     </div>
+  </div>
+  <!-- roadmap (refined) — FULL-WIDTH below the grid so it fits the window (no manual scroll) and
+       is screenshot-ready for reports. §user req -->
+  <div class="rmprev" id="rmprev">
+    <div class="rmprev-head"><div class="t">Roadmap</div></div>
+    <div id="rmPreview"></div>
   </div>
 </div>
 
@@ -486,21 +499,21 @@ function build(srISO){
   // base shifted dates (whole golden moves with the Stable Release anchor)
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:addCal(t.gs,shift),e:addCal(t.ge,shift),warn:''}));
   const bw=rows.filter(r=>!r.fwd), fw=rows.filter(r=>r.fwd);
-  // BACKWARD block (HW, before anchor wall): end pinned at SR-anchored position;
-  // editing duration moves only UPSTREAM tasks — never downstream, never forward. §13.1
-  [...bw].sort((a,b)=>b.gs-a.gs).forEach(r=>{
-    const ov=durOverride[r.i]; if(ov==null) return;
-    const newDur=ov, delta=goldenSpan(r)-newDur;   // >0 if shortened
-    r.s=addCal(r.e,-newDur);                        // recompute start, end pinned
-    if(delta && isDriver(r)) bw.forEach(o=>{ if(o!==r && o.ge<=r.gs){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
-  });
-  // FORWARD block (after anchor wall): start pinned; editing pushes DOWNSTREAM later. §13.1
-  [...fw].sort((a,b)=>a.gs-b.gs).forEach(r=>{
+  // start-pinned DOWNSTREAM reflow within a block: editing a task's duration shifts every later
+  // task in the SAME block by the delta (predecessor end ≤ successor start, by golden order).
+  // SVTP test does not drive downstream (§13.5). §13.1 (rev): HW chain reflows but SR/CFZ/RTM/
+  // FCS (forward gates) are a separate, formula-locked block → never moved by HW edits.
+  const reflow=block=>[...block].sort((a,b)=>a.gs-b.gs).forEach(r=>{
     const ov=durOverride[r.i]; if(ov==null) return;
     const newDur=ov, delta=newDur-goldenSpan(r);    // >0 if lengthened
-    r.e=addCal(r.s,newDur);
-    if(delta) fw.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
+    r.e=addCal(r.s,newDur);                          // start pinned, end moves
+    if(delta && isDriver(r)) block.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
   });
+  // BACKWARD block = HW build (pre-SR): Kick-off pinned, reflow downstream HW tasks. Shorten a
+  // task → the chain finishes earlier (bigger buffer before Stable Release = less dev risk).
+  reflow(bw);
+  // FORWARD block (post-SR): start-pinned downstream push (gates re-locked by formula below).
+  reflow(fw);
   // key gates — anchored at D = Stable Release (ChromeOS). §spec 6
   //   CFZ (FSI Candidate) = D + 3 ; RTM (FSI Sign-off) = CFZ + 7 (one week — both Fridays).
   // Each gate snaps to the EARLIEST (on-or-before) Friday. If a user-adjusted gap makes the
@@ -603,14 +616,23 @@ function branchCardHTML(model,extra){
     return '—';
   };
   const branchInput=document.getElementById('branch')?.value||'';
-  const chromiumBranch = branchInput||b.num||'—';
-  const branchDateHtml = (b.branch instanceof Date) ? `<div class="br"><span class="k">Branch Date</span><span class="v">${fmt(b.branch)}</span></div>` : '';
+  const projInput=document.getElementById('proj')?.value||'';
+  // header (indigo bar, Example.png style): milestone number "M1xx" + release suffix.
+  // number priority: user-typed 1xx → OCR text → cropped OCR image (robust) → —.
+  const typedNum = (branchInput.match(/1\d{2}/)||[])[0];
+  const num = typedNum || b.num || '';
+  const suffix = ((branchInput+' '+projInput).match(/\d(?:st|nd|rd|th)\s+release/i)||[])[0]||'';
+  const numTxt = num?`M${num}`:'—';
+  const titleHTML = (!num && b.numImg)
+    ? `<img class="mnum" src="${b.numImg}" alt="milestone">`
+    : `<span class="mnum-txt">${numTxt}</span>${suffix?`<span class="msuffix"> · ${suffix}</span>`:''}`;
+  // Branch date — always show the row (§3.1.1). Date comes from chromiumdash OCR; '—' if manual.
+  const branchDateHtml = `<div class="br"><span class="k">Branch</span><span class="v">${fmt(b.branch)}</span></div>`;
   const fwCandDate = getDate(model.rows,'FW Candidate');
   const pldDate = getDate(model.rows,'PLD')||getDate(model.rows,'FW Lock Down');
   const stableCutDate = model.earlyCut || getDate(model.rows,'Early Stable Cut');
   return `<div class="brcard${extra?' '+extra:''}">
-    <div class="bt"><b${b.color?` style="color:${b.color}"`:''}>Br ${chromiumBranch}</b></div>
-    <div class="br"><span class="k">Chromiumdash Branch</span><span class="v">${chromiumBranch}</span></div>
+    <div class="bt">${titleHTML}</div>
     ${branchDateHtml}
     <div class="br"><span class="k">FW Candidate</span><span class="v">${fmt(fwCandDate)}</span></div>
     <div class="br"><span class="k">FW Lock Down</span><span class="v">${fmt(pldDate)}</span></div>
@@ -620,13 +642,8 @@ function branchCardHTML(model,extra){
     <div class="br gate"><span class="k">FSI Sign-off (RTM)</span><span class="v">${fmt(model.RTM)}</span></div>
   </div>`;
 }
-function renderBranchCard(model){
-  const el=document.getElementById('branchCard');
-  el.innerHTML=branchCardHTML(model);
-}
 function render(model,val,srISO){
   const has=model.hasAnchor;
-  renderBranchCard(model);
   document.getElementById('out').style.display='block';
   document.getElementById('tlTitle').textContent=document.getElementById('proj').value||'ChromeBook Schedule';
   document.getElementById('tlSub').textContent= has
@@ -729,8 +746,10 @@ function renderRoadmap2(model,host,style){
   host.innerHTML=`<div class="tlcard">
     <div class="tlhead">
       <div class="t">${document.getElementById('proj').value||'ChromeBook Schedule'}</div>
-      ${branchCardHTML(model,'mini')}
-      <div class="fcs">${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b></div>
+      <div class="tlhead-right">
+        <div class="fcs">${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b></div>
+        ${branchCardHTML(model,'mini')}
+      </div>
     </div>
     <div class="rm-canvas"><div class="rm-inner ${cls}" id="rmInnerExp"></div></div>
     <div class="rm-holidays" id="rmHolExp"></div>
@@ -759,8 +778,7 @@ function renderRoadmap2(model,host,style){
   const chipNode=(r,ph,cx,clsFn,labelFn)=>{
     const c=document.createElement('div');c.className='rm-chip '+clsFn(r);
     c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
-    if(/Google/.test(r.nm)){c.style.background='#90bc72';c.style.borderColor='#4e7a35';} // Google tasks → deeper green (distinct from EVT)
-    else{const m=PHASE_META[ph]; if(m){c.style.background=cssv(m.f);c.style.borderColor=cssv(m.b);}}
+    // colour comes from the semantic class (.google/.smt/.gate) — Demo-D style, NOT phase pastel.
     const date=/Tooling Release/i.test(r.nm)?md(r.e)                                  // release = end of tooling
       :(r.mile||/\bSMT\b|Pre-?Build|Main.?build|\bT1\b/i.test(r.nm))?md(r.s)           // SMT/build: start only
       :`${md(r.s)}–${md(r.e)}`;
@@ -768,14 +786,18 @@ function renderRoadmap2(model,host,style){
   };
   // chip layer — ONE row; within each phase the chips sit side-by-side (date-ordered).
   // CFZ/RTM are pulled out and placed over the PVR→PVT area. §user req
-  function chipLayer(list,clsFn,labelFn){
+  // range=[lo,hi] = fraction of each phase segment the chips spread across. SMT uses the LEFT
+  // band, BUILD the RIGHT band — so SMT→build reads left→right as a time sequence. §user req
+  function chipLayer(list,clsFn,labelFn,range){
+    range=range||[0,1];
     const div=document.createElement('div');div.className='rm-layer';div.style.height='46px';
     const isGate=r=>/= CFZ|= RTM/.test(r.nm)||r.nm==='PLD';   // PLD sits with the gates (left of CFZ)
     PHSEG.forEach(([ph])=>{
       const sg=seg[ph]; if(!sg)return;
       const items=list.filter(r=>r.ph===ph&&!isGate(r)).sort((a,b)=>+a.s-+b.s), n=items.length; if(!n)return;
       const segW=sg.x1-sg.x0;
-      items.forEach((r,k)=>div.appendChild(chipNode(r,ph,sg.x0+segW*(k+0.5)/n,clsFn,labelFn)));
+      items.forEach((r,k)=>{const f=range[0]+(range[1]-range[0])*(k+0.5)/n;
+        div.appendChild(chipNode(r,ph,sg.x0+segW*f,clsFn,labelFn));});
     });
     // gates → span the PVR..PVT-start region
     const gates=list.filter(isGate).sort((a,b)=>+a.s-+b.s);
@@ -787,29 +809,34 @@ function renderRoadmap2(model,host,style){
   // phase+site into one chip:  "Pre-B: <date>" / "Sys-B: <start>–<end>".  §user req (ref img 1)
   function buildLayer(list){
     const div=document.createElement('div');div.className='rm-layer';div.style.height='48px';
-    const place=(ph,cx,html)=>{const c=document.createElement('div');c.className='rm-chip';
+    const place=(ph,cx,html,wide)=>{const c=document.createElement('div');c.className='rm-chip build'+(wide?' wide':'');
       c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
-      const m=PHASE_META[ph]; if(m){c.style.background=cssv(m.f);c.style.borderColor=cssv(m.b);}
       c.innerHTML=html;return c;};
     PHSEG.forEach(([ph])=>{
       const sg=seg[ph]; if(!sg)return;
       const inph=list.filter(r=>r.ph===ph); if(!inph.length)return;
-      const chips=[];
-      inph.filter(r=>/Tooling Release/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>Tooling Release</b> <span class="dt">${md(r.e)}</span>`}));
-      inph.filter(r=>/Tooling lock down/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>TLD</b> <span class="dt">${md(r.s)}</span>`})); // display-only "TLD"; real task = Tooling lock down
-      inph.filter(r=>/\bT1\b/.test(r.nm)).forEach(r=>chips.push({s:+r.s,html:`<b>${dispName(r.nm)}</b> <span class="dt">${md(r.s)}</span>`}));
+      const chips=[];   // wide=true only for the Pre-B/Sys-B boxes (T1/TLD/Tooling stay narrow). §user req
+      inph.filter(r=>/Tooling Release/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,wide:false,html:`<b>Tooling Release</b> <span class="dt">${md(r.e)}</span>`}));
+      inph.filter(r=>/Tooling lock down/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,wide:false,html:`<b>TLD</b> <span class="dt">${md(r.s)}</span>`})); // display-only "TLD"; real task = Tooling lock down
+      inph.filter(r=>/\bT1\b/.test(r.nm)).forEach(r=>chips.push({s:+r.s,wide:false,html:`<b>${dispName(r.nm)}</b> <span class="dt">${md(r.s)}</span>`}));
+      // all sites' Pre-B/Sys-B for this phase → ONE combined chip (KS lines then region lines),
+      // so two site builds never sit side-by-side. §user req (不夠美觀)
       const pm=inph.filter(r=>/Pre-?Build|Main.?build/i.test(r.nm));
+      const bLines=[]; let bStart=null;
       [...new Set(pm.map(r=>r.site||''))].forEach(st=>{
         const pre=pm.find(r=>/Pre-?Build/i.test(r.nm)&&(r.site||'')===st);
         const main=pm.find(r=>/Main.?build/i.test(r.nm)&&(r.site||'')===st);
-        const pfx=st?dispSite(st)+' ':'', lines=[];
-        if(pre) lines.push(`<div><b>${pfx}Pre-B:</b> ${md(pre.s)}</div>`);
-        if(main) lines.push(`<div><b>${pfx}Sys-B:</b> ${md(main.s)}${(+main.e!==+main.s)?'–'+md(main.e):''}</div>`);
-        if(lines.length) chips.push({s:+((pre||main).s),html:lines.join('')});
+        const pfx=st?dispSite(st)+' ':'';
+        if(pre){bLines.push(`<div><b>${pfx}Pre-B:</b> ${md(pre.s)}</div>`); if(bStart==null)bStart=+pre.s;}
+        if(main){bLines.push(`<div><b>${pfx}Sys-B:</b> ${md(main.s)}${(+main.e!==+main.s)?'–'+md(main.e):''}</div>`); if(bStart==null)bStart=+main.s;}
       });
+      if(bLines.length) chips.push({s:bStart,wide:true,html:bLines.join('')});
       chips.sort((a,b)=>a.s-b.s);
-      const segW=sg.x1-sg.x0, n=chips.length;
-      chips.forEach((ch,k)=>div.appendChild(place(ph,sg.x0+segW*(k+0.5)/n,ch.html)));
+      // build chips on the RIGHT half (SMT is left) → time sequence; place at band EDGES so two
+      // site chips (KS/VN) never overlap — the earlier (KS) chip sits further left. §user req
+      const segW=sg.x1-sg.x0, n=chips.length, LO=0.45, HI=0.92;
+      chips.forEach((ch,k)=>{const f=(n===1)?0.60:(LO+(HI-LO)*k/(n-1));
+        div.appendChild(place(ph,sg.x0+segW*f,ch.html,ch.wide));});
     });
     return div;
   }
@@ -820,8 +847,8 @@ function renderRoadmap2(model,host,style){
      ['PVR','PVR','--pvr-b'],['MV','PVT','--pvt-b']].forEach(([ph,name,bv])=>{
       const items=list.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s);
       const col=document.createElement('div');col.className='rm-col';col.style.flex=ph==='PVR'?'0.55':'1';
-      col.innerHTML=`<div class="rm-colh" style="color:${cssv(bv)};border-color:${cssv(bv)}">${name}</div>`+
-        items.map(r=>`<div class="rm-li"><span class="bu" style="background:${cssv(bv)}"></span><span class="d">${r.mile?md(r.s):md(r.s)+'–'+md(r.e)}</span><span class="n">${dispName(r.nm)}</span></div>`).join('');
+      // no phase header here — the phase bar already labels the columns. §user req
+      col.innerHTML=items.map(r=>`<div class="rm-li"><span class="bu" style="background:${cssv(bv)}"></span><span class="d">${r.mile?md(r.s):md(r.s)+'–'+md(r.e)}</span><span class="n">${dispName(r.nm)}</span></div>`).join('');
       div.appendChild(col);
     });
     return div;
@@ -836,7 +863,7 @@ function renderRoadmap2(model,host,style){
   // above-bar chip rows (built, then relocated into the center stack with connectors)
   const L1div=chipLayer(L1,r=>/= CFZ|= RTM/.test(r.nm)?'gate':'google',
     r=>dispName(r.nm).replace('FSI Candidate (CFZ)','CFZ').replace('FSI Sign-off (RTM)','RTM'));
-  const L2div=chipLayer(L2,_=>'smt',r=>dispName(r.nm));
+  const L2div=chipLayer(L2,_=>'smt',r=>dispName(r.nm),[0.04,0.46]);  // SMT → left band (before build)
   const BUILDdiv=buildLayer(BUILD);
   // center: above chips + chevron bar + below markers (all dashed-connected to the bar)
   content.appendChild(centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT));
@@ -853,7 +880,7 @@ function barLayer2(model,seg,phRange){
    ['PVR','PVR','--pvr-f'],['MV','PVT','--pvt-f']].forEach(([ph,name,v])=>{
     const sg=seg[ph]; if(!sg)return;
     const c=document.createElement('div');c.className='rm-chev';
-    c.style.position='absolute';c.style.top='0';c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';c.style.height='46px';
+    c.style.position='absolute';c.style.top='0';c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';c.style.height='54px';
     const pr=phRange[ph], dr=pr?`${md(new Date(pr.s))}–${md(new Date(pr.e))}`:'';
     c.innerHTML=chevSVG(cssv(v),'#1a1a1a')+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
     div.appendChild(c);
@@ -866,14 +893,14 @@ function barLayer2(model,seg,phRange){
    lines UP to the bar. §user req (coordinate markers both sides) */
 function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
   // SMT (L2) sits higher/forward with a longer connector; BUILD hugs the bar (minimal gap). §user req
-  const yL1=0,yL2=44,barY=150,yBUILD=barY-40,BARH=46,BELOW=barY+BARH;
-  const GOY=BELOW+62, EXY=BELOW+100, H=EXY+28;
+  const yL1=0,yL2=62,yBUILD=100,barY=176,BARH=54,BELOW=barY+BARH;
+  const GOY=BELOW+64, EXY=BELOW+108, H=EXY+32;
   const div=document.createElement('div');div.className='rm-mid';div.style.position='relative';div.style.height=H+'px';div.style.margin='6px 0';
-  // above-bar: move each layer's chips in at offset oy, with a dashed connector down to the bar
+  // above-bar: move each layer's chips in at offset oy, with a solid connector + dot down to the bar
   const relocate=(layerDiv,oy)=>{[...layerDiv.querySelectorAll('.rm-chip')].forEach(chip=>{
     const x=parseFloat(chip.style.left)||0;
-    const c=document.createElement('div');c.className='rm-conn';
-    c.style.left=x+'%';c.style.top=(oy+20)+'px';c.style.height=Math.max(0,barY-(oy+20))+'px';c.style.color='#9aa6bd';
+    const c=document.createElement('div');c.className='rm-conn barbot';
+    c.style.left=x+'%';c.style.top=(oy+30)+'px';c.style.height=Math.max(0,barY-(oy+30))+'px';c.style.color='#9aa6bd';
     div.appendChild(c);
     chip.style.top=oy+'px';chip.style.zIndex='2';div.appendChild(chip);
   });};
@@ -881,7 +908,7 @@ function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
   // chevron bar
   const bar=barLayer2(model,seg,phRange);bar.style.position='absolute';bar.style.left='0';bar.style.right='0';bar.style.top=barY+'px';bar.style.zIndex='1';div.appendChild(bar);
   // below-bar markers
-  const conn=(x,toY,color)=>{const l=document.createElement('div');l.className='rm-conn';
+  const conn=(x,toY,color)=>{const l=document.createElement('div');l.className='rm-conn bartop';
     l.style.left=x+'%';l.style.top=BELOW+'px';l.style.height=Math.max(0,toY-BELOW)+'px';l.style.color=color;div.appendChild(l);};
   const mk=(x,y,html,color)=>{const m=document.createElement('div');m.className='rm-mk';
     m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=html;div.appendChild(m);};
@@ -990,7 +1017,26 @@ function renderRoadmapPreview(model){
   const host=document.getElementById('rmPreview'); if(!host)return;
   if(!model.hasAnchor){host.innerHTML='<div class="hint" style="padding:6px 2px">輸入 Stable Release 後顯示 roadmap。</div>';return;}
   renderRoadmap2(model,host,'A');
+  requestAnimationFrame(fitRoadmap);   // scale the whole roadmap to fit the window — no manual scroll
 }
+/* fit the roadmap to its container width so the entire chart is visible (screenshot-ready).
+   Keeps a fixed design width (1180) and scales DOWN with a transform when the window is narrower;
+   never forces a horizontal scrollbar. §user req (fit with window). */
+function fitRoadmap(){
+  const host=document.getElementById('rmPreview'); if(!host)return;
+  const canvas=host.querySelector('.rm-canvas'), inner=host.querySelector('#rmInnerExp');
+  if(!canvas||!inner)return;
+  inner.style.transform='none'; inner.style.width='';            // reset before measuring
+  const natural=Math.max(1180, inner.scrollWidth);
+  const avail=canvas.clientWidth||natural;
+  if(avail < natural-1){
+    const s=avail/natural;
+    inner.style.width=natural+'px'; inner.style.transformOrigin='top left';
+    inner.style.transform='scale('+s+')';
+    canvas.style.overflow='hidden'; canvas.style.height=(inner.offsetHeight*s)+'px';
+  }else{ canvas.style.overflow=''; canvas.style.height=''; }
+}
+let _rmFitT; window.addEventListener('resize',()=>{clearTimeout(_rmFitT);_rmFitT=setTimeout(fitRoadmap,120);});
 const reflow=()=>run();
 const generateBtn=document.getElementById('generate');
 if(generateBtn) generateBtn.addEventListener('click',run);
@@ -1142,7 +1188,9 @@ async function analyzeHeaderNumber(f){
         const out=nx.createImageData(bw2,bh2), o=out.data;
         for(let y=0;y<bh2;y++)for(let x=0;x<bw2;x++){
           const p=at(minX+x,minY+y), text=0.299*p[0]+0.587*p[1]+0.114*p[2]>thr, j=(y*bw2+x)*4;
-          o[j]=text?cr:255; o[j+1]=text?cg:255; o[j+2]=text?cb:255; o[j+3]=255;
+          // WHITE digits on a TRANSPARENT background → sits directly on the indigo header,
+          // no white box / blue frame. §user req
+          o[j]=255; o[j+1]=255; o[j+2]=255; o[j+3]=text?255:0;
         }
         nx.putImageData(out,0,0);
         numImg=nc.toDataURL('image/png');

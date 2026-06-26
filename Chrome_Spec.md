@@ -60,18 +60,21 @@
 
 ### 3.1.1 Branch 資訊圖卡 ✅（OCR 後呈現）
 
-OCR 讀到 Branch 圖後，呈現一張資訊圖卡（**配色對齊上傳的 chromiumdash 圖：靛藍標題列 + 白底列**），共 6 列：
+OCR 讀到 Branch 圖後，呈現一張資訊圖卡（**配色對齊上傳的 chromiumdash 圖：靛藍標題列 + 白底列**），共 8 列：
 
 | 列 | 內容 | 來源 |
 |---|---|---|
-| 1 | Chrome milestone 號碼（例 `152` / `155`，標題黃底） | OCR（圖頂 1xx 數字） |
+| 1 | 標題列：`M<milestone#> · <release 版次>`（例 `M152 · 2nd release`，**靛藍底白字**） | OCR / 手填（圖頂 1xx 數字 + 版次） |
 | 2 | Branch: date | OCR（`Branch` 那行，例 7/27） |
-| 3 | Stable Cut: date | OCR（`Stable Cut`，例 8/11） |
-| 4 | Stable Release: date（**= 錨點 D**） | OCR（**ChromeOS** 區塊的 `Stable Release`，例 9/8） |
-| 5 | FSI Candidate: date（**= CFZ**） | 引擎計算（`D + 3 days`，見 §6） |
-| 6 | FSI Sign-off: date（**= RTM**） | 引擎計算（`CFZ + 7 days`，一週，見 §6） |
+| 3 | FW Candidate: date | 引擎計算（= FW Lock Down − 1 week，見 §6） |
+| 4 | FW Lock Down: date（= PLD） | 引擎計算（= Stable Cut − 1 week，見 §6） |
+| 5 | Stable Cut: date | OCR（`Stable Cut`，例 8/11）／引擎（`D − 14`） |
+| 6 | Stable Release: date（**= 錨點 D**） | OCR（**ChromeOS** 區塊的 `Stable Release`，例 9/8） |
+| 7 | FSI Candidate: date（**= CFZ**） | 引擎計算（`D + 3 days`，見 §6） |
+| 8 | FSI Sign-off: date（**= RTM**） | 引擎計算（`CFZ + 7 days`，一週，見 §6） |
 
-- 第 1–4 列由 OCR 抓；第 5–6 列由引擎用錨點算出（隨 Stable Release 連動）。
+- 標題與 Branch / Stable Release 由 OCR 抓；FW Candidate / FW Lock Down / Stable Cut / CFZ / RTM 由引擎用錨點算出（隨 Stable Release 連動）。
+- **FW Candidate 與 FW Lock Down 兩列為必要欄位**（roadmap 右上 mini 卡與頁面完整卡皆須顯示，見 §13.8.6）。
 
 ### 3.2 支援兩種輸入場景（Scenario）
 - **Scenario A：上傳 Chromiumdash Branch 圖片**。
@@ -338,6 +341,8 @@ Example.png 與 xlsx 中出現 **KS** 與 **VN** 兩個工廠：
   手動日期 fallback；lead site / region site(VN/TH) 選擇；每個 task duration 可內嵌編輯，即時 reflow。
 - **視覺**：dark dashboard + 白色 export-ready timeline card；phase chevron 用 `Develop phase graph.png`
   粉彩配色（DB藍 Proto / SI綠 EVT / PV紅 DVT / PVR粉 / MV黃 PVT / FCS綠）；PNG 匯出 (html2canvas)。
+  **Roadmap 卡採 Example.png 方塊流程圖風格（語意配色 chip + 實線圓點連線 + SMT/build 左右時間錯開 +
+  靛藍 Branch 卡），詳見 §13.8。**
 - **自我驗證 (§4.2)**：每次重算自動對照 Example.png golden — golden 輸入時逐 task 比對日期 + 檢查 38 WKs，
   顯示 pass / 偏差清單；非 golden 輸入時確認 dependency 邏輯一致並顯示當前週數。
 - **已知簡化（v1，待後續強化）**：reflow 採全域 shift + gate 公式 re-snap + duration 線性下游推移；
@@ -360,7 +365,7 @@ Example.png 與 xlsx 中出現 **KS** 與 **VN** 兩個工廠：
 | ME Dev | Mockup review | 2/25 | 2/26 |
 | ME Dev | DFM review | 3/2 | 3/4 |
 | ME Dev | ME drawing modification for tooling | 3/4 | 3/6 |
-| ME Dev | ME tooling create | 3/7 | 4/17 |
+| ME Dev | ME tooling Release | 3/7 | 4/17 |
 | ME Dev | T1+T2 | 4/18 | 4/25 |
 | ME Dev | SI ME parts | 4/26 | 5/12 |
 | DB | Layout | 1/6 | 2/11 |
@@ -470,18 +475,16 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
 
 > 以下 5 點為實際操作回報的 bug，視為硬規則，覆寫先前任何衝突描述。
 
-### 13.1 Stable Release 是「定錨牆」— 前段不可影響後段（HARD）
+### 13.1 SR / CFZ / RTM / FCS 堅不可摧；HW 鏈 downstream reflow（HARD，v2 修正）
 
-- **CFZ 由 Stable Release 制約：`CFZ = SR+3`、`RTM = CFZ+7`，以及整條 MV→PR→FCS 後段鏈，
-  只受 Stable Release 影響。** 只要 Stable Release 沒有往前移，**任何 Stable Release 之前的 task
-  （HW build：ME dev / DB / SI / PV build + test）不論怎麼改 duration，都不可改變 RTM、MV Pre-Build
-  等後段 task 的時間。**
-- 模型：以 **CFZ (=SR+3) 為定錨牆**，分兩個 block：
-  - **後段 (forward block)**：CFZ、PV Regression、RTM、PV exit、PVR、MV、FCS。只由 SR / CFZ 公式驅動。
-    編輯後段 task duration → 只往**下游**順延（end pinned at SR-anchored gates by 公式）。
-  - **前段 (backward block)**：HW build。以 block 尾端（PV testing，pinned 在 SR-anchored 位置）往回算。
-    編輯前段 task duration → 只移動**上游**（更早的 task / project start），**下游與後段完全不動**。
-- 例：DB SVTP test 34→24，project start 端往後挪，但 SI/PV/CFZ/RTM/MV/FCS **全部不動**。
+- **Stable Release、CFZ、RTM、KS/VN FCS = 鎖死的里程碑**，只由 SR 公式驅動（`CFZ=SR+3`、`RTM=CFZ+7`、
+  FCS=…）；**任何 task duration 編輯都不可移動這四個 gate。**
+- 兩個獨立 block，編輯 duration → **start-pinned、往下游 reflow**（改某 task → 同 block 內 golden 順序在它
+  之後的 task 一起平移 delta）。**前段 (backward = HW build) Kick-off pinned：縮短某 task → 整條 HW 鏈提前
+  完成（SR 前 buffer 變大＝降低 risk）**；加長則往後推。兩 block 互不影響，HW 編輯不動後段 gates。
+  SVTP test 不 drive downstream（§13.5），編輯它只改自己那條 bar。
+- ⚠️ v1 舊規則「前段 end-pinned、只移上游、下游不動」**已被本 v2 取代**（user 要看到 HW 縮短後提前完成）。
+- 例：縮短 `PCB FAB` → 它之後的 HW task（SMT/test/exit…）全部提前，HW 提早做完；SR/CFZ/RTM/FCS 不動。
 
 ### 13.2 Region site 切換要連動 schedule 圖卡的 task（HARD）
 
@@ -556,3 +559,43 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
 
   ⚠️ §13.5 的「下游定錨」仍只認 `Google validation` / `Google dogfooding`（roadmap 的 SVTP→G.O.
   週數計算用 `/Google (validation|dogfooding)/` 精準匹配），新增的 Google 里程碑**不**參與下游定錨。
+
+### 13.8 Roadmap 視覺精修 v2 — Example.png 方塊流程圖風格（HARD）
+
+> 採用使用者核可的 **Example.png 流程圖語言**：一條連續的 chevron phase 帶（§5.2），
+> task 以**彩色圓角方塊**浮在帶子上下、用**實線 + 端點圓點**連到帶子。覆寫先前粉彩 tint chip 樣式。
+> 結構 / 分層 / 哪些 task 進 roadmap 仍 100% 依 §13.6；本節只規範**視覺呈現**。
+
+1. **Chip 語意配色（不再用 phase 粉彩）**：chip 顏色由 task 類別決定，而非所在 phase——
+   `Google = 綠`、`SMT = 灰`、`build（Tooling / T1 / Pre-B·Sys-B / TLD）= 米色`、
+   `gate（PLD / CFZ / RTM）= 紅`。同類 task 在不同 phase 維持同色。
+2. **Chip 文字格式**：
+   - Google / SMT chip：**name 一行 + date 一行**（date 在下，`.dt` block）。
+   - **build chip**：`Pre-B: <date>` 與 `Sys-B: <start>–<end>` **各自一行**（label 與值同一行，`b` inline）；米色保留。
+   - **同一個 phase 的 KS + region(VN/TH) 兩站 Pre-B/Sys-B 合併成「單一方塊、多行」**
+     （KS 兩行在上、region 兩行在下），**不可拆成兩個並排方塊**（並排不美觀且易重疊）。§user req
+   - **只有 Pre-B/Sys-B box 加寬**（class `.build.wide`，min-width ≈ 104px、左對齊）；
+     **`T1+T2` / `TLD` / `Tooling Release` 維持自然窄寬**（不套 min-width）。
+3. **SMT ↔ build 左右錯開（時間先後）**：每個 phase 內 **SMT chip 置於該 phase 區段的左帶
+   （fraction ≈ 0.04–0.46）**、**build chip 置於右帶（≈ 0.45–0.92）**，使 `SMT → build` 由左至右
+   讀起來有時間先後感，不再上下直接疊在同一 x。（build 已合併為單一方塊，見第 2 點。）
+4. **連線**：chip↔bar 用**實線**（非虛線），並在**碰到 bar 的那一端加實心圓點**（`.rm-conn.barbot/.bartop`）。
+5. **版面間距**：**SMT 層比 Google 層下移**（與第一層 Google chip 在垂直空間上錯開，避免擁擠）；
+   **build 層上移、與 phase bar 之間保留間隙**（4 行的合併 build chip 不可壓到 / 蓋到 bar）；
+   **Phase Exit 方塊不可被截斷**；**底部 boxless 清單（§13.6 layer 6）緊貼 Phase Exit 列下方**
+   （`.rm-collist` 去除 border-top、margin 收到最小），且 **不顯示 Proto/EVT/DVT/PVR/PVT 欄標題**
+   （phase bar 已在相同水平位置標示，欄標題重複 → 移除）。
+6. **Branch 卡（只顯示在 roadmap 卡右上 mini，§3.1.1 版型）**：**靛藍標題列**顯示
+   `M<milestone#> · <release 版次>`（如 `M152 · 2nd release`；號碼來源：手填 Branch 欄 → OCR 文字 →
+   OCR 數字裁切圖）。**milestone digital number（`M<num>`）字體放大**（`.mnum-txt`，mini ≈ 24px），
+   版次後綴（`.msuffix`）維持小字。**號碼直接以白字呈現在靛藍標題列，不可有白底框 / 藍邊框**
+   （OCR 數字裁切圖 `numImg` 改為**透明底 + 白色數字**）。列依序為 **Branch / FW Candidate / FW Lock Down / Stable Cut /
+   Stable Release / FSI Candidate (CFZ) / FSI Sign-off (RTM)**（**FW Candidate 與 FW Lock Down 兩列必須保留**，
+   見 §3.1.1）。Branch date 一律顯示該列（OCR 有值則填，純手動無來源時為 `—`）。
+   ⚠️ **頁面最上方原本的獨立完整 Branch 卡（`#branchCard`）已移除**，資訊只保留在 roadmap 卡右上 mini。
+7. **header 排版**：roadmap 卡標題列為 title 靠左、**FCS 日期 + Branch mini 卡靠右上一欄**（`.tlhead-right`）。
+8. **整張 roadmap 必須 fit-to-window、可直接截圖（HARD）**：roadmap 圖卡放在 **2-column grid 之外、
+   橫跨整個 `.wrap` 寬度**（不再被右欄壓窄）。並以 `fitRoadmap()` 維持固定設計寬度（1180px），
+   **當視窗比設計寬度窄時用 CSS `transform: scale()` 等比縮小**、reflow 卡片高度，
+   **永遠不出現水平捲軸、不需 user 手動拉**（render 後與 `window.resize` 皆觸發）。
+   目的：整張圖隨時完整可見，可直接截圖貼進報告。
