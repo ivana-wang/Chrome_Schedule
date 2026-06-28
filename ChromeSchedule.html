@@ -26,7 +26,11 @@ body{font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient
 h1,h2,h3{font-weight:600;letter-spacing:.2px}
 .wrap{max-width:1540px;margin:0 auto}
 header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#04121f;box-shadow:0 0 24px var(--glow)}
+/* author profile pinned to the top-right: avatar with name underneath */
+.profile{margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:5px}
+.profile .pname{font-size:12px;font-weight:600;color:var(--mut);white-space:nowrap;letter-spacing:.2px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#04121f;box-shadow:0 0 24px var(--glow);overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
 header .sub{color:var(--mut);font-size:12.5px;margin-top:2px}
 .grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
 /* input panel = sticky left sidebar (dashboard layout): stays visible while scrolling the canvas */
@@ -104,8 +108,12 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
   color:#2a3142;box-shadow:0 8px 26px rgba(20,30,70,.30)}
 /* milestone number now shows as a normal card row (no indigo header). §user req */
 .brcard .mile{align-items:baseline}
-.brcard .mile .v{display:flex;align-items:baseline;gap:5px;justify-content:flex-end;flex-wrap:wrap}
+.brcard .mile{justify-content:flex-start}
+.brcard .mile .v{display:flex;align-items:baseline;gap:5px;justify-content:flex-start;flex-wrap:wrap}
 .brcard .mnum-txt{font-size:31px;font-weight:800;letter-spacing:.5px;color:#3730a3;font-family:'JetBrains Mono'}
+/* pixel-crop fallback of the milestone number (when text-OCR can't read the digits). §user */
+.brcard .mnum-img{height:31px;width:auto;display:block}
+.brcard.mini .mnum-img{height:24px}
 .brcard .msuffix{font-size:12px;font-weight:600;color:#6b7385}
 .brcard .br{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 14px;
   font-size:13px;border-top:1px solid #eef0f6}
@@ -205,10 +213,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 <body>
 <div class="wrap">
   <header>
-    <div class="logo">CS</div>
     <div>
       <h1>ChromeSchedule</h1>
-      <div class="sub">ChromeBook Schedule Simulation · anchored on Branch Stable Release · self-validated vs Example.png golden</div>
+      <div class="sub">ChromeBook Schedule Simulation · anchored on Branch Stable Release</div>
+    </div>
+    <div class="profile">
+      <div class="logo"><img src="assets/ivana-avatar.jpg" alt="Ivana"></div>
+      <div class="pname">Wang, Ivana</div>
     </div>
   </header>
 
@@ -217,31 +228,31 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
     <div class="card">
       <h2><span class="n">1</span> Project Setup</h2>
       <label>Project Name</label>
-      <input type="text" id="proj" value="" placeholder="例：Education Azul (MTK8189) — M151 2nd release">
+      <input type="text" id="proj" value="" placeholder="e.g. Education Azul (MTK8189) — M151 2nd release">
 
-      <label>Chromiumdash Branch</label>
-      <input type="text" id="branch" value="" placeholder="例：152 或 155">
+      <label>Chromiumdash Branch number</label>
+      <input type="text" id="branch" value="" placeholder="e.g. 152 or 155">
 
       <label>Branch image (chromiumdash screenshot)</label>
       <div class="drop" id="drop">
-        <div id="dropTxt">📷 點此上傳 Branch 圖片<br><span style="font-size:11px">或手動輸入下方 ChromeOS Stable Release</span></div>
+        <div id="dropTxt">📷 Click to upload Branch image<br><span style="font-size:11px">or manually enter ChromeOS Stable Release below</span></div>
       </div>
       <input type="file" id="file" accept="image/*" hidden>
-      <div class="hint" id="ocrHint">支援 png / jpg。OCR 會自動抓 ChromeOS Stable Release；若失敗，請手動填入下方。任一種方式皆可觸發排程。</div>
+      <div class="hint" id="ocrHint">Supports png / jpg. OCR auto-detects ChromeOS Stable Release; if it fails, enter it manually below. Either method triggers the schedule.</div>
 
-      <label>Stable Release (ChromeOS) — 錨點</label>
-      <input type="text" id="sr" value="" placeholder="YYYY-MM-DD 或 MM/DD/YYYY">
+      <label>Stable Release (ChromeOS) — anchor</label>
+      <input type="text" id="sr" value="" placeholder="YYYY-MM-DD or MM/DD/YYYY">
 
       <label>Lead site factory</label>
-      <select id="lead"><option value="KS">KS (Kunshan, CN) — default</option><option value="OTHER">其他 ODM（自行輸入）</option></select>
-      <input type="text" id="leadCustom" placeholder="輸入 lead site 名稱（取代 KS）" hidden style="margin-top:8px">
+      <select id="lead"><option value="KS">KS (Kunshan, CN) — default</option><option value="OTHER">Other ODM (custom)</option></select>
+      <input type="text" id="leadCustom" placeholder="Enter lead site name (replaces KS)" hidden style="margin-top:8px">
 
       <label>Region site factory</label>
-      <select id="region"><option value="VN">Vietnam (越南)</option><option value="TH">Thailand (泰國)</option></select>
+      <select id="region"><option value="VN">Vietnam</option><option value="TH">Thailand</option></select>
 
       <button class="btn" id="generate">⚙ Generate Schedule</button>
       <button class="btn ghost" id="reset">Reset to defaults</button>
-      <div class="hint">改 Project Name / Branch / Stable Release / 工廠都會即時自動重算排程。</div>
+      <div class="hint">Changing Project Name / Branch / Stable Release / factory instantly recomputes the schedule.</div>
     </div>
 
     <!-- ============ OUTPUT (main canvas) ============ -->
@@ -371,7 +382,7 @@ const GOLDEN=[
   T('SI','SI Gerber release',[4,27],[4,27],{mile:1}),
   T('SI','SI ME parts',[4,26],[5,12]),
   T('SI','PCB FAB',[4,27],[5,11]),
-  T('SI','SI SMT build',[5,12],[5,15]),
+  T('SI','SI SMT build',[5,12],[5,24]),   // C5 fix: full-lot SMT end = 5/24 (Milestone_FCS). Pre-Build gates on SMT *first-article* (≈ SMT start), not full-lot end.
   T('SI','SI Pre-Build',[5,15],[5,15],{mile:1}),
   T('SI','SI Main build',[5,19],[5,20]),
   T('SI','OOBIP',[5,20],[5,27]),
@@ -446,7 +457,7 @@ const BAR=[
   {name:'PVT',  phs:['MV'],     f:'--pvt-f',  b:'--pvt-b'},
 ];
 
-/* ME 重點 task — Example.png 紅框那些（放在 phase bar 下方一層）。§ user req 7 */
+/* Key ME tasks — the ones in the red boxes of Example.png (placed one layer below the phase bar). §user req 7 */
 const ME_KEY=new Set(['ME design','Layout','Tooling Release','T1+T2','SI ME parts',
   'Mockup review','DFM review','ME PV-R build (KS)','ME PV-R build (VN)',
   'Tooling lock down (KS)','Tooling lock down (VN)']);
@@ -469,23 +480,98 @@ let BRANCH_INFO=null;
 let lastValidSrISO='';
 
 /* =====================================================================
-   SCHEDULER — global shift from anchor + re-snap gates + duration edits.
-   shiftCal = liveSR - goldenSR (calendar). Every golden date shifts by
-   shiftCal; the 5 gates are then re-snapped by their formula so they
-   stay holiday-correct. Duration overrides push downstream tasks.
+   SCHEDULER v2 — true dependency DAG (§4.1 "(B) real dependency"). Each task's
+   START is computed from its predecessor(s); editing any task's Days propagates
+   to every descendant. Lags are AUTO-CALIBRATED from the golden dates so the
+   default run reproduces golden exactly (§4.2). SR/CFZ/RTM/FCS gates stay
+   formula-locked to the anchor (§13.1) and are never moved by Days edits.
    ===================================================================== */
 function goldenSpan(t){return calDiff(t.gs,t.ge);}
-/* forward block = SR/CFZ-driven (after the Stable Release anchor wall). §13.1 */
 function isFwd(t){
   if(t.ph==='PVR'||t.ph==='MV'||t.ph==='FCS') return true;
   if(t.ph==='PV' && /CFZ|RTM|PV Regression|PV exit/.test(t.nm)) return true;
   return false;
 }
-/* SVTP test does NOT drive downstream; Google validation/dogfooding does. §13.5 */
-function isDriver(t){ return !/SVTP test/.test(t.nm); }
+/* golden lookup by "ph/nm" key + golden gate positions (for lag calibration). */
+const GKEY={}; GOLDEN.forEach(t=>GKEY[t.ph+'/'+t.nm]=t);
+const G_CFZ=D(2026,8,28), G_RTM=D(2026,9,4);
+function gdate(ref,anchor){
+  if(ref==='@CFZ') return G_CFZ; if(ref==='@RTM') return G_RTM;
+  const t=GKEY[ref]; return anchor==='s'?t.gs:t.ge;
+}
+/* gates whose dates come from the SR formula chain, NOT the DAG. */
+const ANCHOR_NAMES=new Set(['Code Freeze (FSI candidate) = CFZ','RTM Ties-1 = RTM','PLD',
+  'FW Candidate','FW Candidate Testing','MV Gerber release','KS FCS','VN FCS']);
+/* dependency edges, keyed by "ph/nm".
+   ['P']                     = project start (Kick-off)
+   ['FS', predKey, a?]       = finish/start-to-start: start = pred[a] + lag   (a='e' end | 's' start; default 'e')
+   ['MAX', [[key,a],...]]    = start = MAX(refs) + lag   (refs may be '@CFZ'/'@RTM' gate scalars)
+   ['OFF', leadKey]          = region task tied to its lead-site counterpart END (fixed offset, §7.2)
+   lag/offset are auto-derived from golden → default reproduces golden. */
+const DEP={
+  // ---- DB / Proto ----
+  'DB/ID Lock':['P'], 'DB/ME design':['FS','DB/ID Lock'], 'DB/Layout':['FS','DB/ID Lock'],
+  'DB/DB Gerber released':['FS','DB/Layout'],
+  'DB/Mockup review':['FS','DB/ME design'], 'DB/DFM review':['FS','DB/Mockup review'],
+  'DB/Tooling Release':['FS','DB/DFM review'], 'DB/T1+T2':['FS','DB/Tooling Release'],
+  'DB/PCB FAB':['FS','DB/DB Gerber released'], 'DB/DB SMT Build':['FS','DB/PCB FAB'],
+  'DB/Ship DB PCBA ETA to TPE RD & HP':['FS','DB/DB SMT Build'],
+  'DB/DB SVTP test':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
+  'DB/Google validation':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
+  'DB/Google prototype':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
+  'DB/DB exit':['FS','DB/Google validation','s'],
+  // ---- SI / EVT ----
+  'SI/SI Gerber release':['FS','DB/Google validation','s'],   // phase handoff off DB Testing(Google) start
+  'SI/SI ME parts':['FS','DB/T1+T2'],
+  'SI/PCB FAB':['FS','SI/SI Gerber release'], 'SI/SI SMT build':['FS','SI/PCB FAB'],
+  // Pre-Build = MAX(SMT first-article ≈ SMT start, ME ETA = ME parts end). §12.C
+  'SI/SI Pre-Build':['MAX',[['SI/SI SMT build','s'],['SI/SI ME parts','e']]],
+  'SI/SI Main build':['FS','SI/SI Pre-Build'],
+  'SI/OOBIP':['FS','SI/SI Pre-Build'],
+  'SI/Ship SI unit ETA to NSDD (PCBA Only)':['FS','SI/SI Main build'],          // PCBA-only → off Main build
+  'SI/Ship SI unit ETA to QAD/TPE RD & HP':['FS','SI/SI Main build','e'],        // full unit → drives test
+  'SI/SI SVTP test':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
+  'SI/Google release SI image':['FS','SI/SI Gerber release'],
+  'SI/Google EVT unit':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
+  'SI/Google dogfooding':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
+  'SI/SI exit':['FS','SI/Google dogfooding','e'],
+  // ---- PV / DVT ----
+  'PV/PV Gerber release':['FS','SI/Google dogfooding','s'],   // handoff off SI Testing(Google) start
+  'PV/PCB FAB':['FS','PV/PV Gerber release'], 'PV/PV SMT Build':['FS','PV/PCB FAB'],
+  'PV/VN SMT build':['OFF','PV/PV SMT Build'],
+  'PV/PV Pre-Build':['MAX',[['PV/PV SMT Build','s']]],        // no PV ME parts task → SMT-gated
+  'PV/VN Pre-build':['OFF','PV/PV Pre-Build'],
+  'PV/PV Main build':['FS','PV/PV Pre-Build'],
+  'PV/VN Main-build':['OFF','PV/PV Main build'],
+  'PV/OOBIP':['FS','PV/PV Pre-Build'],
+  'PV/Ship PV unit ETA to NSDD (PCBA Only)':['FS','PV/PV Main build'],
+  'PV/Ship PV unit ETA to QAD/TPE RD & HP':['FS','PV/PV Main build','e'],
+  'PV/PV SVTP test':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
+  'PV/Google release PV image':['FS','PV/PV Gerber release'],
+  'PV/Google DVT unit':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
+  'PV/Google dogfooding':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
+  'PV/PV Regression':['FS','@CFZ'], 'PV/PV exit':['FS','PV/PV Regression','e'],
+  // ---- PVR (ME PV-R) ----
+  'PVR/ME PV-R build (KS)':['FS','PV/Google dogfooding','s'],
+  'PVR/By part (KS)':['FS','PVR/ME PV-R build (KS)'],
+  'PVR/Tooling lock down (KS)':['FS','PVR/By part (KS)'],
+  'PVR/ME PV-R build (VN)':['OFF','PVR/ME PV-R build (KS)'],
+  'PVR/Tooling lock down (VN)':['OFF','PVR/Tooling lock down (KS)'],
+  // ---- MV / PVT ----
+  'MV/MV SMT':['FS','MV/MV Gerber release'],
+  'MV/VN SMT build':['OFF','MV/MV SMT'],
+  'MV/MV Pre-Build':['MAX',[['MV/MV SMT','e'],['@RTM']]],     // §11: MAX(MV SMT+1, RTM+1)
+  'MV/VN Pre-build':['OFF','MV/MV Pre-Build'],
+  'MV/MV Main build':['FS','MV/MV Pre-Build'],
+  'MV/VN Main-build':['OFF','MV/MV Main build'],
+  'MV/Marketing OOBA':['FS','MV/MV Main build'],
+  'MV/Mini Regression -1':['FS','MV/MV Main build'],
+  'MV/Product release - KS':['FS','MV/Mini Regression -1'],
+  'MV/Product release - VN':['OFF','MV/Product release - KS'],
+  'MV/First Order Drop':['FS','MV/Product release - KS'],
+};
 function build(srISO){
   const hasAnchor=!!srISO;
-  // no anchor: skeleton — task names + editable Days only, dates blank
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
     return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,fcsKS:null,fcsVN:null,
@@ -493,89 +579,109 @@ function build(srISO){
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
-  // base shifted dates (whole golden moves with the Stable Release anchor)
-  const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:addCal(t.gs,shift),e:addCal(t.ge,shift),warn:''}));
-  const bw=rows.filter(r=>!r.fwd), fw=rows.filter(r=>r.fwd);
-  // start-pinned DOWNSTREAM reflow within a block: editing a task's duration shifts every later
-  // task in the SAME block by the delta (predecessor end ≤ successor start, by golden order).
-  // SVTP test does not drive downstream (§13.5). §13.1 (rev): HW chain reflows but SR/CFZ/RTM/
-  // FCS (forward gates) are a separate, formula-locked block → never moved by HW edits.
-  const reflow=block=>[...block].sort((a,b)=>a.gs-b.gs).forEach(r=>{
-    const ov=durOverride[r.i]; if(ov==null) return;
-    const newDur=ov, delta=newDur-goldenSpan(r);    // >0 if lengthened
-    r.e=addCal(r.s,newDur);                          // start pinned, end moves
-    if(delta && isDriver(r)) block.forEach(o=>{ if(o!==r && o.gs>=r.ge){ o.s=addCal(o.s,delta); o.e=addCal(o.e,delta);} });
-  });
-  // BACKWARD block = HW build (pre-SR): Kick-off pinned, reflow downstream HW tasks. Shorten a
-  // task → the chain finishes earlier (bigger buffer before Stable Release = less dev risk).
-  reflow(bw);
-  // FORWARD block (post-SR): start-pinned downstream push (gates re-locked by formula below).
-  reflow(fw);
-  // key gates — anchored at D = Stable Release (ChromeOS). §spec 6
-  //   CFZ (FSI Candidate) = D + 3 ; RTM (FSI Sign-off) = CFZ + 7 (one week — both Fridays).
-  // Each gate snaps to the EARLIEST (on-or-before) Friday. If a user-adjusted gap makes the
-  // Friday land earlier than the rule date, it's a PULL-IN (sign-off before the rule) → red flag.
-  const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:3;    // D + 3 days
+  const projStart=addCal(G_PROJ,shift);
+  // ---- SR-locked gate scalars (§13.1: never moved by Days edits) ----
+  const cfzDays=(cfzDaysOverride!=null)?cfzDaysOverride:3;
   const cfzRule=addCal(SR,cfzDays), CFZ=prevFriday(cfzRule,LEADHOL);
-  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:7;    // CFZ + 7 days (one week)
+  const rtmDays=(rtmDaysOverride!=null)?rtmDaysOverride:7;
   const rtmRule=addCal(CFZ,rtmDays), RTM=prevFriday(rtmRule,LEADHOL);
-  const cfzPullIn=calDiff(CFZ,cfzRule), rtmPullIn=calDiff(RTM,rtmRule); // >0 = pulled in (earlier than rule)
-  // default (un-adjusted) gate positions, for measuring downstream slip
-  const defCFZ=prevFriday(addCal(SR,3),LEADHOL);
-  const baseRTM=prevFriday(addCal(defCFZ,7),LEADHOL);
-  const dCFZ=calDiff(defCFZ,CFZ);
-  const dRTM=calDiff(baseRTM,RTM);
-  const gCFZ=D(2026,8,28), gRTM=D(2026,9,4);                 // golden gate positions (RTM = CFZ+7 = Fri)
-  rows.forEach(r=>{
-    if(!r.fwd) return;
-    if(r.nm==='Code Freeze (FSI candidate) = CFZ'||r.nm==='RTM Ties-1 = RTM') return; // set below
-    let extra=0;
-    if(r.gs>=gCFZ) extra+=dCFZ;            // tasks at/after CFZ ride the CFZ slip
-    if(r.gs>=gRTM) extra+=(dRTM-dCFZ);     // tasks at/after RTM additionally ride the RTM slip
-    if(extra){ r.s=addCal(r.s,extra); r.e=addCal(r.e,extra); }
-  });
-  set(rows,'Code Freeze (FSI candidate) = CFZ',CFZ,CFZ);
-  set(rows,'RTM Ties-1 = RTM',RTM,RTM);
-  // FCS = Product release + 7 cal (skip lead/region holidays)
-  const prKS=getDate(rows,'Product release - KS');
-  const prVN=getDate(rows,'Product release - VN');
-  const fcsKS=skipNonWork(addCal(prKS,7),LEADHOL);
-  const fcsVN=nextFriday(addCal(prVN,7)); let fv=fcsVN; while(isHol(fv,REGIONHOL))fv=nextFriday(addCal(fv,1));
-  set(rows,'KS FCS',fcsKS,fcsKS);
-  set(rows,'VN FCS',fv,fv);
-  // FW gates — Early Stable Cut (chromiumdash if read, else SR-14) drives them. §user req
-  const earlyCut=(BRANCH_INFO&&BRANCH_INFO.earlyCut)?BRANCH_INFO.earlyCut:addCal(SR,-14);
-  const fwLock=addCal(earlyCut,-7);          // FW Lock Down (= PLD)
-  const fwCand=addCal(fwLock,-7);            // FW Candidate = FW Lock Down - 1 week (single day)
-  set(rows,'PLD',fwLock,fwLock);
-  set(rows,'FW Lock Down',fwLock,fwLock);
-  set(rows,'FW Candidate',fwCand,fwCand);
-  // FW Candidate Testing = day after FW Candidate .. day before FW Lock Down; lock = test end + 1
-  set(rows,'FW Candidate Testing',addCal(fwCand,1),addCal(fwLock,-1));
-  // MV G.O. = DVT (PV) Test Start + N days (default 28 = 4wk), user-editable. §user req
-  const pvTest=(rows.find(r=>r.ph==='PV' && /Google (validation|dogfooding)/.test(r.nm))||{}).s;
+  const cfzPullIn=calDiff(CFZ,cfzRule), rtmPullIn=calDiff(RTM,rtmRule);
+  // §user: every anchor point derives from the ChromeOS Stable Release ONLY (never Chrome Browser,
+  // never an independently-OCR'd cut). Stable Cut = ChromeOS SR − 2 weeks → FW Lock(PLD) = −1wk → FW Candidate = −1wk.
+  const earlyCut=addCal(SR,-14);
+  const fwLock=addCal(earlyCut,-7), fwCand=addCal(fwLock,-7);
   const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:28;
-  if(pvTest) set(rows,'MV Gerber release',addCal(pvTest,mvGoDays),addCal(pvTest,mvGoDays));
-  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart:minStart(rows),fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,mvGoDays,
-          cfzRule,rtmRule,cfzPullIn,rtmPullIn};
+  // ---- DAG nodes ----
+  const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
+  const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
+  const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
+  const setSE=(r,s)=>{ r.s=s; r.e=r.mile?s:addCal(s,spanOf(r)); };
+  const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
+  const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
+  const resolved=new Set();
+  const depNeeds=dep=>{
+    if(dep[0]==='FS') return dep[1][0]==='@'?[]:[dep[1]];
+    if(dep[0]==='MAX') return dep[1].filter(([k])=>k[0]!=='@').map(([k])=>k);
+    if(dep[0]==='OFF') return [dep[1]];
+    return [];                                  // 'P'
+  };
+  const computeDep=(r,dep)=>{
+    if(dep[0]==='P'){ setSE(r, addCal(projStart, calDiff(G_PROJ,r.gs))); }
+    else if(dep[0]==='FS'){ const pk=dep[1], a=dep[2]||'e'; setSE(r, addCal(curRef(pk,a), calDiff(gdate(pk,a),r.gs))); }
+    else if(dep[0]==='MAX'){ const refs=dep[1];
+      const lag=calDiff(maxD(refs.map(([k,a])=>gdate(k,a||'e'))), r.gs);
+      setSE(r, addCal(maxD(refs.map(([k,a])=>curRef(k,a||'e'))), lag)); }
+    else if(dep[0]==='OFF'){ const lk=dep[1]; setSE(r, addCal(byKey[lk].e, calDiff(GKEY[lk].ge, r.gs))); }
+  };
+  const tryAnchor=r=>{
+    switch(r.nm){
+      case 'Code Freeze (FSI candidate) = CFZ': r.s=r.e=CFZ; return true;
+      case 'RTM Ties-1 = RTM': r.s=r.e=RTM; return true;
+      case 'PLD': r.s=r.e=fwLock; return true;
+      case 'FW Candidate': r.s=r.e=fwCand; return true;
+      case 'FW Candidate Testing': r.s=addCal(fwCand,1); r.e=addCal(fwLock,-1); return true;
+      case 'MV Gerber release': {
+        // §13.1 two-block rule: the forward (MV/FCS) block is anchored to Stable Release, NOT to
+        // the live (HW-editable) DVT test. So MV G.O. = SR-nominal DVT Test Start + N — HW/Days
+        // edits in the backward chain never leak past SR into CFZ/RTM/FCS. (mvGoDays editable.)
+        const dvt=addCal(GKEY['PV/Google dogfooding'].gs, shift);
+        r.s=r.e=addCal(dvt, mvGoDays); return true; }
+      case 'KS FCS': { const k='MV/Product release - KS'; if(!resolved.has(k))return false;
+        r.s=r.e=skipNonWork(addCal(byKey[k].s,7),LEADHOL); return true; }
+      case 'VN FCS': { const k='MV/Product release - VN'; if(!resolved.has(k))return false;
+        let f=nextFriday(addCal(byKey[k].s,7)); while(isHol(f,REGIONHOL))f=nextFriday(addCal(f,1));
+        r.s=r.e=f; return true; }
+    }
+    return true;
+  };
+  // resolve everything by repeated passes (deps + cross-links between gates and DAG)
+  let pass=0;
+  while(resolved.size<rows.length && pass++<40){
+    for(const r of rows){
+      const key=r.ph+'/'+r.nm; if(resolved.has(key)) continue;
+      if(ANCHOR_NAMES.has(r.nm)){ if(tryAnchor(r)) resolved.add(key); continue; }
+      const dep=DEP[key];
+      if(!dep){ setSE(r, addCal(r.gs,shift)); resolved.add(key); continue; }   // fallback: plain shift
+      if(!depNeeds(dep).every(k=>resolved.has(k))) continue;
+      computeDep(r,dep); resolved.add(key);
+    }
+  }
+  const fcsKS=byKey['FCS/KS FCS'].s, fv=byKey['FCS/VN FCS'].s;
+  return {hasAnchor:true,SR,CFZ,RTM,rows,projStart,fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,mvGoDays,
+          cfzRule,rtmRule,cfzPullIn,rtmPullIn,unresolved:rows.length-resolved.size};
 }
-function set(rows,nm,s,e){const r=rows.find(x=>x.nm===nm);if(r){r.s=s;r.e=e;}}
 function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
-function minStart(rows){return rows.reduce((m,r)=>r.s<m?r.s:m,rows[0].s);}
 
 /* =====================================================================
-   VALIDATION — compare to golden (only meaningful at golden SR) +
-   overall development duration (project start -> KS FCS).
+   VALIDATION — independent oracle (C6). Two checks at golden SR:
+   (1) DAG reproduces the scheduling GOLDEN exactly (verifies the dep/lag logic);
+   (2) output matches the ORACLE — anchor dates taken straight from the xlsx
+       Milestone_FCS D/E source, a SEPARATE constant from GOLDEN, so any drift
+       between GOLDEN and the source (e.g. the old SI-SMT 5/15 fudge) is caught.
    ===================================================================== */
+const ORACLE={
+  'SI SMT build':['5/12','5/24'], 'SI Pre-Build':['5/15','5/15'],
+  'Ship SI unit ETA to QAD/TPE RD & HP':['5/27','5/27'],
+  'PV SMT Build':['7/7','7/10'], 'PV Pre-Build':['7/10','7/10'],
+  'FW Candidate':['7/28','7/28'], 'PLD':['8/4','8/4'],   // SR→Stable Cut→FW Lock Down→FW Candidate chain
+  'Code Freeze (FSI candidate) = CFZ':['8/28','8/28'], 'RTM Ties-1 = RTM':['9/4','9/4'],
+  'Product release - KS':['9/17','9/17'], 'KS FCS':['9/24','9/24'], 'VN FCS':['10/2','10/2'],
+};
 function validate(model,srISO){
   if(!model.hasAnchor) return {noAnchor:true,atGolden:false,miss:[],wkAll:0,durOK:true,pass:true};
   const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0
     && cfzDaysOverride==null && rtmDaysOverride==null && mvGoDaysOverride==null;
   const miss=[];
+  if(model.unresolved) miss.push(`DAG: ${model.unresolved} task(s) unresolved (cyclic/missing dep)`);
   if(atGolden){
     for(const r of model.rows){
       if(iso(r.s)!==iso(r.gs)||iso(r.e)!==iso(r.ge))
         miss.push(`${r.ph} · ${r.nm}: got ${md(r.s)}–${md(r.e)} | golden ${md(r.gs)}–${md(r.ge)}`);
+    }
+    for(const [nm,[gs,ge]] of Object.entries(ORACLE)){
+      const r=model.rows.find(x=>x.nm===nm);
+      if(!r){ miss.push(`oracle: missing ${nm}`); continue; }
+      if(md(r.s)!==gs||md(r.e)!==ge) miss.push(`oracle ${nm}: got ${md(r.s)}–${md(r.e)} | source ${gs}–${ge}`);
     }
   }
   const wkAll=Math.ceil(calDiff(model.projStart,model.fcsKS)/7);
@@ -617,11 +723,16 @@ function branchCardHTML(model,extra){
   // milestone number "M1xx" (+ release suffix). TEXT only — no indigo header, no OCR image crop
   // (the crop looked ugly). priority: user-typed 1xx → OCR text → —. §user req
   const typedNum = (branchInput.match(/1\d{2}/)||[])[0];
-  const num = typedNum || b.num || '';
   const suffix = ((branchInput+' '+projInput).match(/\d(?:st|nd|rd|th)\s+release/i)||[])[0]||'';
-  const numTxt = num?`M${num}`:'—';
-  // milestone shows as a normal row (with the other dates) — enlarged number, no header. §user req
-  const mileRow = `<div class="br mile"><span class="k">Milestone</span><span class="v"><span class="mnum-txt">${numTxt}</span>${suffix?` <span class="msuffix">${suffix}</span>`:''}</span></div>`;
+  // §user: drop the "Milestone" wording entirely — show ONLY the big digital number (left-aligned title row).
+  // priority: manually typed Branch # (shown as the raw number, no "M") → OCR text → OCR pixel-crop
+  // (numImg, shows even when Tesseract can't recognize the digits, since it's the real header pixels) → —.
+  let mileMain;
+  if(typedNum) mileMain = `<span class="mnum-txt">${typedNum}</span>`;
+  else if(b.num) mileMain = `<span class="mnum-txt">M${b.num}</span>`;
+  else if(b.numImg) mileMain = `<img class="mnum-img" src="${b.numImg}" alt="milestone #">`;
+  else mileMain = `<span class="mnum-txt">—</span>`;
+  const mileRow = `<div class="br mile"><span class="v">${mileMain}${suffix?` <span class="msuffix">${suffix}</span>`:''}</span></div>`;
   // Branch date — always show the row (§3.1.1). Date comes from chromiumdash OCR; '—' if manual.
   const branchDateHtml = `<div class="br"><span class="k">Branch</span><span class="v">${fmt(b.branch)}</span></div>`;
   const fwCandDate = getDate(model.rows,'FW Candidate');
@@ -644,7 +755,7 @@ function render(model,val,srISO){
   document.getElementById('tlTitle').textContent=document.getElementById('proj').value||'ChromeBook Schedule';
   document.getElementById('tlSub').textContent= has
     ? `Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Project start ${md(model.projStart)} · ${val.wkAll} WKs`
-    : '尚未輸入 Stable Release（錨點）· 僅顯示 task 結構與可調 Days，輸入後自動算出日期';
+    : 'No Stable Release (anchor) entered yet · showing task structure and adjustable Days only; dates compute automatically once entered';
   document.getElementById('tlFcs').innerHTML= has
     ? `${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b>` : '';
   // ---- phase bar = Develop phase graph.png (Proto/EVT/DVT/PVT) ----
@@ -816,7 +927,7 @@ function renderRoadmap2(model,host,style){
       inph.filter(r=>/Tooling lock down/i.test(r.nm)).forEach(r=>chips.push({s:+r.s,wide:false,html:`<b>TLD</b> <span class="dt">${md(r.s)}</span>`})); // display-only "TLD"; real task = Tooling lock down
       inph.filter(r=>/\bT1\b/.test(r.nm)).forEach(r=>chips.push({s:+r.s,wide:false,html:`<b>${dispName(r.nm)}</b> <span class="dt">${md(r.s)}</span>`}));
       // all sites' Pre-B/Sys-B for this phase → ONE combined chip (KS lines then region lines),
-      // so two site builds never sit side-by-side. §user req (不夠美觀)
+      // so two site builds never sit side-by-side. §user req (not visually clean)
       const pm=inph.filter(r=>/Pre-?Build|Main.?build/i.test(r.nm));
       const bLines=[]; let bStart=null;
       [...new Set(pm.map(r=>r.site||''))].forEach(st=>{
@@ -935,25 +1046,25 @@ function axisLayer(T0,T1,xp){
 }
 function renderHolidays(el){
   const lead=HOL_LABELS.KS, reg=HOL_LABELS[REGIONNAME]||HOL_LABELS.VN;
-  const col=(title,arr)=>`<div class="hcol"><h4>${title} 假日</h4>${arr.map(([n,d])=>`<div>${d} · ${n}</div>`).join('')}</div>`;
-  el.innerHTML=`<div class="rm-sec" style="width:100%">Development 期間 Holidays</div>`+
+  const col=(title,arr)=>`<div class="hcol"><h4>${title} Holidays</h4>${arr.map(([n,d])=>`<div>${d} · ${n}</div>`).join('')}</div>`;
+  el.innerHTML=`<div class="rm-sec" style="width:100%">Holidays during Development</div>`+
     col(LEADNAME+' (lead)',lead)+col(REGIONNAME+' (region)',reg);
 }
 function renderVal(val,model){
   const w=document.getElementById('valWrap');
   if(val.noAnchor){
-    w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">尚未輸入 Stable Release · 上傳 Branch 圖片或填入錨點後，會自動回推日期並算出排程。</div></div>`;
+    w.innerHTML=`<div class="vbar"><span class="dot" style="color:var(--mut)"></span><div style="color:var(--mut)">No Stable Release entered yet · upload a Branch image or fill in the anchor, and dates will be back-calculated and the schedule computed automatically.</div></div>`;
     return;
   }
   // PULL-IN flag (red): a gate's Friday lands earlier than its rule date → sign-off before the
   // rule allows. It's a pull-in opportunity that needs extra communication. §user req
   const pull=[];
   if(model){
-    if(model.rtmPullIn>0) pull.push(`<b>RTM</b> 落在 <b>${md(model.RTM)}</b>（最早的週五），比規則 CFZ+${model.rtmDays}（${md(model.rtmRule)}）<b>早 ${model.rtmPullIn} 天</b>`);
-    if(model.cfzPullIn>0) pull.push(`<b>CFZ</b> 落在 <b>${md(model.CFZ)}</b>，比規則 D+${model.cfzDays}（${md(model.cfzRule)}）<b>早 ${model.cfzPullIn} 天</b>`);
+    if(model.rtmPullIn>0) pull.push(`<b>RTM</b> lands on <b>${md(model.RTM)}</b> (earliest Friday), <b>${model.rtmPullIn} day(s) earlier</b> than the rule CFZ+${model.rtmDays} (${md(model.rtmRule)})`);
+    if(model.cfzPullIn>0) pull.push(`<b>CFZ</b> lands on <b>${md(model.CFZ)}</b>, <b>${model.cfzPullIn} day(s) earlier</b> than the rule D+${model.cfzDays} (${md(model.cfzRule)})`);
   }
   const pullBar = pull.length
-    ? `<div class="vbar bad"><span class="dot"></span><div>⚠ <b>Pull-in opportunity（需額外溝通確認）</b>：${pull.join('；')}。此為提前 sign-off 的機會，建議與相關方溝通；若不 pull-in，閘門應落在規則日期。</div></div>`
+    ? `<div class="vbar bad"><span class="dot"></span><div>⚠ <b>Pull-in opportunity (needs extra confirmation)</b>: ${pull.join('; ')}. This is a chance to sign off early — coordinate with the relevant parties; if not pulled in, the gates should land on their rule dates.</div></div>`
     : '';
   // §4.2 self-validation still runs on every recompute, but the golden / Example.png
   // comparison is a developer concern — it goes to the console, not the user-facing UI.
@@ -966,7 +1077,7 @@ function renderVal(val,model){
     }
   }
   // user-facing: pull-in flag (if any) + the overall development duration.
-  w.innerHTML=pullBar+`<div class="vbar ok"><span class="dot"></span><div>整體開發週數 <b>${val.wkAll} WKs</b>（Project start → ${LEADNAME} FCS）。</div></div>`;
+  w.innerHTML=pullBar+`<div class="vbar ok"><span class="dot"></span><div>Overall development duration <b>${val.wkAll} WKs</b> (Project start → ${LEADNAME} FCS).</div></div>`;
 }
 
 /* =====================================================================
@@ -998,11 +1109,11 @@ function run(){
   }
   const hint=document.getElementById('ocrHint');
   if(srRaw && !srDate){
-    hint.textContent='日期格式錯誤，請使用 YYYY-MM-DD、MM/DD/YYYY 或 MM-DD-YYYY。保持先前有效日期直到修正完成。';
+    hint.textContent='Invalid date format. Use YYYY-MM-DD, MM/DD/YYYY or MM-DD-YYYY. Keeping the last valid date until it is fixed.';
   } else if(!srRaw && hasAnyLastValid){
-    hint.textContent='Stable Release 欄位為空，保留先前有效日期供預覽，若要清空請按 Reset。';
+    hint.textContent='Stable Release field is empty; keeping the last valid date for preview. Press Reset to clear.';
   } else {
-    hint.textContent='支援 png / jpg。OCR 會自動抓 ChromeOS Stable Release 日期；若 OCR 抓不到，可手動填入下方。任一種方式皆可觸發排程。';
+    hint.textContent='Supports png / jpg. OCR auto-detects the ChromeOS Stable Release date; if OCR fails, enter it manually below. Either method triggers the schedule.';
   }
   const model=build(srISO);
   const val=validate(model,srISO);
@@ -1011,7 +1122,7 @@ function run(){
 }
 function renderRoadmapPreview(model){
   const host=document.getElementById('rmPreview'); if(!host)return;
-  if(!model.hasAnchor){host.innerHTML='<div class="hint" style="padding:6px 2px">輸入 Stable Release 後顯示 roadmap。</div>';return;}
+  if(!model.hasAnchor){host.innerHTML='<div class="hint" style="padding:6px 2px">Enter a Stable Release to display the roadmap.</div>';return;}
   renderRoadmap2(model,host,'A');
   requestAnimationFrame(fitRoadmap);   // scale the whole roadmap to fit the window — no manual scroll
 }
@@ -1064,7 +1175,7 @@ drop.ondragleave=()=>drop.classList.remove('busy');
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove('busy');if(e.dataTransfer.files[0])ocr(e.dataTransfer.files[0]);};
 async function ocr(f){
   const txt=document.getElementById('dropTxt'),hint=document.getElementById('ocrHint');
-  drop.classList.add('busy');txt.innerHTML='🔎 OCR 讀取中…';
+  drop.classList.add('busy');txt.innerHTML='🔎 Running OCR…';
   try{
     const{data}=await Tesseract.recognize(f,'eng');
     console.log('[OCR raw text]\n'+data.text);              // inspect real OCR output here
@@ -1088,34 +1199,34 @@ async function ocr(f){
     const date=info.stableRel;
     if(date){
       document.getElementById('sr').value=iso(date);
-      txt.innerHTML='✅ 已讀取 Branch 資訊';
+      txt.innerHTML='✅ Branch info read';
       // show branch NUMBER (not the parsed branch date) in the OCR hint
-      hint.innerHTML=`Branch <b>${info.num||'?'}</b> · Stable Release <b>${ymd(date)}</b>（已填入錨點）`;
+      hint.innerHTML=`Branch <b>${info.num||'?'}</b> · Stable Release <b>${ymd(date)}</b> (filled into anchor)`;
       run();
     }else{
-      txt.innerHTML='⚠ 未找到 Stable Release';
+      txt.innerHTML='⚠ Stable Release not found';
       const srRaw=document.getElementById('sr').value.trim();
       const srDate=parseInputDate(srRaw);
       if(srDate){
-        hint.textContent='OCR 未抓到 Stable Release，但已使用手動輸入的日期繼續排程。';
+        hint.textContent='OCR did not detect a Stable Release, but the manually entered date is used to continue the schedule.';
         run();
       } else {
-        hint.textContent='OCR 沒抓到 ChromeOS Stable Release 日期，請手動填入下方錨點。';
+        hint.textContent='OCR did not detect a ChromeOS Stable Release date. Please enter the anchor manually below.';
       }
     }
   }catch(err){
     console.error('[OCR error]',err);
     const fileOrigin=location.protocol==='file:';
-    txt.innerHTML='⚠ OCR 失敗';
+    txt.innerHTML='⚠ OCR failed';
     const srRaw=document.getElementById('sr').value.trim();
     const srDate=parseInputDate(srRaw);
     if(srDate){
-      hint.innerHTML='OCR 失敗，但已使用手動輸入的 Stable Release 繼續排程。';
+      hint.innerHTML='OCR failed, but the manually entered Stable Release is used to continue the schedule.';
       run();
     } else {
       hint.innerHTML=fileOrigin
-        ? '⚠ 偵測到從 <b>file://</b> 開啟 — Tesseract OCR 無法在 file:// 執行（安全限制）。請改用本機伺服器開啟（例如 <code>http://localhost</code>），或手動填入下方 Stable Release。'
-        : '請手動填入 Stable Release。'+err;
+        ? '⚠ Opened from <b>file://</b> — Tesseract OCR cannot run under file:// (security restriction). Please open via a local server (e.g. <code>http://localhost</code>), or enter the Stable Release manually below.'
+        : 'Please enter the Stable Release manually. '+err;
     }
   }finally{drop.classList.remove('busy');}
 }
@@ -1184,9 +1295,9 @@ async function analyzeHeaderNumber(f){
         const out=nx.createImageData(bw2,bh2), o=out.data;
         for(let y=0;y<bh2;y++)for(let x=0;x<bw2;x++){
           const p=at(minX+x,minY+y), text=0.299*p[0]+0.587*p[1]+0.114*p[2]>thr, j=(y*bw2+x)*4;
-          // WHITE digits on a TRANSPARENT background → sits directly on the indigo header,
-          // no white box / blue frame. §user req
-          o[j]=255; o[j+1]=255; o[j+2]=255; o[j+3]=text?255:0;
+          // INDIGO digits on a TRANSPARENT background → readable on the white header-less card
+          // (matches .mnum-txt #3730a3), no white box / blue frame. §user req
+          o[j]=55; o[j+1]=48; o[j+2]=163; o[j+3]=text?255:0;
         }
         nx.putImageData(out,0,0);
         numImg=nc.toDataURL('image/png');
@@ -1242,7 +1353,7 @@ function parseBranch(text){
     if(/chrome\s*browser/i.test(l))sc='browser'; else if(/chrome\s*[o0]s/i.test(l))sc='os'; return sc;
   });
   const info={num:'',branch:null,earlyCut:null,stableRel:null};
-  for(const l of lines){const m=l.match(/\b(1\d{2})\b/);if(m){info.num=m[1];break;}} // milestone # (1xx)
+  for(const l of lines){const m=l.match(/\b[Mm]?\s?(1\d{2})\b/);if(m){info.num=m[1];break;}} // milestone # (1xx, tolerate "M151")
   const dateAt=i=>{
     if(dates[i]) return dates[i];                                    // date on the label line
     if(i+1<lines.length && dates[i+1] && !isLabel(lines[i+1])) return dates[i+1]; // next pure-date line

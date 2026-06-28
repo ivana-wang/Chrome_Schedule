@@ -68,8 +68,8 @@ OCR 讀到 Branch 圖後，呈現一張資訊圖卡（**配色對齊上傳的 ch
 | 2 | Branch: date | OCR（`Branch` 那行，例 7/27） |
 | 3 | FW Candidate: date | 引擎計算（= FW Lock Down − 1 week，見 §6） |
 | 4 | FW Lock Down: date（= PLD） | 引擎計算（= Stable Cut − 1 week，見 §6） |
-| 5 | Stable Cut: date | OCR（`Stable Cut`，例 8/11）／引擎（`D − 14`） |
-| 6 | Stable Release: date（**= 錨點 D**） | OCR（**ChromeOS** 區塊的 `Stable Release`，例 9/8） |
+| 5 | Stable Cut: date | **引擎計算（= ChromeOS `D − 14`）** ⚠️ 不獨立讀 OCR 的 cut；一律由 ChromeOS Stable Release 算出 |
+| 6 | Stable Release: date（**= 錨點 D**） | OCR（**ChromeOS** 區塊的 `Stable Release`，例 9/8；**完全不參考 Chrome Browser**） |
 | 7 | FSI Candidate: date（**= CFZ**） | 引擎計算（`D + 3 days`，見 §6） |
 | 8 | FSI Sign-off: date（**= RTM**） | 引擎計算（`CFZ + 7 days`，一週，見 §6） |
 
@@ -276,6 +276,14 @@ Example.png 與 xlsx 中出現 **KS** 與 **VN** 兩個工廠：
 - 例：VN FCS 10/2 = KS FCS 9/24 + region offset，落點再依**越南**假日表調整（非中國 10/1）。
 - 實作：holiday store 要能依「lead site 國別」「region site 國別」分別掛不同假日表（KS=中國/台灣；region=越南 or 泰國），不可共用同一張表。
 
+### 7.2 Region build dependency — ✅ region = lead + 固定 offset（v2 已實作）
+
+> 來源 = xlsx 第 18 列 (VN SMT) + 第 19 列 (VN FATP)。golden（PV）：`VN SMT 7/21 → VN Pre-build 7/27 → VN Main-build 7/29`；MV：`VN SMT 9/11 → VN Pre-build 9/15 → VN Main-build 9/17`。
+
+- **實作（v2，`DEP` 的 `OFF` 邊型）**：每個 region task 動態算為 **`region = 對應 lead-site task 的 END + 固定 per-phase offset`**（offset 由 golden 自動校準）。因此 **lead site SMT / Pre-build / Main-build 不管被 anchor 還是 Days 編輯推到哪，region 都自動跟著移、offset 維持不變**（已用 Node harness 驗證：anchor +7d 與 lead PV SMT +4d 兩種情況 region 皆連動）。這正是 §user 要的「region 跟著 lead 被推移」邏輯。
+- region 端 task / FCS 仍依 **region site 國別假日**（VN/TH）調整（§7.1），與 lead 假日表分離。
+- **仍簡化**：region 採「lead + offset」而非 region 端**獨立**的 `MAX(region SMT, region ME)` 雙閘；目前 region Days 隨 lead 連動、不可獨立編輯。**TLD（Tooling Lock Down）**（第 14 列 PVR/MV 多個 `TLD`，如 VN PV-R TLD 9/2）仍以 offset 近似、未建獨立節點。日後若需 region 獨立編輯再升級成雙閘。
+
 ---
 
 ## 8. ChromeBook 專屬 TASK / Dependency / Duration 來源
@@ -334,19 +342,30 @@ Example.png 與 xlsx 中出現 **KS** 與 **VN** 兩個工廠：
 
 ## 實作摘要（`ChromeSchedule.html`）
 
-- **引擎**：anchor = Stable Release → `CFZ = fridayOrPrev(SR+3)`、`RTM = fridayOrPrev(CFZ+7)`；
-  HW 階段以 golden working-day 關係回推到專案起點、MV→FCS 往後展開。已驗證重現 golden：
-  **CFZ 8/28、RTM 9/4、PR 9/17、KS FCS 9/24、VN FCS 10/2、Overall 38 WKs**。
-- **輸入**：Branch 圖片上傳 → **Tesseract.js OCR** 自動抓 Chrome Browser Stable Release（跳過 ChromeOS 那個），
-  手動日期 fallback；lead site / region site(VN/TH) 選擇；每個 task duration 可內嵌編輯，即時 reflow。
+- **引擎 (v2 — 真實 dependency DAG，§4.1 的 (B))**：每個 task 的 START 由其 predecessor 算出（FS / MAX 雙閘 /
+  region OFF / SR-anchor 四種邊型，見 §12.A–E、§12.C），**lag 由 golden 自動校準** → 預設跑必重現 golden；
+  **編輯任一 task 的 Days 會沿依賴邊傳遞到所有下游**（拓樸解算）。`CFZ = fridayOrPrev(SR+3)`、
+  `RTM = fridayOrPrev(CFZ+7)`、FCS = PR+7（避假日）為 **SR-locked 前向 block**，**backward HW 編輯不會越過 SR 推動
+  CFZ/RTM/FCS**（§13.1 兩-block 規則；MV G.O. 錨在 SR-nominal DVT test，不吃 HW 編輯）。已用 Node harness 驗證重現
+  golden：**CFZ 8/28、RTM 9/4、PR 9/17、KS FCS 9/24、VN FCS 10/2、Overall 38 WKs**，且 HW 編輯下 FCS 不動、
+  region 隨 lead 連動。
+- **輸入**：Branch 圖片上傳 → **Tesseract.js OCR** 自動抓 **ChromeOS Stable Release**（**完全不參考 Chrome Browser**；
+  優先取 `os` scope 那行，避開 Early Stable Release），手動日期 fallback；lead site / region site(VN/TH) 選擇；
+  每個 task duration 可內嵌編輯，即時 reflow。**所有定錨點（Stable Cut = SR−14 → FW Lock Down → FW Candidate、
+  CFZ、RTM、HW/MV 全鏈）一律由 ChromeOS Stable Release 計算**，不獨立讀 OCR 的 cut 當錨。
 - **視覺**：dark dashboard + 白色 export-ready timeline card；phase chevron 用 `Develop phase graph.png`
   粉彩配色（DB藍 Proto / SI綠 EVT / PV紅 DVT / PVR粉 / MV黃 PVT / FCS綠）；PNG 匯出 (html2canvas)。
   **Roadmap 卡採 Example.png 方塊流程圖風格（語意配色 chip + 實線圓點連線 + SMT/build 左右時間錯開 +
   靛藍 Branch 卡），詳見 §13.8。**
-- **自我驗證 (§4.2)**：每次重算自動對照 Example.png golden — golden 輸入時逐 task 比對日期 + 檢查 38 WKs，
-  顯示 pass / 偏差清單；非 golden 輸入時確認 dependency 邏輯一致並顯示當前週數。
-- **已知簡化（v1，待後續強化）**：reflow 採全域 shift + gate 公式 re-snap + duration 線性下游推移；
-  holiday-aware 重算目前聚焦在 5 個 gate，其餘子 task 以 golden offset 平移。holiday 表為 2026 概略值，可再校正。
+- **自我驗證 (§4.2, C6)**：`validate()` 為**獨立 oracle** — (1) 檢查 DAG 是否逐 task 重現排程用的 `GOLDEN`，
+  (2) 另比對一份**獨立常數 `ORACLE`**（直接抄自 xlsx `Milestone_FCS` D/E 的錨點日期，與 `GOLDEN` 分離），
+  任何 `GOLDEN` 與來源的偏離（如先前 SI SMT 被偷改成 5/15 的 fudge）都會被抓出。比對結果走 console，
+  UI 只顯示 Overall WKs。
+- **v2 已修正的衝突**：C1 Pre-Build 雙閘 `MAX(SMT 首件, ME ETA)`（§12.C）、C2 雙 Ship ETA / OOBIP / Phase exit
+  依賴（§12.E）、C3 G.O/FAB/SMT 與 ME 鏈 dependency（§12.A/B）、C5 SI SMT=5/24（first-article gate）、
+  C6 獨立 oracle、C7 region=lead+offset（§7.2）—— 皆已落實。
+- **仍待強化（v2.1）**：edge lag 目前為 **calendar 校準**（保證重現 golden + 正確傳遞），尚未做「span 隨落點不同
+  holiday 重新延展」的 holiday-aware-span（C4）；holiday 表為 2026 概略值，可再校正。
 
 ---
 
@@ -449,6 +468,99 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
 | SVTP test start | = Ship unit ETA 日 | DB 3/23 ✓ |
 | Google validation/dogfooding | = 與 SVTP test **平行**（golden 同起訖），但**是下游定錨關鍵**（見 §13.5） | DB 3/23–4/26 ✓ |
 
+### 12.0 來源與一致性 ✅（FCS0924 × FCS1016 交叉驗證 — authoritative Days）
+
+> 下面兩條鏈的 **Days（duration）來源 = xlsx 的兩張 Gantt sheet `MTK-FCS0924`（golden）與 `MTK-FCS1016-A`（替代情境）逐格抽出**（完整對照見 `Validation/MILESTONE_FCS_gantt_extract.md`）。
+>
+> - **Proto(DB) + EVT(SI) 段兩情境逐格完全相同** → 這些 Days 是 **anchor-independent ground truth**，直接當預設值。
+> - **DVT(PV) + PVT(MV) 段底層 Days 一致**（MV FAB 兩者皆 16 天；PV/ME parts ±1），calendar 差異 = FCS 錨點不同 + 各 phase 視窗壓到的假日不同（如 PV 0924 壓到 Dragon 6/19–6/21 → 19 天 vs 1016 的 15 天）。→ 用 **holiday-aware span** 即可重現，**不可寫死 calendar 天數**。
+> - **所有 Days 皆為引擎參數、可由 User 編輯；任一 Days 調整 → 該鏈下游 task 一律 holiday-aware 往後 shift**（§13.1 reflow）。
+
+### 12.A G.O.(Gerber) → PCB FAB → SMT 鏈（第13列，Days）
+
+> ⚠️ 取代先前「Gerber→PCB FAB start 未定義 / 各 phase 不一致」的疑慮：規則統一如下。
+
+| 關係 | 公式 | 預設 Days | 驗證 |
+|---|---|---|---|
+| Gerber (G.O.) | = Layout end + 1 工作日 | — | 2/11→2/12 ✓ |
+| **PCB FAB start** | **= Gerber(G.O.) 當天**（`G` 即 FAB 第 1 天） | — | SI 4/27、PV、MV ✓ |
+| **PCB FAB span** | **holiday-aware span**（遇假日延展，非固定 calendar） | **DB 14 · SI 15 · PV 15 · MV 16 天** | 兩情境一致（DB/SI 逐格相同；MV 皆 16）✓ |
+| SMT Build start | = PCB FAB end + 1 工作日 | — | DB 3/10→3/11、SI 5/11→5/12 ✓ |
+
+- **DB 的 2/12→2/25「空檔」= CNY 2/14–2/22 把 FAB span 推到年後**，是 holiday-aware 的結果，**不是**額外 offset。
+- **`Ship <phase> PCBA ETA to TPE RD & HP` 不在本鏈**：它接在 SMT 之後、= 該 phase 的 **SVTP test start**（DB 3/23），見 §12 主表 `SVTP test start = Ship unit ETA 日`。
+
+### 12.B ME 鏈（第21–36列，Days）— ID Lock → … → EVT Pre-Build
+
+> 補齊先前 §12 完全沒涵蓋的 ME Dev dependency。預設 Days 兩情境（至 SI ME parts）逐格相同。
+
+| ME task | 接法（dependency） | 預設 Days | 驗證 |
+|---|---|---|---|
+| ID Master/Detail Ready (ID Lock) | 起點（= 專案起跑 1/6） | — | 1/6 |
+| ME design | = ID Lock | **30** | 1/6→2/4 ✓ |
+| Mockup drawing release/build | = ME design end + 1 工作日 | **9** | 2/5→2/13 ✓ |
+| Mockup review | = Mockup end + 後續第 1 工作日（holiday-aware，跨 CNY） | 里程碑 | 2/25 ✓ |
+| DFM review | = Mockup review end + 1 工作日（跨 228 假日） | — | 3/2 ✓ |
+| ME drawing modification (EC) | 與 DFM 收尾重疊 | — | 3/4 ✓ |
+| ME Tooling Release | = modification end + 1 工作日 | **42** | 3/7→4/17 ✓ |
+| T1 + T2 | = Tooling Release end + 1 工作日 | **8** | 4/18→4/25 ✓ |
+| SI (EVT) ME parts | = T1+T2 end + 1 工作日 | **17** | 4/26→5/12 ✓ |
+| SI (EVT) ME ETA | = SI ME parts **完成日**（交件）| — | 5/12 ✓ |
+| SI (EVT) Pre-Build | **= MAX(SI SMT 完成/PCBA 備妥, SI ME ETA) + build lead**（見 §12.C）| — | 5/15 ✓ |
+
+- PV / PV-R / MV ME parts（R34–36）Days 與上同邏輯（PV 16、PV-R 14、MV 15；兩情境 ±1），但**錨點隨 phase handoff（§12 階段交接）移動**，屬 anchor-driven，不列為固定 golden。
+- Mockup review / DFM 的較大間隔來自 **CNY / 228 假日（holiday-aware）**，非固定 offset；調整這些 task 的 Days 時，下游沿 holiday-aware 重算往後 shift。
+
+### 12.C Pre-Build (FATP) gating ✅（第14列 FATP × 第13列 SMT × 第17列 ME ETA）
+
+> **來源 = xlsx 第 14 列 (FATP/build track) 必須同時等到第 13 列的 SMT 完成（PCBA 備妥）與第 17 列的 `ME ETA`（ME parts 交件）兩個前置都備齊，才能起 `Pre-Build`。** 這是一個 **雙前置 MAX gate**，先前 spec 漏寫（§12.B 舊版只認 ME 一邊，已修正）。
+
+- **規則（DB 無全機 build，套用於 SI / PV）：**
+
+  ```
+  <phase> ME ETA      = <phase> ME parts 完成日           (第17列 ME ETA marker)
+  <phase> Pre-Build   = MAX( <phase> SMT 完成/PCBA 備妥 , <phase> ME ETA ) + build lead
+  <phase> Main build  = Pre-Build end + 1                 (§12 主表，不變)
+  ```
+
+- **`ME ETA` 為新定義的里程碑** = 該 phase ME parts（§12.B）的**完成/交件日**（第17列 `ME ETA`）。SI ME ETA = 5/12、PV ME ETA = 7/8。
+- ⚠️ **SMT 閘 = 「PCBA first-article 備妥」≈ SMT *起算* + lead，不是 SMT 整批量產結束**（C5 釐清）。源頭 `Milestone_FCS`：**SI SMT 整批 = 5/12→5/24**，但 **SI Pre-Build = 5/15**（在整批結束 5/24 之前 9 天）——因為 Pre-Build 只需頭幾片 bright-up 板，不必等整批。先前引擎把 SI SMT 結束偷改成 5/15 來遷就「SMT end」模型 = bug，已還原成 5/24，閘改抓 SMT 起算。**∴ 拉長 SMT 整批 Days 不會延後 Pre-Build**（已驗證 d=0）；PV 因 SMT 只 4 天、首件≈結束，才看似 = SMT end。
+- **兩個 gate 哪個卡關依資料而定**，引擎一律取 `MAX`：
+  - **SI**：ME ETA 5/12 與 SMT first-article 約同期 → Pre-Build **5/15** ✓。
+  - **PV**：**SMT 首件 7/10 卡關**（晚於 ME ETA 7/8）→ Pre-Build **7/10** ✓。← 證明 SMT gate 必須存在，不能只用 ME ETA。
+- **MV phase** 的第二個 gate 不是 ME ETA 而是 **RTM**：`MV Pre-Build = MAX(MV SMT +1, RTM +1)`（見 §11 註 / line 429，維持不變）。
+- **可編輯 / reflow**：SMT span、ME parts Days、ME ETA 任一被 User 調整 → 重新取 `MAX` 後 Pre-Build → Main build → OOBIP 整條 holiday-aware 往下游 shift（§13.1）。**縮短較早的那個 gate 不會提前 Pre-Build**（被另一個 gate 卡住），需兩個 gate 都提前才會提前——此即 §4.2 要驗證的 dependency 結構。
+
+### 12.D Pre-Build / build track 完整鏈（更新骨幹）
+
+> 更新 §12 開頭骨幹：build 階段 Pre-Build 之前是**雙線匯流**（HW 線的 SMT + ME 線的 ME parts），非單線。
+
+```
+HW 線 : Layout → Gerber(G.O.) → PCB FAB → SMT 完成(PCBA) ┐
+                                                          ├─ MAX → Pre-Build → Main build → OOBIP
+ME 線 : ME design → … → T1+T2 → <phase> ME parts → ME ETA ┘
+```
+
+### 12.E Pre-Build 下游：Main build → OOBIP → Ship ETA(雙) → Test → Phase exit ✅
+
+> 來源 = §11 Milestone_FCS D/E 欄 + 第 14/15/16 列。補齊先前 §12 對 OOBIP / Ship ETA / Phase exit 的缺漏，並釐清「Ship unit ETA」其實是**兩個不同 gate**。
+
+| Task | 接法（dependency） | golden(SI / PV) | 信心 |
+|---|---|---|---|
+| Main build | = Pre-Build end + 1 | 5/19→5/20 / 7/14→7/15 | ✅ 高（原有）|
+| **OOBIP** | build 段檢測，**holiday-aware span**；起點落在 Main build 區段、預設 golden offset、**可編輯** | 5/20→5/27 / 7/11→7/31 | ⚠️ 中（兩 phase 起點 anchor 不一致，用 golden offset 近似）|
+| **Ship 到 NSDD（PCBA Only）** | **= Main build end + buffer**（只需 PCBA、不等整機 → 較早出貨）| 5/22 / 7/15 | ✅ 高 |
+| **Ship 到 QAD/TPE RD & HP（整機）** | **= 整機 build/OOBA 備妥**（晚於 NSDD）；且 **= SVTP/Google test start − 1 工作日** | 5/27 / 7/22 | ✅ 高 |
+| SVTP / Google test start | **= Ship(QAD/TPE 整機) end + 1 工作日**（**不是** NSDD 那條）| 5/28 / 7/23 | ✅ 高（釐清原本模糊的「= Ship unit ETA」）|
+| **Phase exit** | = 該 phase 測試/regression 完成 + buffer（holiday-aware，§13.5 以 **Google** 為 driver）| SI 6/24→**7/2** | ⚠️ 視 phase：SI = test end +≈6 工作日；**PV exit 9/3 改錨在 PV Regression/CFZ 區**（anchor-driven，非單純 test end + buffer）|
+
+**HARD 重點（雙 Ship ETA gate）**：
+- `Ship 到 NSDD (PCBA Only)` 只要 **PCBA 備妥**（≈ Main build end）即可送 → **早**。
+- `Ship 到 QAD/TPE (整機)` 要 **整機 build 完成** → **晚**，且這條才是 **驅動 SVTP/Google test 起算**的那個 ETA。
+- 兩條 ETA **各自獨立**，不可合併成單一「Ship unit ETA」；下游 test 一律掛在 **QAD/TPE 整機** 那條。
+
+**reflow**：Main build / OOBIP / 整機 build Days 被編輯 → Ship(QAD/TPE) → test → Phase exit 整條 holiday-aware 往下游 shift（§13.1）。NSDD(PCBA-only) 那條獨立、只受 Main build 影響，不驅動 test。
+
 ### 階段交接（phase handoff）＆ 階段 buffer ✅（Q14 已定，§13.5 修正定錨來源）
 
 - **下一階段錨在前一階段的「Testing start」+ N 工作週**（= PRODUCT_SPEC 的 G.O. 規則：
@@ -485,6 +597,13 @@ Layout → Gerber release → PCB FAB → SMT Build → (Pre-Build → Main buil
   SVTP test 不 drive downstream（§13.5），編輯它只改自己那條 bar。
 - ⚠️ v1 舊規則「前段 end-pinned、只移上游、下游不動」**已被本 v2 取代**（user 要看到 HW 縮短後提前完成）。
 - 例：縮短 `PCB FAB` → 它之後的 HW task（SMT/test/exit…）全部提前，HW 提早做完；SR/CFZ/RTM/FCS 不動。
+- **v2 dependency DAG 如何保證此規則（實作）**：backward block（HW/ME）由 Kick-off 經依賴邊正向算、編輯沿邊傳遞；
+  forward block（PVR/MV/FCS + PV gates）錨在 SR/CFZ/RTM。兩 block 唯一橋接點 `MV G.O.` **改錨在 SR-nominal
+  DVT Test Start**（= `addCal(golden DVT test start, shift) + mvGoDays`，**不吃** live HW 編輯），所以 HW 編輯
+  不會越過 SR 推動 MV→FCS。已用 Node harness 驗證：`PCB FAB +5d` → HW 全部 +5、但 KS/VN FCS **Δ=0**。
+- ⚠️ **副作用（待 user 確認）**：因 MV G.O. 鎖在 SR-nominal，HW 大幅 slip 時畫面上 DVT test 會位移、但 MV G.O. 與
+  FCS 不動 → 兩者間距不再剛好 4 週。這是「FCS 鎖死」與「MV G.O.=DVT test+4wk」兩條 HARD 規則衝突時，**優先鎖 FCS**
+  的取捨。若 user 反而希望「HW 真的 slip 時 FCS 跟著延」，再放寬此鎖。
 
 ### 13.2 Region site 切換要連動 schedule 圖卡的 task（HARD）
 

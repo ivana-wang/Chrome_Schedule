@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" font-family="'Segoe UI', system-ui, -apple-system, Roboto, sans-serif" role="img" aria-label="AIO / Desktop PC Development Timeline — animated preview: five scenario tabs and a building DB, SI, PV, MV, FCS chevron timeline">
+  <defs>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5b9eff"/>
+      <stop offset="0.5" stop-color="#3df0f5"/>
+      <stop offset="1" stop-color="#8b6dff"/>
+    </linearGradient>
+    <linearGradient id="gTab" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3df0f5"/>
+      <stop offset="1" stop-color="#5b9eff"/>
+    </linearGradient>
+    <linearGradient id="gExport" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3df0f5"/>
+      <stop offset="1" stop-color="#5b9eff"/>
+    </linearGradient>
+    <linearGradient id="gPill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a2042"/>
+      <stop offset="1" stop-color="#131830"/>
+    </linearGradient>
+    <linearGradient id="gDB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b9eff"/><stop offset="1" stop-color="#3a7be0"/>
+    </linearGradient>
+    <linearGradient id="gSI" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4188ed"/><stop offset="1" stop-color="#2e6ad0"/>
+    </linearGradient>
+    <linearGradient id="gPV" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f74dc"/><stop offset="1" stop-color="#1d56b8"/>
+    </linearGradient>
+    <linearGradient id="gMV" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1c5cb8"/><stop offset="1" stop-color="#0d3e89"/>
+    </linearGradient>
+    <linearGradient id="gFCS" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38c172"/><stop offset="1" stop-color="#1f9d55"/>
+    </linearGradient>
+    <radialGradient id="glowCyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5b9eff" stop-opacity="0.18"/><stop offset="1" stop-color="#5b9eff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowViolet" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8b6dff" stop-opacity="0.14"/><stop offset="1" stop-color="#8b6dff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowTeal" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#3df0f5" stop-opacity="0.08"/><stop offset="1" stop-color="#3df0f5" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#ffffff" stroke-opacity="0.02"/>
+    </pattern>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <style>
+      @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.35}}
+      @keyframes onWin0{0%,19.5%{opacity:1}20%,100%{opacity:0}}
+      @keyframes onWin1{0%,20%{opacity:0}20.01%,39.5%{opacity:1}40%,100%{opacity:0}}
+      @keyframes onWin2{0%,40%{opacity:0}40.01%,59.5%{opacity:1}60%,100%{opacity:0}}
+      @keyframes onWin3{0%,60%{opacity:0}60.01%,79.5%{opacity:1}80%,100%{opacity:0}}
+      @keyframes onWin4{0%,80%{opacity:0}80.01%,99.5%{opacity:1}100%{opacity:0}}
+      @keyframes rowIn1{0%,3%{opacity:0;transform:translateX(-16px)}9%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes rowIn2{0%,6%{opacity:0;transform:translateX(-16px)}12%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes rowIn3{0%,9%{opacity:0;transform:translateX(-16px)}15%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes chDB{0%,6%{opacity:0;transform:translateX(-24px)}12%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes chSI{0%,11%{opacity:0;transform:translateX(-24px)}17%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes chPV{0%,16%{opacity:0;transform:translateX(-24px)}22%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes chMV{0%,21%{opacity:0;transform:translateX(-24px)}27%,90%{opacity:1;transform:translateX(0)}98%,100%{opacity:0}}
+      @keyframes chFCS{0%,26%{opacity:0;transform:translateX(-24px) scale(.92)}31%{opacity:1;transform:translateX(0) scale(1.05)}34%,90%{opacity:1;transform:translateX(0) scale(1)}98%,100%{opacity:0}}
+      @keyframes wwIn{0%,34%{opacity:0}40%,90%{opacity:1}98%,100%{opacity:0}}
+      .dot{animation:dotPulse 2.2s ease-in-out infinite}
+      .t0{animation:onWin0 15s linear infinite}
+      .t1{animation:onWin1 15s linear infinite}
+      .t2{animation:onWin2 15s linear infinite}
+      .t3{animation:onWin3 15s linear infinite}
+      .t4{animation:onWin4 15s linear infinite}
+      .r1{animation:rowIn1 15s ease-in-out infinite}
+      .r2{animation:rowIn2 15s ease-in-out infinite}
+      .r3{animation:rowIn3 15s ease-in-out infinite}
+      .cdb{animation:chDB 15s ease-in-out infinite}
+      .csi{animation:chSI 15s ease-in-out infinite}
+      .cpv{animation:chPV 15s ease-in-out infinite}
+      .cmv{animation:chMV 15s ease-in-out infinite}
+      .cfcs{animation:chFCS 15s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+      .ww{animation:wwIn 15s ease-in-out infinite}
+      .mono{font-family:'Consolas','SF Mono','Roboto Mono',ui-monospace,monospace}
+      @media (prefers-reduced-motion: reduce){*{animation:none!important}}
+    </style>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="1200" height="620" fill="#07091a"/>
+  <rect width="1200" height="620" fill="url(#grid)"/>
+  <ellipse cx="190" cy="10" rx="540" ry="320" fill="url(#glowCyan)"/>
+  <ellipse cx="1080" cy="60" rx="480" ry="300" fill="url(#glowViolet)"/>
+  <ellipse cx="600" cy="660" rx="540" ry="280" fill="url(#glowTeal)"/>
+
+  <!-- Header -->
+  <g>
+    <rect x="48" y="34" width="246" height="30" rx="15" fill="#3df0f5" fill-opacity="0.05" stroke="#3df0f5" stroke-opacity="0.28"/>
+    <circle class="dot" cx="66" cy="49" r="4" fill="#3df0f5"/>
+    <text x="82" y="53" class="mono" font-size="12" letter-spacing="2.4" fill="#3df0f5">PROJECT SCHEDULE STUDIO</text>
+    <text x="48" y="104" font-size="40" font-weight="600" letter-spacing="-0.5" fill="#e6e9f5">AIO / Desktop PC <tspan fill="url(#titleGrad)" font-weight="700">Development Timeline</tspan></text>
+    <text x="48" y="138" font-size="15" fill="#a4abc9">Plan, edit &amp; visualize multi-phase product schedules &#8212; DB &#183; SI &#183; PV &#183; MV &#183; FCS milestones.</text>
+  </g>
+
+  <!-- Owner badge -->
+  <g>
+    <rect x="978" y="40" width="174" height="46" rx="23" fill="url(#gPill)" stroke="#2e3766"/>
+    <circle cx="1006" cy="63" r="17" fill="#0a0e22" stroke="#3df0f5" stroke-width="1.5"/>
+    <text x="1006" y="68" font-size="13" font-weight="600" fill="#3df0f5" text-anchor="middle">IW</text>
+    <text x="1032" y="58" class="mono" font-size="9" letter-spacing="1.8" fill="#3df0f5">OWNER</text>
+    <text x="1032" y="75" font-size="13" font-weight="600" fill="#e6e9f5">Wang, Ivana</text>
+  </g>
+
+  <!-- Scenario nav -->
+  <g>
+    <rect x="48" y="160" width="1104" height="52" rx="14" fill="#131830" stroke="#232a4f"/>
+    <!-- inactive labels -->
+    <text x="161.5" y="190" font-size="14" fill="#a4abc9" text-anchor="middle">Planning</text>
+    <text x="380.5" y="190" font-size="14" fill="#a4abc9" text-anchor="middle">Ground-up Product</text>
+    <text x="599.5" y="190" font-size="14" fill="#a4abc9" text-anchor="middle">NPI Silicon/TTM</text>
+    <text x="818.5" y="190" font-size="14" fill="#a4abc9" text-anchor="middle">Production Silicon/OOC</text>
+    <text x="1037.5" y="190" font-size="14" fill="#a4abc9" text-anchor="middle">Generate Schedule</text>
+    <!-- active states (cycle) -->
+    <g class="t0" opacity="0">
+      <rect x="56" y="166" width="211" height="40" rx="10" fill="url(#gTab)"/>
+      <text x="161.5" y="190" font-size="14" font-weight="600" fill="#0a0e22" text-anchor="middle">Planning</text>
+    </g>
+    <g class="t1" opacity="1">
+      <rect x="275" y="166" width="211" height="40" rx="10" fill="url(#gTab)"/>
+      <text x="380.5" y="190" font-size="14" font-weight="600" fill="#0a0e22" text-anchor="middle">Ground-up Product</text>
+    </g>
+    <g class="t2" opacity="0">
+      <rect x="494" y="166" width="211" height="40" rx="10" fill="url(#gTab)"/>
+      <text x="599.5" y="190" font-size="14" font-weight="600" fill="#0a0e22" text-anchor="middle">NPI Silicon/TTM</text>
+    </g>
+    <g class="t3" opacity="0">
+      <rect x="713" y="166" width="211" height="40" rx="10" fill="url(#gTab)"/>
+      <text x="818.5" y="190" font-size="14" font-weight="600" fill="#0a0e22" text-anchor="middle">Production Silicon/OOC</text>
+    </g>
+    <g class="t4" opacity="0">
+      <rect x="932" y="166" width="211" height="40" rx="10" fill="url(#gTab)"/>
+      <text x="1037.5" y="190" font-size="14" font-weight="600" fill="#0a0e22" text-anchor="middle">Generate Schedule</text>
+    </g>
+  </g>
+
+  <!-- White export-ready timeline card -->
+  <g filter="url(#cardShadow)">
+    <rect x="48" y="232" width="1104" height="364" rx="18" fill="#ffffff" stroke="#d8dde8"/>
+  </g>
+
+  <!-- Card header -->
+  <g>
+    <text x="72" y="272" font-size="16" font-weight="600" fill="#1d2434" class="t0" opacity="0">Planning</text>
+    <text x="72" y="272" font-size="16" font-weight="600" fill="#1d2434" class="t1" opacity="1">Ground-up Product</text>
+    <text x="72" y="272" font-size="16" font-weight="600" fill="#1d2434" class="t2" opacity="0">NPI Silicon / TTM</text>
+    <text x="72" y="272" font-size="16" font-weight="600" fill="#1d2434" class="t3" opacity="0">Production Silicon / OOC</text>
+    <text x="72" y="272" font-size="16" font-weight="600" fill="#1d2434" class="t4" opacity="0">Generate Schedule</text>
+    <text x="1128" y="272" class="mono" font-size="12" fill="#6b7299" text-anchor="end">KICK-OFF 2025/04/08 &#8594; FCS 2026/01/02</text>
+    <line x1="72" y1="285" x2="1128" y2="285" stroke="#eef1f6"/>
+  </g>
+
+  <!-- Task rows (Gantt staircase) -->
+  <g>
+    <g class="r1">
+      <text x="84" y="317" class="mono" font-size="11" fill="#4a5273">2025/05</text>
+      <rect x="150" y="304" width="300" height="18" rx="5" fill="url(#gDB)"/>
+      <text x="162" y="317" font-size="11" font-weight="600" fill="#ffffff">DB &#183; Build / Test</text>
+    </g>
+    <g class="r2">
+      <text x="84" y="343" class="mono" font-size="11" fill="#4a5273">2025/07</text>
+      <rect x="300" y="330" width="300" height="18" rx="5" fill="url(#gSI)"/>
+      <text x="312" y="343" font-size="11" font-weight="600" fill="#ffffff">SI &#183; Build / Test</text>
+    </g>
+    <g class="r3">
+      <text x="84" y="369" class="mono" font-size="11" fill="#4a5273">2025/09</text>
+      <rect x="470" y="356" width="300" height="18" rx="5" fill="url(#gPV)"/>
+      <text x="482" y="369" font-size="11" font-weight="600" fill="#ffffff">PV &#183; Build / Test</text>
+    </g>
+  </g>
+
+  <!-- Chevron phase bar -->
+  <g>
+    <g class="cdb">
+      <polygon points="72,398 268,398 294,430 268,462 72,462" fill="url(#gDB)"/>
+      <text x="172" y="426" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">DB</text>
+      <text x="172" y="448" class="mono" font-size="10.5" fill="#ffffff" fill-opacity="0.85" text-anchor="middle">G.O. 05/16</text>
+    </g>
+    <g class="csi">
+      <polygon points="268,398 464,398 490,430 464,462 268,462 294,430" fill="url(#gSI)"/>
+      <text x="381" y="426" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">SI</text>
+      <text x="381" y="448" class="mono" font-size="10.5" fill="#ffffff" fill-opacity="0.85" text-anchor="middle">G.O. 07/18</text>
+    </g>
+    <g class="cpv">
+      <polygon points="464,398 660,398 686,430 660,462 464,462 490,430" fill="url(#gPV)"/>
+      <text x="577" y="426" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">PV</text>
+      <text x="577" y="448" class="mono" font-size="10.5" fill="#ffffff" fill-opacity="0.85" text-anchor="middle">G.O. 09/19</text>
+    </g>
+    <g class="cmv">
+      <polygon points="660,398 856,398 882,430 856,462 660,462 686,430" fill="url(#gMV)"/>
+      <text x="773" y="426" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">MV</text>
+      <text x="773" y="448" class="mono" font-size="10.5" fill="#ffffff" fill-opacity="0.85" text-anchor="middle">G.O. 11/14</text>
+    </g>
+    <g class="cfcs">
+      <ellipse cx="978" cy="430" rx="126" ry="46" fill="#38c172" fill-opacity="0.16"/>
+      <polygon points="856,398 1074,398 1100,430 1074,462 856,462 882,430" fill="url(#gFCS)"/>
+      <text x="982" y="421" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">FCS</text>
+      <text x="982" y="439" class="mono" font-size="11" fill="#ffffff" text-anchor="middle">2026/01/02</text>
+      <text x="982" y="453" class="mono" font-size="8.5" letter-spacing="1.6" fill="#ffffff" fill-opacity="0.8" text-anchor="middle">L10 CHINA</text>
+    </g>
+  </g>
+
+  <!-- Working-week buffer pills -->
+  <g class="ww">
+    <g>
+      <rect x="262" y="478" width="64" height="22" rx="11" fill="#2952d4" fill-opacity="0.07" stroke="#2952d4" stroke-opacity="0.28"/>
+      <text x="294" y="493" class="mono" font-size="11" fill="#2952d4" text-anchor="middle">4 ww</text>
+    </g>
+    <g>
+      <rect x="458" y="478" width="64" height="22" rx="11" fill="#2952d4" fill-opacity="0.07" stroke="#2952d4" stroke-opacity="0.28"/>
+      <text x="490" y="493" class="mono" font-size="11" fill="#2952d4" text-anchor="middle">4 ww</text>
+    </g>
+    <g>
+      <rect x="654" y="478" width="64" height="22" rx="11" fill="#2952d4" fill-opacity="0.07" stroke="#2952d4" stroke-opacity="0.28"/>
+      <text x="686" y="493" class="mono" font-size="11" fill="#2952d4" text-anchor="middle">3 ww</text>
+    </g>
+  </g>
+
+  <!-- Card footer -->
+  <g>
+    <text x="72" y="556" class="mono" font-size="11" fill="#6b7299">&#9679; Holiday-aware &#183; weekday-snapped &#183; working-week buffers &#183; single-file, no build</text>
+    <rect x="986" y="540" width="142" height="30" rx="15" fill="url(#gExport)"/>
+    <text x="1057" y="560" font-size="12" font-weight="600" fill="#0a1f2e" text-anchor="middle">&#8595; Export PPTX</text>
+  </g>
+</svg>
