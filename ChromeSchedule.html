@@ -228,10 +228,10 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
     <div class="card">
       <h2><span class="n">1</span> Project Setup</h2>
       <label>Project Name</label>
-      <input type="text" id="proj" value="" placeholder="e.g. Education Azul (MTK8189) — M151 2nd release">
+      <input type="text" id="proj" value="" placeholder="">
 
       <label>Chromiumdash Branch number</label>
-      <input type="text" id="branch" value="" placeholder="e.g. 152 or 155">
+      <input type="text" id="branch" value="" placeholder="152">
 
       <label>Branch image (chromiumdash screenshot)</label>
       <div class="drop" id="drop">
@@ -250,7 +250,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <label>Region site factory</label>
       <select id="region"><option value="VN">Vietnam</option><option value="TH">Thailand</option></select>
 
-      <button class="btn" id="generate">⚙ Generate Schedule</button>
       <button class="btn ghost" id="reset">Reset to defaults</button>
       <div class="hint">Changing Project Name / Branch / Stable Release / factory instantly recomputes the schedule.</div>
     </div>
@@ -1145,8 +1144,7 @@ function fitRoadmap(){
 }
 let _rmFitT; window.addEventListener('resize',()=>{clearTimeout(_rmFitT);_rmFitT=setTimeout(fitRoadmap,120);});
 const reflow=()=>run();
-const generateBtn=document.getElementById('generate');
-if(generateBtn) generateBtn.addEventListener('click',run);
+document.getElementById('proj').addEventListener('input',reflow);
 document.getElementById('region').addEventListener('change',reflow);
 document.getElementById('lead').addEventListener('change',reflow);
 document.getElementById('leadCustom').addEventListener('input',reflow);
