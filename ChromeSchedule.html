@@ -241,7 +241,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <div class="hint" id="ocrHint">Supports png / jpg. OCR auto-detects ChromeOS Stable Release; if it fails, enter it manually below. Either method triggers the schedule.</div>
 
       <label>Stable Release (ChromeOS) — anchor</label>
-      <input type="text" id="sr" value="" placeholder="YYYY-MM-DD or MM/DD/YYYY">
+      <input type="text" id="sr" value="" placeholder="Just type numbers — e.g. 20260923 → 2026-09-23">
 
       <label>Lead site factory</label>
       <select id="lead"><option value="KS">KS (Kunshan, CN) — default</option><option value="OTHER">Other ODM (custom)</option></select>
@@ -1154,7 +1154,19 @@ document.getElementById('lead').addEventListener('change',reflow);
 document.getElementById('leadCustom').addEventListener('input',reflow);
 document.getElementById('branch').addEventListener('input',reflow);
 const srInput=document.getElementById('sr');
-srInput.addEventListener('input',reflow);
+// friendly date entry: the user just types digits (e.g. 20260923) and the YYYY-MM-DD
+// dashes are inserted automatically — no need to type "-" or "/". If they instead type
+// a slash (MM/DD/YYYY) we leave their formatting alone and let parseInputDate handle it.
+function autoFormatSr(){
+  const v=srInput.value;
+  if(/[^0-9-]/.test(v)) return;                 // contains "/" etc. → user picked another format, don't touch
+  const digits=v.replace(/\D/g,'').slice(0,8);  // YYYYMMDD
+  let out=digits;
+  if(digits.length>6) out=digits.slice(0,4)+'-'+digits.slice(4,6)+'-'+digits.slice(6);
+  else if(digits.length>4) out=digits.slice(0,4)+'-'+digits.slice(4);
+  if(out!==v) srInput.value=out;
+}
+srInput.addEventListener('input',()=>{autoFormatSr();reflow();});
 srInput.addEventListener('change',reflow);
 srInput.addEventListener('blur',()=>{
   const raw=srInput.value.trim();
