@@ -477,6 +477,10 @@ let cfzDaysOverride=null, rtmDaysOverride=null, mvGoDaysOverride=null;
 /* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
 let BRANCH_INFO=null;
 let lastValidSrISO='';
+/* monotonically increasing token; bumped on every upload AND on Reset. An async OCR
+   pass captures the token when it starts and discards its result if the token has moved
+   on (a newer upload, or a Reset) — so a slow OCR can never repopulate a cleared form. */
+let uploadToken=0;
 
 /* =====================================================================
    SCHEDULER v2 — true dependency DAG (§4.1 "(B) real dependency"). Each task's
@@ -1161,39 +1165,57 @@ srInput.addEventListener('blur',()=>{
     run();
   }
 });
-document.getElementById('reset').onclick=()=>{durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;BRANCH_INFO=null;lastValidSrISO='';document.getElementById('branch').value='';srInput.value='';
-  document.getElementById('lead').value='KS';document.getElementById('region').value='VN';run();};
+document.getElementById('reset').onclick=()=>{
+  uploadToken++;                 // invalidate any in-flight OCR so it can't repopulate after reset
+  durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;
+  BRANCH_INFO=null;lastValidSrISO='';
+  document.getElementById('proj').value='';
+  document.getElementById('branch').value='';
+  srInput.value='';
+  document.getElementById('lead').value='KS';
+  document.getElementById('leadCustom').value='';
+  document.getElementById('region').value='VN';
+  // clear the file picker so the SAME image can be re-uploaded afterwards (change fires only on a new value)
+  const fileEl=document.getElementById('file'); if(fileEl) fileEl.value='';
+  // restore the upload box + hint to their default copy
+  document.getElementById('dropTxt').innerHTML='📷 Click to upload Branch image<br><span style="font-size:11px">or manually enter ChromeOS Stable Release below</span>';
+  document.getElementById('ocrHint').textContent='Supports png / jpg. OCR auto-detects ChromeOS Stable Release; if it fails, enter it manually below. Either method triggers the schedule.';
+  run();
+};
 
 /* ---- image upload + OCR ---- */
 const drop=document.getElementById('drop'),file=document.getElementById('file');
 drop.onclick=()=>file.click();
-file.onchange=e=>{if(e.target.files[0])ocr(e.target.files[0]);};
+file.onchange=e=>{const f=e.target.files[0]; e.target.value=''; if(f)ocr(f);};   // reset value → same file re-fires change
 drop.ondragover=e=>{e.preventDefault();drop.classList.add('busy');};
 drop.ondragleave=()=>drop.classList.remove('busy');
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove('busy');if(e.dataTransfer.files[0])ocr(e.dataTransfer.files[0]);};
 async function ocr(f){
+  const myToken=++uploadToken;          // claim this upload; a later upload or Reset invalidates it
+  // a new image supersedes the Branch number that was typed/read before: clear the field so the
+  // image's own digital Branch number drives it (§user req). The Stable Release is left intact —
+  // OCR overwrites it below when the image carries a date, else a manual anchor is preserved.
+  document.getElementById('branch').value='';
+  BRANCH_INFO=null;
   const txt=document.getElementById('dropTxt'),hint=document.getElementById('ocrHint');
   drop.classList.add('busy');txt.innerHTML='🔎 Running OCR…';
   try{
     const{data}=await Tesseract.recognize(f,'eng');
+    if(myToken!==uploadToken) return;                       // superseded by a newer upload / Reset
     console.log('[OCR raw text]\n'+data.text);              // inspect real OCR output here
     const info=parseBranch(data.text);
     // milestone # lives in the coloured header band, which the full-image pass
     // mangles — re-read just that band, and grab the band colour for the card.
     const header=await analyzeHeaderNumber(f);
+    if(myToken!==uploadToken) return;                       // superseded while reading the header band
     if(header.num) info.num=header.num;
     info.color=header.color;
     info.numImg=header.numImg;
     console.log('[parseBranch]',info,'header',header);
     BRANCH_INFO=info;
-    // Populate branch input with branch NUMBER (not the branch date). Keep any manual suffix the user typed.
-    if(info.num){
-      const inp=document.getElementById('branch');
-      const prev=inp.value.trim();
-      // if user previously typed a suffix like "2nd", preserve it when possible
-      const suffix=(prev && prev.startsWith(info.num))? prev.slice(String(info.num).length).trim() : '';
-      inp.value = suffix? `${info.num} ${suffix}` : String(info.num);
-    }
+    // Fill the branch input with the NUMBER read from the image (field was cleared above, so the
+    // image's digital number replaces anything the user had typed before). §user req.
+    if(info.num) document.getElementById('branch').value=String(info.num);
     const date=info.stableRel;
     if(date){
       document.getElementById('sr').value=iso(date);
@@ -1213,6 +1235,7 @@ async function ocr(f){
       }
     }
   }catch(err){
+    if(myToken!==uploadToken) return;                       // superseded — don't touch the newer state
     console.error('[OCR error]',err);
     const fileOrigin=location.protocol==='file:';
     txt.innerHTML='⚠ OCR failed';
