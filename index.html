@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChromeSchedule — Schedule Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- OCR + PNG export — same CDNs as ChromeSchedule.html -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#0f1424; --card:#141b2e; --card2:#1a2236;
+  --line:#26304a; --ink:#e7ecf7; --mut:#8a96b3; --mut2:#5d6b8a;
+  --accent:#3b82f6; --accent2:#22d3ee; --glow:rgba(34,211,238,.35);
+  --ok:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  /* pastel phase palette — identical to ChromeSchedule.html §5.2 (Develop phase graph) */
+  --proto-f:#d9e7f5; --proto-b:#4a86c8;   /* DB  → Proto */
+  --evt-f:#ddead0;   --evt-b:#6aa84f;     /* SI  → EVT   */
+  --dvt-f:#f4cccc;   --dvt-b:#c0504d;     /* PV  → DVT   */
+  --pvr-f:#f8dde6;   --pvr-b:#cc6688;     /* PVR (pink)  */
+  --pvt-f:#fff2cc;   --pvt-b:#d6b656;     /* MV  → PVT   */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}   /* guard the full-bleed Ground-up view against a stray horizontal scrollbar */
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:44px 24px;font-size:14px}
+h1,h2,h3{font-weight:600;letter-spacing:.2px}
+h1{font-size:19px;font-weight:500}
+.wrap{max-width:1080px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px}
+header .sub{color:var(--mut2);font-size:12.5px;margin-top:4px}
+/* owner badge — lives on the shell frame so it shows under every Function tab */
+.owner{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.owner .oav{width:36px;height:36px;border-radius:50%;overflow:hidden;border:1px solid var(--line);flex:0 0 auto}
+.owner .oav img{width:100%;height:100%;object-fit:cover;display:block}
+.owner .olabel{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut2)}
+.owner .oname{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;margin-top:1px}
+
+/* ---------- top tab bar (minimal) ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:40px}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--mut2);padding:14px 14px 15px;cursor:pointer;font-family:'Space Grotesk';font-size:14px;font-weight:500;transition:.15s;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .tsub{display:block;font-family:'JetBrains Mono';font-size:10px;font-weight:400;color:var(--mut2);margin-top:3px}
+.tab.on .tsub{color:var(--accent2)}
+@media(max-width:760px){.tab{font-size:13px;padding:12px 8px 13px}}
+
+/* ---------- panels / views ---------- */
+.view{display:none}
+.view.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px}
+.panel + .panel{margin-top:22px}
+.phead{margin-bottom:18px}
+.phead .ptitle{font-size:17px;font-weight:600}
+.phead .pcode{font-family:'JetBrains Mono';font-size:11px;color:var(--mut2);margin-top:3px}
+.phead .pdesc{font-size:12.5px;color:var(--mut);margin-top:10px;line-height:1.6;max-width:640px}
+
+/* Ground-up tab: the untouched ChromeSchedule.html, embedded FULL-WIDTH so its own
+   fit-to-window shows the entire roadmap with no horizontal scroll bar. The section
+   breaks out of the narrow shell wrap to span the whole viewport. */
+#view-a{margin:0 calc(50% - 50vw);padding:0 24px}
+.gframe{display:block;width:100%;height:calc(100vh - 140px);min-height:600px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+
+label{display:block;font-size:11.5px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
+input[type=text],select{width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 11px;font-family:'JetBrains Mono';font-size:13px;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.btn{margin-top:16px;background:var(--accent);color:#04121f;border:0;border-radius:9px;padding:11px 18px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block;transition:.15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--mut2);filter:none}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:30px 18px;text-align:center;color:var(--mut);cursor:pointer;transition:.15s;background:#0c1220;margin-top:6px}
+.drop:hover{border-color:var(--accent2);color:var(--ink)}
+.drop.busy{border-color:var(--accent2);color:var(--ink)}
+.hint{font-size:11.5px;color:var(--mut2);margin-top:8px;line-height:1.6}
+.note{font-size:12.5px;color:var(--mut);line-height:1.65;background:#0c1220;border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:9px;padding:12px 14px;margin-top:14px}
+.note b{color:var(--ink)}
+.pill{display:inline-block;font-family:'JetBrains Mono';font-size:11px;padding:3px 9px;border-radius:100px;border:1px solid var(--line);color:var(--mut);background:#0c1220}
+
+/* editable extracted-tasks table */
+.etbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px}
+.etbl th{text-align:left;color:var(--mut);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding:5px 6px;border-bottom:1px solid var(--line)}
+.etbl td{padding:4px 6px;border-bottom:1px solid #1c2438;vertical-align:middle}
+.etbl input,.etbl select{padding:6px 8px;font-size:12px;border-radius:7px}
+.etbl .tcol{width:40%} .etbl .pcol{width:18%} .etbl .dcol{width:16%} .etbl .xcol{width:36px;text-align:center}
+.etbl .del{cursor:pointer;color:var(--bad);font-size:16px;line-height:1;background:none;border:0;padding:4px}
+.etbl .del:hover{filter:brightness(1.2)}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.flowarrow{text-align:center;color:var(--mut2);font-size:20px;margin:10px 0 4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stub{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 18px;color:var(--mut)}
+.stub .big{font-size:38px;margin-bottom:10px}
+.stub h3{color:var(--ink);font-size:16px;margin-bottom:6px}
+
+/* ===== independent, data-driven Roadmap renderer (photo-3 look) ===== */
+.tlcard{background:#ffffff;border-radius:14px;padding:22px 24px;color:#1a1a1a;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.tlcard .tlhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:1px solid #e7ebf2;padding-bottom:12px}
+.tlcard .tt{font-size:19px;font-weight:600;color:#101826}
+.tlcard .tsub{font-size:11.5px;color:#5d6b8a;font-family:'JetBrains Mono';margin-top:3px}
+.tlcard .fcsbox{text-align:right;font-family:'JetBrains Mono';font-size:12px;color:#2b3a55;line-height:1.5}
+.tlcard .fcsbox b{color:#101826}
+.rmbar{display:flex;align-items:stretch;margin:20px 0 18px}
+.rmchev{position:relative;flex:1;height:56px;display:flex;align-items:center;justify-content:center;margin-left:-14px}
+.rmchev:first-child{margin-left:0}
+.rmchev .chev-svg{position:absolute;inset:0;width:100%;height:100%}
+.rmchev .lbl{position:relative;z-index:2;text-align:center;color:#1a1a1a}
+.rmchev .lbl b{display:block;font-size:14px;line-height:1.1}
+.rmchev .lbl small{font-family:'JetBrains Mono';font-size:10px;color:#33415c;opacity:.85}
+.rmcols{display:flex;gap:16px;margin-top:4px}
+.rmcol{flex:1;min-width:0}
+.rmcol .ch{font-weight:600;font-size:12px;color:#23303f;padding:5px 9px;border-radius:6px;margin-bottom:8px;display:inline-block}
+.rmli{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:3px 2px;line-height:1.35}
+.rmli .bu{width:8px;height:8px;border-radius:50%;margin-top:4px;flex:0 0 auto}
+.rmli .d{font-family:'JetBrains Mono';font-size:11px;color:#2f6fb0;white-space:nowrap;font-weight:500}
+.rmli .n{color:#1c2433}
+.rmempty{color:#9aa6bd;font-size:12px;padding:18px 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>ChromeSchedule</h1>
+      <div class="sub">Schedule toolkit · pick a function from the tabs</div>
+    </div>
+    <div class="owner">
+      <div class="oav"><img src="assets/ivana-avatar.jpg" alt="Wang, Ivana"></div>
+      <div><div class="olabel">Owner</div><div class="oname">Wang, Ivana</div></div>
+    </div>
+  </header>
+
+  <!-- ============ TOP TAB BAR (2 functions) ============ -->
+  <nav class="tabs">
+    <button class="tab on" data-tab="a" onclick="pick('a')">
+      <span class="tx">Chrome Ground-up<small class="tsub">Function 1</small></span>
+    </button>
+    <button class="tab" data-tab="refresh" onclick="pick('refresh')">
+      <span class="tx">Refresh Board<small class="tsub">Function 2</small></span>
+    </button>
+    <button class="tab" data-tab="gen" onclick="pick('gen')">
+      <span class="tx">Generate Image<small class="tsub">Function 3</small></span>
+    </button>
+  </nav>
+
+  <!-- ============ Function 1: Chrome Ground-up (untouched engine, embedded) ============ -->
+  <section class="view on" id="view-a">
+    <iframe class="gframe" id="groundFrame" title="Chrome Ground-up Schedule" loading="lazy"></iframe>
+  </section>
+
+  <!-- ============ Function 2: Generate Image ============ -->
+  <section class="view" id="view-gen">
+    <div class="panel">
+      <div class="phead">
+        <div>
+          <div class="ptitle">Generate Image</div>
+          <div class="pcode">Function 3 · import &amp; re-render · ● Beta</div>
+          <div class="pdesc">Upload an existing schedule image. We read each TASK + Date by OCR, you confirm/correct them in the table below (your own task names are kept), then we re-render them into a clean Roadmap card.</div>
+        </div>
+      </div>
+
+      <label>Project / chart title</label>
+      <input type="text" id="genTitle" placeholder="e.g. Azul (MTK8189) Milestone">
+
+      <label>Upload schedule image</label>
+      <div class="drop" id="genDrop">📤 Click to upload <b>.png / .jpg</b><br><span style="font-size:11px" id="genDropSub">your hand-drawn / exported schedule chart — read by OCR</span></div>
+      <input type="file" id="genFile" accept="image/*" hidden>
+      <div class="hint" id="genHint">OCR is best-effort — after it runs, review the extracted rows below, fix anything wrong, add or delete rows, then render. Tip: OCR needs a local server (http://localhost), it cannot run from a file:// path.</div>
+    </div>
+
+    <!-- Step 1: editable extracted tasks -->
+    <div class="panel" id="genExtract" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="pill">Step 1</span><b>Extracted tasks</b>
+        <span style="color:var(--mut);font-size:12px">— edit freely; your task names are used as-is</span>
+      </div>
+      <table class="etbl">
+        <thead><tr>
+          <th class="tcol">Task</th><th class="pcol">Phase</th>
+          <th class="dcol">Start</th><th class="dcol">End</th><th class="xcol"></th>
+        </tr></thead>
+        <tbody id="genRows"></tbody>
+      </table>
+      <div class="rowbtns" style="margin-top:12px">
+        <button class="btn ghost" id="genAddRow">+ Add row</button>
+        <button class="btn" id="genRender">Render Roadmap →</button>
+      </div>
+      <div class="note">Phases map to the standard chevrons — <b>DB→Proto</b>, <b>SI→EVT</b>, <b>PV→DVT</b>, <b>PVR</b>, <b>MV→PVT</b> — but the task names and dates come entirely from your image. Dates may be <code>M/D</code>, <code>MM/DD</code>, <code>YYYY-MM-DD</code>; leave End blank for a milestone.</div>
+    </div>
+
+    <!-- Step 2: rendered roadmap output -->
+    <div class="panel" id="genOutPanel" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+        <span class="pill">Step 2</span><b>Roadmap</b>
+        <button class="btn ghost" id="genPng" style="margin:0 0 0 auto;padding:7px 14px">⬇ Export PNG</button>
+      </div>
+      <div id="genRoadmap"></div>
+    </div>
+  </section>
+
+  <!-- ============ Function 3: Refresh Board (interface scaffold) ============ -->
+  <section class="view" id="view-refresh">
+    <div class="panel">
+      <div class="phead">
+        <div>
+          <div class="ptitle">Refresh Board</div>
+          <div class="pcode">Function 2 · PCB refresh schedule · ● Interface only</div>
+          <div class="pdesc">A dedicated schedule for PCB refresh boards. The inputs are framed below; the task list &amp; dependency rules are not wired yet — tell me the tasks/rules and I'll build the engine next.</div>
+        </div>
+      </div>
+
+      <label>Project / Board Name</label>
+      <input type="text" id="rbName" placeholder="e.g. Refresh board rev B">
+      <div class="row2">
+        <div>
+          <label>Base / Kick-off date</label>
+          <input type="text" id="rbKick" placeholder="YYYY-MM-DD">
+        </div>
+        <div>
+          <label>Target FCS date</label>
+          <input type="text" id="rbFcs" placeholder="YYYY-MM-DD">
+        </div>
+      </div>
+      <label>Lead site factory</label>
+      <select id="rbLead"><option>KS (Kunshan, CN)</option><option>Other ODM</option></select>
+
+      <div class="stub">
+        <div class="big">🚧</div>
+        <h3>Schedule logic coming soon</h3>
+        <div>Refresh-board tasks &amp; dependencies to be defined. The tab, page &amp; inputs are in place.</div>
+        <button class="btn ghost" disabled>Generate (pending logic)</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================ tab switching ============================ */
+function pick(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('view-'+t).classList.add('on');
+  if(t==='a'){ const fr=document.getElementById('groundFrame'); if(!fr.src) fr.src='ChromeSchedule.html'; }
+}
+// load the Ground-up engine into its iframe on first paint (kept as a separate, untouched file)
+document.getElementById('groundFrame').src='ChromeSchedule.html';
+
+/* ====================================================================
+   GENERATE IMAGE — independent module.
+   Pipeline: upload → OCR (best-effort) → editable table → data-driven
+   roadmap renderer. Shares NO code with ChromeSchedule.html's engine /
+   renderer, so Function 1 stays completely untouched and the two
+   rendering paths can never conflict (§user req).
+   ==================================================================== */
+const PHASES=[
+  {key:'DB', label:'Proto', f:'var(--proto-f)', b:'var(--proto-b)'},
+  {key:'SI', label:'EVT',   f:'var(--evt-f)',   b:'var(--evt-b)'},
+  {key:'PV', label:'DVT',   f:'var(--dvt-f)',   b:'var(--dvt-b)'},
+  {key:'PVR',label:'PVR',   f:'var(--pvr-f)',   b:'var(--pvr-b)'},
+  {key:'MV', label:'PVT',   f:'var(--pvt-f)',   b:'var(--pvt-b)'},
+];
+const PH_BY_KEY=Object.fromEntries(PHASES.map(p=>[p.key,p]));
+const cssv=v=>{const m=/^var\((--[\w-]+)\)$/.exec(v);return m?getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim():v;};
+
+/* guess a phase from a task name (best-effort; user can override in the table) */
+function guessPhase(name){
+  const s=name.toLowerCase();
+  if(/\bpvr\b|pv-?r|regression/.test(s)) return 'PVR';
+  if(/\bmv\b|pvt|\bfcs\b|\brtm\b|\bcfz\b|product release|first order|marketing/.test(s)) return 'MV';
+  if(/\bpv\b|dvt/.test(s)) return 'PV';
+  if(/\bsi\b|evt/.test(s)) return 'SI';
+  if(/\bdb\b|proto|layout|gerber|mockup|\bid\b|tooling/.test(s)) return 'DB';
+  return 'DB';
+}
+
+/* date parsing for sorting + phase ranges. Accepts M/D, MM/DD, M/D/YY(YY), YYYY-MM-DD.
+   Bare M/D assumes year 2026 (the schedules in use are 2026). Returns a Date or null. */
+const GEN_YEAR=2026;
+function parseGenDate(raw){
+  if(!raw) return null;
+  const s=String(raw).trim();
+  let m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  m=/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})$/.exec(s);              // M/D/YYYY or M-D-YY
+  if(m){let y=+m[3]; if(y<100)y+=2000; return new Date(y,+m[1]-1,+m[2]);}
+  m=/^(\d{1,2})[/\-](\d{1,2})$/.exec(s);                            // M/D (no year)
+  if(m) return new Date(GEN_YEAR,+m[1]-1,+m[2]);
+  return null;
+}
+function fmtGen(raw){const d=parseGenDate(raw); return d?`${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`:String(raw||'').trim();}
+
+/* ---- OCR: read the image, pull "task + date(s)" out of each line ---- */
+const genDrop=document.getElementById('genDrop'), genFile=document.getElementById('genFile');
+genDrop.onclick=()=>genFile.click();
+genFile.onchange=e=>{const f=e.target.files[0]; e.target.value=''; if(f)genOcr(f);};
+genDrop.ondragover=e=>{e.preventDefault();genDrop.classList.add('busy');};
+genDrop.ondragleave=()=>genDrop.classList.remove('busy');
+genDrop.ondrop=e=>{e.preventDefault();genDrop.classList.remove('busy');if(e.dataTransfer.files[0])genOcr(e.dataTransfer.files[0]);};
+
+const DATE_TOKEN=/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/\-]\d{1,2}(?:[/\-]\d{2,4})?)\b/g;
+function parseOcrLines(text){
+  const rows=[];
+  text.split(/\r?\n/).forEach(line=>{
+    const dates=line.match(DATE_TOKEN);
+    if(!dates) return;                                   // only keep lines that carry a date
+    let name=line.replace(DATE_TOKEN,' ')
+                 .replace(/[~–—:>|]+/g,' ')
+                 .replace(/\s-\s/g,' ')                 // " - " range leftover (keep hyphens inside words e.g. PV-R)
+                 .replace(/\b(eta|start|end)\b/ig,' ')
+                 .replace(/\s{2,}/g,' ')
+                 .replace(/^[\s\-–—]+|[\s\-–—]+$/g,''); // trim stray leading/trailing dashes
+    if(name.replace(/[^a-z]/ig,'').length<2) return;     // drop pure-noise lines
+    rows.push({task:name, phase:guessPhase(name), start:dates[0]||'', end:dates[1]||''});
+  });
+  return rows;
+}
+async function genOcr(f){
+  const hint=document.getElementById('genHint');
+  genDrop.classList.add('busy'); genDrop.innerHTML='🔎 Running OCR… this can take a few seconds';
+  if(!document.getElementById('genTitle').value.trim())
+    document.getElementById('genTitle').value=f.name.replace(/\.[^.]+$/,'');
+  try{
+    const{data}=await Tesseract.recognize(f,'eng');
+    console.log('[GenerateImage OCR raw]\n'+data.text);
+    const rows=parseOcrLines(data.text);
+    genDrop.innerHTML='✅ OCR done — review the rows below';
+    if(rows.length){ genState=rows; hint.textContent=`OCR found ${rows.length} dated line(s). Review and correct them, then render.`; }
+    else { genState=[blankRow()]; hint.textContent='OCR could not find dated lines automatically. Add the tasks manually below, then render.'; }
+    renderGenTable(); document.getElementById('genExtract').style.display='block';
+  }catch(err){
+    console.error('[GenerateImage OCR error]',err);
+    genDrop.innerHTML='⚠ OCR failed — enter tasks manually';
+    const fileOrigin=location.protocol==='file:';
+    hint.innerHTML=fileOrigin
+      ? '⚠ Opened from <b>file://</b> — Tesseract OCR cannot run under file:// (browser security). Open this page via a local server (e.g. <code>http://localhost</code>), or add the tasks manually below.'
+      : 'OCR failed ('+err+'). Add the tasks manually below, then render.';
+    genState=[blankRow()]; renderGenTable(); document.getElementById('genExtract').style.display='block';
+  }finally{ genDrop.classList.remove('busy'); }
+}
+
+/* ---- editable table ---- */
+let genState=[];
+const blankRow=()=>({task:'',phase:'DB',start:'',end:''});
+function renderGenTable(){
+  const tb=document.getElementById('genRows'); tb.innerHTML='';
+  genState.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    const phOpts=PHASES.map(p=>`<option value="${p.key}" ${p.key===r.phase?'selected':''}>${p.key} · ${p.label}</option>`).join('');
+    tr.innerHTML=`
+      <td class="tcol"><input type="text" data-i="${i}" data-k="task" value="${escapeHtml(r.task)}" placeholder="task name"></td>
+      <td class="pcol"><select data-i="${i}" data-k="phase">${phOpts}</select></td>
+      <td class="dcol"><input type="text" data-i="${i}" data-k="start" value="${escapeHtml(r.start)}" placeholder="M/D"></td>
+      <td class="dcol"><input type="text" data-i="${i}" data-k="end" value="${escapeHtml(r.end)}" placeholder="M/D"></td>
+      <td class="xcol"><button class="del" data-del="${i}" title="delete row">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+document.getElementById('genRows').addEventListener('input',e=>{
+  const i=e.target.dataset.i, k=e.target.dataset.k; if(i==null||!k)return;
+  genState[+i][k]=e.target.value;
+});
+document.getElementById('genRows').addEventListener('click',e=>{
+  const d=e.target.dataset.del; if(d==null)return;
+  genState.splice(+d,1); if(!genState.length)genState=[blankRow()]; renderGenTable();
+});
+document.getElementById('genAddRow').onclick=()=>{ genState.push(blankRow()); renderGenTable(); };
+
+/* ---- independent, data-driven roadmap renderer (photo-3 look) ---- */
+function chevSVG(fill,stroke){
+  return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
+    `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
+    `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function dateRangeLabel(items){
+  const ds=items.map(r=>parseGenDate(r.start)).filter(Boolean);
+  const de=items.map(r=>parseGenDate(r.end)||parseGenDate(r.start)).filter(Boolean);
+  if(!ds.length) return '';
+  const lo=new Date(Math.min(...ds)), hi=new Date(Math.max(...de.length?de:ds));
+  const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
+  return (+lo===+hi)?f(lo):`${f(lo)}–${f(hi)}`;
+}
+function renderGenRoadmap(){
+  const rows=genState.filter(r=>r.task.trim());
+  const host=document.getElementById('genRoadmap');
+  if(!rows.length){ host.innerHTML='<div class="tlcard"><div class="rmempty">No tasks to render — add at least one task with a date.</div></div>'; return; }
+  // group by phase, keep only phases that actually have tasks, in canonical order
+  const present=PHASES.filter(p=>rows.some(r=>r.phase===p.key));
+  const sortByStart=(a,b)=>{const da=parseGenDate(a.start),db=parseGenDate(b.start);
+    if(da&&db)return da-db; if(da)return -1; if(db)return 1; return 0;};
+  // header: surface an FCS-like row if present
+  const fcs=rows.filter(r=>/fcs/i.test(r.task)).sort(sortByStart)
+    .map(r=>`${escapeHtml(r.task)} <b>${fmtGen(r.start)}</b>`).join('<br>');
+  const title=document.getElementById('genTitle').value.trim()||'Imported Schedule';
+
+  const bar=present.map(p=>{
+    const items=rows.filter(r=>r.phase===p.key);
+    const dr=dateRangeLabel(items);
+    return `<div class="rmchev">${chevSVG(cssv(p.f),'#1a1a1a')}
+      <div class="lbl"><b>${p.label}</b>${dr?`<small>${dr}</small>`:''}</div></div>`;
+  }).join('');
+
+  const cols=present.map(p=>{
+    const items=rows.filter(r=>r.phase===p.key).sort(sortByStart);
+    const bcol=cssv(p.b), fcol=cssv(p.f);
+    const lis=items.map(r=>{
+      const dt=r.end&&fmtGen(r.end)!==fmtGen(r.start)?`${fmtGen(r.start)}–${fmtGen(r.end)}`:fmtGen(r.start);
+      return `<div class="rmli"><span class="bu" style="background:${bcol}"></span>
+        <span class="d">${dt||'—'}</span><span class="n">${escapeHtml(r.task)}</span></div>`;
+    }).join('');
+    return `<div class="rmcol"><span class="ch" style="background:${fcol}">${p.key} · ${p.label}</span>${lis}</div>`;
+  }).join('');
+
+  host.innerHTML=`<div class="tlcard" id="genCard">
+    <div class="tlhead">
+      <div><div class="tt">${escapeHtml(title)}</div><div class="tsub">Generated from uploaded image · ${rows.length} tasks</div></div>
+      ${fcs?`<div class="fcsbox">${fcs}</div>`:''}
+    </div>
+    <div class="rmbar">${bar}</div>
+    <div class="rmcols">${cols}</div>
+  </div>`;
+}
+document.getElementById('genRender').onclick=()=>{
+  renderGenRoadmap();
+  document.getElementById('genOutPanel').style.display='block';
+  document.getElementById('genOutPanel').scrollIntoView({behavior:'smooth',block:'start'});
+};
+document.getElementById('genPng').onclick=async()=>{
+  const card=document.getElementById('genCard'); if(!card)return;
+  const canvas=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
+  const a=document.createElement('a');
+  a.download=(document.getElementById('genTitle').value.trim()||'roadmap')+'.png';
+  a.href=canvas.toDataURL('image/png'); a.click();
+};
+</script>
+</body>
+</html>
