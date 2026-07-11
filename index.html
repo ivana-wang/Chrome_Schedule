@@ -59,7 +59,7 @@ header .sub{color:var(--mut2);font-size:12.5px;margin-top:4px}
 /* Ground-up tab: the untouched ChromeSchedule.html, embedded FULL-WIDTH so its own
    fit-to-window shows the entire roadmap with no horizontal scroll bar. The section
    breaks out of the narrow shell wrap to span the whole viewport. */
-#view-a{margin:0 calc(50% - 50vw);padding:0 24px}
+#view-a,#view-refresh{margin:0 calc(50% - 50vw);padding:0 24px}
 .gframe{display:block;width:100%;height:calc(100vh - 140px);min-height:600px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 
 label{display:block;font-size:11.5px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
@@ -199,39 +199,9 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
     </div>
   </section>
 
-  <!-- ============ Function 3: Refresh Board (interface scaffold) ============ -->
+  <!-- ============ Function 2: Refresh Board (own engine, embedded full-bleed) ============ -->
   <section class="view" id="view-refresh">
-    <div class="panel">
-      <div class="phead">
-        <div>
-          <div class="ptitle">Refresh Board</div>
-          <div class="pcode">Function 2 · PCB refresh schedule · ● Interface only</div>
-          <div class="pdesc">A dedicated schedule for PCB refresh boards. The inputs are framed below; the task list &amp; dependency rules are not wired yet — tell me the tasks/rules and I'll build the engine next.</div>
-        </div>
-      </div>
-
-      <label>Project / Board Name</label>
-      <input type="text" id="rbName" placeholder="e.g. Refresh board rev B">
-      <div class="row2">
-        <div>
-          <label>Base / Kick-off date</label>
-          <input type="text" id="rbKick" placeholder="YYYY-MM-DD">
-        </div>
-        <div>
-          <label>Target FCS date</label>
-          <input type="text" id="rbFcs" placeholder="YYYY-MM-DD">
-        </div>
-      </div>
-      <label>Lead site factory</label>
-      <select id="rbLead"><option>KS (Kunshan, CN)</option><option>Other ODM</option></select>
-
-      <div class="stub">
-        <div class="big">🚧</div>
-        <h3>Schedule logic coming soon</h3>
-        <div>Refresh-board tasks &amp; dependencies to be defined. The tab, page &amp; inputs are in place.</div>
-        <button class="btn ghost" disabled>Generate (pending logic)</button>
-      </div>
-    </div>
+    <iframe class="gframe" id="refreshFrame" title="Refresh Board Schedule" loading="lazy"></iframe>
   </section>
 
 </div>
@@ -243,6 +213,7 @@ function pick(t){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.getElementById('view-'+t).classList.add('on');
   if(t==='a'){ const fr=document.getElementById('groundFrame'); if(!fr.src) fr.src='ChromeSchedule.html'; }
+  if(t==='refresh'){ const fr=document.getElementById('refreshFrame'); if(!fr.src) fr.src='RefreshBoard.html'; }
 }
 // load the Ground-up engine into its iframe on first paint (kept as a separate, untouched file)
 document.getElementById('groundFrame').src='ChromeSchedule.html';
