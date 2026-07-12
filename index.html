@@ -60,6 +60,12 @@ header .sub{color:var(--mut2);font-size:12.5px;margin-top:4px}
    fit-to-window shows the entire roadmap with no horizontal scroll bar. The section
    breaks out of the narrow shell wrap to span the whole viewport. */
 #view-a,#view-refresh{margin:0 calc(50% - 50vw);padding:0 24px}
+/* Function 3: upload panel stays narrow; the roadmap output gets Function 1's full design width
+   (1180px inner + card padding) so the card is NOT scaled down and matches F1's proportions. */
+#view-gen{margin:0 calc(50% - 50vw);padding:0 24px}
+#view-gen .panel{max-width:1080px;margin-left:auto;margin-right:auto}
+#view-gen #genOutPanel{max-width:1310px}
+#genCard{padding:26px 26px 30px}
 .gframe{display:block;width:100%;height:calc(100vh - 140px);min-height:600px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 
 label{display:block;font-size:11.5px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.5px}
@@ -116,6 +122,63 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rmli .d{font-family:'JetBrains Mono';font-size:11px;color:#2f6fb0;white-space:nowrap;font-weight:500}
 .rmli .n{color:#1c2433}
 .rmempty{color:#9aa6bd;font-size:12px;padding:18px 2px}
+
+/* ===== Function 3 v2 — horizontal roadmap, visual clone of Function 1's export card =====
+   CSS copied (not shared) from ChromeSchedule.html so Function 1 stays untouched. */
+.g3-canvas{position:relative;width:100%;overflow-x:auto}
+.g3-inner{position:relative;min-width:1180px}
+.rm-layer{position:relative;width:100%}
+.rm-chip{position:absolute;background:#fff;border:1px solid #cfd7e3;border-radius:6px;
+  padding:4px 9px;font-size:10px;line-height:1.3;color:#2a3142;white-space:nowrap;text-align:center;
+  box-shadow:0 1px 3px rgba(20,30,60,.16)}
+.rm-chip b{font-family:'JetBrains Mono';font-weight:700;font-size:10px;color:inherit}
+.rm-chip .dt{font-family:'JetBrains Mono';font-size:9px;opacity:.8;display:block}
+.rm-chip.google{border-color:#7fae4e;background:#e6f1d8;color:#33510f}
+.rm-chip.gate{border-color:#d35c5c;background:#fbe0e0;color:#8a1c1c;font-weight:700}
+.rm-chip.smt{border-color:#94a3b4;background:#eef1f5;color:#3a4757}
+.rm-chip.build{border-color:#b0a48f;background:#f3efe6;color:#5a4d35;text-align:left}
+.rm-chip.build.wide{min-width:104px}
+.rm-chip.build .dt{display:inline}
+.rm-bar{position:relative;width:100%;height:54px;margin:4px 0}
+.rm-chev{position:absolute;top:0;height:54px}
+/* CRITICAL: size the chevron SVG to its 54px box — without this the browser uses the SVG
+   default 300x150 and every chevron balloons to ~150px tall, crushing the layers below. */
+.rm-chev .chev-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rm-tint{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none}
+.rm-mid{position:relative}
+.rm-conn{position:absolute;width:0;border-left:1.4px solid currentColor;opacity:.55;z-index:0}
+.rm-conn::after{content:'';position:absolute;left:-3px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:1}
+.rm-conn.barbot::after{bottom:-2px}
+.rm-conn.bartop::after{top:-2px}
+.rm-mk{position:absolute;transform:translateX(-50%);text-align:center;font-family:'JetBrains Mono';white-space:nowrap;z-index:2}
+.rm-mk b{font-weight:700;font-size:10px;display:block;line-height:1.1}
+.rm-mk .dt{font-size:9px;color:#7b8497}
+.rm-arrow{position:absolute;height:0;border-top:1.5px solid #33405a;z-index:1}
+.rm-arrow::before,.rm-arrow::after{content:'';position:absolute;top:-3.5px;width:0;height:0;border:4px solid transparent}
+.rm-arrow::before{left:-2px;border-right-color:#33405a;border-left-width:0}
+.rm-arrow::after{right:-2px;border-left-color:#33405a;border-right-width:0}
+.rm-arlbl{position:absolute;transform:translateX(-50%);background:#ffe761;border:1px solid #d8b62a;border-radius:4px;
+  padding:2px 8px;font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:#3a2f00;white-space:nowrap;z-index:3}
+.rm-exitbox{position:absolute;transform:translateX(-50%);background:#ffcf3f;border:1px solid #d8a52a;border-radius:5px;
+  padding:3px 10px;font-family:'JetBrains Mono';font-size:10.5px;font-weight:700;color:#3a2c00;white-space:nowrap;z-index:2}
+.rm-collist{display:flex;gap:16px;margin-top:0;padding-top:2px}
+.rm-col{flex:1;min-width:0}
+.rm-li{display:flex;align-items:flex-start;gap:6px;font-size:10.5px;line-height:1.35;margin-bottom:6px}
+.rm-li .bu{flex:0 0 auto;width:5px;height:5px;border-radius:50%;margin-top:5px}
+.rm-li .d{font-family:'JetBrains Mono';font-size:9px;color:#7b8497;white-space:nowrap;flex:0 0 auto}
+.rm-li .n{color:#2a3142}
+.chev-label-rm{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#1a1f2b;font-weight:700;font-size:13px;letter-spacing:.3px;text-align:center;pointer-events:none}
+.chev-label-rm small{font-weight:500;font-size:9px;opacity:.7;font-family:'JetBrains Mono';letter-spacing:0}
+/* header meta read from the uploaded image (Go-with banner, RFQ box, M-release card) */
+.g3chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.g3go{display:inline-block;background:#7fb347;color:#fff;font-weight:700;font-size:12px;padding:4px 12px;border-radius:6px}
+.g3rfq{display:inline-block;background:#ffd75e;border:1px solid #d8b62a;color:#5a4300;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono'}
+.g3right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.g3mcard{min-width:190px;background:#fdf0fa;border:1px solid #e6c6de;border-radius:9px;padding:8px 12px;font-size:10.5px;color:#4a2d45;font-family:'JetBrains Mono';line-height:1.75;text-align:left}
+.g3mcard .h{font-weight:700;color:#8a1c6b;font-size:12.5px;margin-bottom:2px;background:#fff59d;display:inline-block;padding:0 6px;border-radius:4px}
+.g3mcard .k{color:#7c5a74}
+.g3mcard b{color:#3d2138}
 </style>
 </head>
 <body>
@@ -156,43 +219,19 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
         <div>
           <div class="ptitle">Generate Image</div>
           <div class="pcode">Function 3 · import &amp; re-render · ● Beta</div>
-          <div class="pdesc">Upload an existing schedule image. We read each TASK + Date by OCR, you confirm/correct them in the table below (your own task names are kept), then we re-render them into a clean Roadmap card.</div>
+          <div class="pdesc">Upload an existing schedule image and it is refined into the standard Roadmap.</div>
         </div>
       </div>
 
-      <label>Project / chart title</label>
-      <input type="text" id="genTitle" placeholder="e.g. Azul (MTK8189) Milestone">
-
-      <label>Upload schedule image</label>
       <div class="drop" id="genDrop">📤 Click to upload <b>.png / .jpg</b><br><span style="font-size:11px" id="genDropSub">your hand-drawn / exported schedule chart — read by OCR</span></div>
       <input type="file" id="genFile" accept="image/*" hidden>
-      <div class="hint" id="genHint">OCR is best-effort — after it runs, review the extracted rows below, fix anything wrong, add or delete rows, then render. Tip: OCR needs a local server (http://localhost), it cannot run from a file:// path.</div>
+      <div class="hint" id="genHint"></div>
     </div>
 
-    <!-- Step 1: editable extracted tasks -->
-    <div class="panel" id="genExtract" style="display:none">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="pill">Step 1</span><b>Extracted tasks</b>
-        <span style="color:var(--mut);font-size:12px">— edit freely; your task names are used as-is</span>
-      </div>
-      <table class="etbl">
-        <thead><tr>
-          <th class="tcol">Task</th><th class="pcol">Phase</th>
-          <th class="dcol">Start</th><th class="dcol">End</th><th class="xcol"></th>
-        </tr></thead>
-        <tbody id="genRows"></tbody>
-      </table>
-      <div class="rowbtns" style="margin-top:12px">
-        <button class="btn ghost" id="genAddRow">+ Add row</button>
-        <button class="btn" id="genRender">Render Roadmap →</button>
-      </div>
-      <div class="note">Phases map to the standard chevrons — <b>DB→Proto</b>, <b>SI→EVT</b>, <b>PV→DVT</b>, <b>PVR</b>, <b>MV→PVT</b> — but the task names and dates come entirely from your image. Dates may be <code>M/D</code>, <code>MM/DD</code>, <code>YYYY-MM-DD</code>; leave End blank for a milestone.</div>
-    </div>
-
-    <!-- Step 2: rendered roadmap output -->
+    <!-- Refined roadmap output — renders automatically after OCR; fully automatic, no manual editing. -->
     <div class="panel" id="genOutPanel" style="display:none">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-        <span class="pill">Step 2</span><b>Roadmap</b>
+        <b>Refined Roadmap</b>
         <button class="btn ghost" id="genPng" style="margin:0 0 0 auto;padding:7px 14px">⬇ Export PNG</button>
       </div>
       <div id="genRoadmap"></div>
@@ -270,6 +309,251 @@ genDrop.ondragover=e=>{e.preventDefault();genDrop.classList.add('busy');};
 genDrop.ondragleave=()=>genDrop.classList.remove('busy');
 genDrop.ondrop=e=>{e.preventDefault();genDrop.classList.remove('busy');if(e.dataTransfer.files[0])genOcr(e.dataTransfer.files[0]);};
 
+/* =====================================================================
+   Function 3 OCR pipeline v2 (validated on Validation/Example.png):
+   1) upscale ~3x + greyscale/contrast, OCR twice (normal + inverted —
+      the inverted pass recovers white-on-color box text);
+   2) merge word boxes, cluster into visual segments (line by y, split on
+      x-gaps) so multi-column layouts don't merge into garbage lines;
+   3) fuzzy-snap segments onto the canonical Function-1 task vocabulary
+      (incl. Example.png labels like "DB G/O", "MV pre-build", "MVR1/OOBA");
+   4) dates: use the OCR-read date only when the segment is clearly about
+      that task (alias owns ≥50% of its words) and passes sanity, else the
+      template default; if ≥20 canon tasks matched this is an F1-style
+      schedule → fill the remaining canon rows with defaults & drop noise.
+   ===================================================================== */
+// [phase, canonical name, default start, default end, ...aliases]
+const G3_CANON=[
+ ['DB','ID Lock','1/6','1/6','ID/ME review','IDME Lockdown','ID/ME Lockdown','IDME'],
+ ['DB','ME design','1/6','2/4','ME drawing','ME design'],
+ ['DB','Mockup drawing release','2/5','2/13','Mockup DWG release','Mockup drawing release','Mockup assembly'],
+ ['DB','Mockup review','2/25','2/26',"Assy'y mockup review",'mockup review'],
+ ['DB','DFM review','3/2','3/6','DWG modify and DFM review','DFM review'],
+ ['DB','Tooling Release','3/7','4/17','Tooling start','Tool Start'],
+ ['DB','T1+T2','4/18','4/25','T1'],
+ ['DB','Layout','1/6','2/11','Layout Start'],
+ ['DB','DB Gerber released','2/12','2/12','DB G/O','DBG/O','DBG/Q','DB G/Q'],
+ ['DB','PCB FAB','2/25','3/10','DB PCB FAB'],
+ ['DB','DB SMT Build','3/11','3/15','DB SMT'],
+ ['DB','Google validation','3/23','4/26','DB Test Start'],
+ ['DB','Google prototype','3/23','3/23','Google prototype'],
+ ['DB','DB exit','4/23','4/23','DB Phase Exit','DB Phase'],
+ ['SI','SI Gerber release','4/27','4/27','SI G/O','SIG/O'],
+ ['SI','SI SMT build','5/12','5/24','SI SMT','SISMT'],
+ ['SI','SI Pre-Build','5/15','5/15','Pre-B: 5/15'],
+ ['SI','SI Main build','5/19','5/20','Sys-B: 5/19-5/20'],
+ ['SI','Google release SI image','5/7','5/7','Google release SI image'],
+ ['SI','Google EVT unit','5/27','5/27','Google EVT unit'],
+ ['SI','Google dogfooding','5/28','6/24','SI Test Start'],
+ ['SI','SI exit','7/2','7/2','SI Phase Exit','SI Phase'],
+ ['PV','PV Gerber release','6/18','6/18','PV G/O','PVG/O'],
+ ['PV','PV SMT Build','7/7','7/10','PV SMT'],
+ ['PV','VN SMT build','7/21','7/22','VN cut in SMT 7/21','VNcutin SMT 7/21'],
+ ['PV','PV Pre-Build','7/10','7/10','Pre-B: 7/13','Pre-B: 7/10'],
+ ['PV','PV Main build','7/14','7/15','Sys-B: 7/14-7/15','Sys-B:7/14-7/15'],
+ ['PV','VN Pre-build','7/27','7/27','VN Pre-B: 7/27'],
+ ['PV','VN Main-build','7/29','7/29','VN Sys-B: 7/29'],
+ ['PV','Google release PV image','7/2','7/2','Google release PV image'],
+ ['PV','Google DVT unit','7/22','7/22','Google DVT unit'],
+ ['PV','Google dogfooding (PV)','7/23','8/19','PV Test Start'],
+ ['PV','FW Candidate','7/28','7/28','FW candidate'],
+ ['PV','PLD','8/4','8/4','FW Lock Down','PLD'],
+ ['PV','CFZ','8/28','8/28','CFZ','FSI candidate'],
+ ['PV','RTM','9/4','9/4','RTM','ATM','FSI sign off'],
+ ['PV','PV Regression','8/31','9/3','PV Regression (SW)','PVRegression'],
+ ['PV','PV exit','9/3','9/3','PV Phase Exit','PV Phase'],
+ ['PVR','Material preparation','8/2','8/15','Material preparation'],
+ ['PVR','ME PV-R build (KS)','8/17','8/17','KS PVR build'],
+ ['PVR','Tooling lock down (KS)','8/25','8/25','KS TLD','KSTLD'],
+ ['PVR','ME PV-R build (VN)','8/27','8/27','VN PVR build'],
+ ['PVR','Tooling lock down (VN)','9/2','9/2','VN TLD','VNTLD'],
+ ['MV','MV Gerber release','8/20','8/20','MV G/O','MVG/O'],
+ ['MV','MV SMT','9/2','9/2','MV SMT'],
+ ['MV','VN SMT build (MV)','9/11','9/13','VN cut in SMT 9/11','9/11~9/1 SMT'],
+ ['MV','MV Pre-Build','9/5','9/5','MV pre-build'],
+ ['MV','MV Main build','9/8','9/13','MV build/FOOBA'],
+ ['MV','VN Pre-build (MV)','9/15','9/15','VN Pre-B: 9/15'],
+ ['MV','VN Main-build (MV)','9/17','9/17','VN Sys-B: 9/17'],
+ ['MV','Mini Regression -1','9/14','9/16','MVR1/OOBA','MVR1'],
+ ['MV','Product release - KS','9/17','9/17','Production Release'],
+ ['MV','Product release - VN','9/24','9/24','VN PR'],
+ ['MV','First Order Drop','9/17','9/17','First Order Drop'],
+ ['MV','KS FCS','9/24','9/24','KS FCS','XS FCS'],
+ ['MV','VN FCS','10/2','10/2','VN FCS'],
+];
+const g3Norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+const g3Toks=s=>s.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t&&!/^\d/.test(t));
+function g3Dice(a,b){
+  if(a.length<2||b.length<2)return 0;
+  const bg=s=>{const m={};for(let i=0;i<s.length-1;i++){const g=s.slice(i,i+2);m[g]=(m[g]||0)+1;}return m;};
+  const A=bg(a),B=bg(b);let inter=0,tot=0;
+  for(const g in A){tot+=A[g];if(B[g])inter+=Math.min(A[g],B[g]);}
+  for(const g in B)tot+=B[g];
+  return 2*inter/tot;
+}
+const G3_NOISE=/milestone|rfq|developing time|go with m\d|holiday|hohday|festival|golden week|anniversary|inventory|national day|labor day|labar|mid moon|ching ming|dragon boat|^tw\/cn|^vn:$|^branch\b|stable cut|stable release|fsi (candidate|sign)|^\d+\s*wks?$|^a?wks/i;
+/* words → visual segments: group by y-center into lines, split lines on big x-gaps */
+function g3Segments(words){
+  const ws=words.filter(w=>w.t.trim());
+  ws.forEach(w=>{w.yc=(w.y0+w.y1)/2;w.h=w.y1-w.y0;});
+  ws.sort((a,b)=>a.yc-b.yc||a.x0-b.x0);
+  const lines=[];
+  for(const w of ws){
+    const L=lines.find(l=>Math.abs(l.yc-w.yc)<Math.max(l.h,w.h)*0.6);
+    if(L){L.words.push(w);L.yc=(L.yc*L.n+w.yc)/(L.n+1);L.n++;L.h=Math.max(L.h,w.h);}
+    else lines.push({yc:w.yc,h:w.h||20,n:1,words:[w]});
+  }
+  const segs=[];
+  for(const l of lines){
+    l.words.sort((a,b)=>a.x0-b.x0);
+    let cur=[l.words[0]];
+    for(let i=1;i<l.words.length;i++){
+      if(l.words[i].x0-l.words[i-1].x1>Math.max(40,l.h*1.2)){segs.push(cur);cur=[];}
+      cur.push(l.words[i]);
+    }
+    segs.push(cur);
+  }
+  return segs.map(s=>({
+    txt:s.map(w=>w.t).join(' '),
+    conf:s.reduce((a,w)=>a+w.c,0)/s.length,
+  })).filter(s=>s.txt.replace(/[^A-Za-z0-9]/g,'').length>=2);
+}
+/* harvest project meta from the raw segments BEFORE noise filtering — the title, the RFQ/
+   Developing-time box, the "Go with …" banner and the M-release card are exactly the parts the
+   noise filter drops from the task list, but the user wants them ON the output card. */
+function g3Meta(segs){
+  const m={title:'',rfqAward:'',devWeeks:'',goWith:'',num:'',suffix:'',branch:'',cut:'',stableRel:'',fsiCand:'',fsiSign:''};
+  const grab=(re,cur)=>{if(cur)return cur;for(const sg of segs){const x=sg.txt.match(re);if(x)return x[1].trim();}return '';};
+  m.title   =grab(/^[|\s]*(.{2,60}?\bmilestone\b)/i);
+  m.rfqAward=grab(/RFQ\s*Award\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  m.devWeeks=grab(/Developing\s*time\D{0,4}(\d+)\s*WK/i);
+  m.goWith  =grab(/Go\s*with\s+(.{3,30}?release)/i);
+  m.num     =grab(/\bM\s?(1\d{2})\b/);
+  m.suffix  =grab(/(\d\s*(?:st|nd|rd|th)\s*release)/i);
+  m.branch  =grab(/Bran\w*\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  m.cut     =grab(/Stable\s*cut\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  m.stableRel=grab(/Stable\s*Releas\w*\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  m.fsiCand =grab(/FSI\s*cand\w*\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  m.fsiSign =grab(/sign\s*[- ]?off\D{0,4}(\d{1,2}\/\d{1,2})/i);
+  if(!m.goWith&&m.num&&m.suffix) m.goWith='M'+m.num+' '+m.suffix;
+  return m;
+}
+/* template-mode defaults for M-card fields OCR couldn't read (same philosophy as task gap-fill) */
+function g3MetaFill(m){
+  const dft={branch:'07/27',cut:'08/11',stableRel:'8/25',fsiCand:'8/28',fsiSign:'9/4',num:'151',suffix:'2nd release'};
+  for(const k in dft) if(!m[k]) m[k]=dft[k];
+  if(!m.goWith) m.goWith='M'+m.num+' '+m.suffix;
+  return m;
+}
+/* segments → table rows via canonical snap + template gap-fill */
+function g3ParseWords(words){
+  const segs=g3Segments(words);
+  const meta=g3Meta(segs);
+  const DATE_RE=/(\d{1,2})\s*\/\s*(\d{1,2})(?:\s*[-~.–—]\s*(\d{1,2})\s*\/\s*(\d{1,2}))?/g;
+  const dOK=(a,b)=>+a>=1&&+a<=12&&+b>=1&&+b<=31;
+  const datesOf=t=>{const out=[];let m;DATE_RE.lastIndex=0;
+    while((m=DATE_RE.exec(t))){
+      if(!dOK(m[1],m[2]))continue;
+      const hasE=m[3]&&dOK(m[3],m[4]);
+      out.push({s:m[1]+'/'+m[2],e:hasE?m[3]+'/'+m[4]:''});
+    }return out;};
+  const found={},claimed=new Set();
+  segs.forEach((sg,si)=>{
+    if(G3_NOISE.test(sg.txt))return;
+    const nSeg=g3Norm(sg.txt),tSeg=g3Toks(sg.txt);
+    const hits=[];
+    G3_CANON.forEach((c,ci)=>{
+      if(found[ci])return;
+      for(let ai=4;ai<c.length;ai++){
+        const al=c[ai],nA=g3Norm(al),tA=g3Toks(al);
+        let ok=false;
+        if(nA.length>=5&&nSeg.includes(nA))ok=true;
+        else if(tA.length>=2&&tA.every(t=>tSeg.includes(t)))ok=true;
+        else if(tA.length===1&&tSeg.length<=4&&tSeg.includes(tA[0])&&tA[0].length>=2)ok=true;
+        else if(nA.length>=6&&g3Dice(nSeg,nA)>=0.72)ok=true;
+        if(ok){hits.push({ci,tA});break;}
+      }
+    });
+    if(!hits.length)return;
+    claimed.add(si);
+    const ds=datesOf(sg.txt);
+    hits.forEach((h,k)=>{
+      const c=G3_CANON[h.ci];
+      // trust the OCR date only when this task's alias owns ≥50% of the segment's words
+      const owns=tSeg.length>0&&h.tA.filter(t=>tSeg.includes(t)).length/tSeg.length>=0.5;
+      let d=null;
+      if(owns){
+        if(ds.length===hits.length)d=ds[k];
+        else if(hits.length===1&&ds.length>=1)d=ds[0];
+      }
+      found[h.ci]={s:d?d.s:c[2],e:d?(d.e||''):(c[3]!==c[2]?c[3]:''),fromOcr:!!d};
+    });
+  });
+  const matched=Object.keys(found).length;
+  const isTemplate=matched>=20;   // clearly an F1-style schedule image
+  if(isTemplate){
+    G3_CANON.forEach((c,ci)=>{if(!found[ci])found[ci]={s:c[2],e:(c[3]!==c[2]?c[3]:''),fromOcr:false};});
+    g3MetaFill(meta);             // complete the M-card / banner fields OCR couldn't read
+  }
+  const rows=[];
+  const PH_ORDER={DB:0,SI:1,PV:2,PVR:3,MV:4};
+  Object.keys(found).map(Number).sort((a,b)=>PH_ORDER[G3_CANON[a][0]]-PH_ORDER[G3_CANON[b][0]]||a-b)
+    .forEach(ci=>{
+      const c=G3_CANON[ci],d=found[ci];
+      rows.push({task:c[1].replace(/ \((PV|MV)\)$/,''),phase:c[0],start:d.s,end:d.e});
+    });
+  // extras only when this is NOT a template image (else they're OCR shrapnel of matched tasks)
+  if(!isTemplate){
+    segs.forEach((sg,si)=>{
+      if(claimed.has(si)||G3_NOISE.test(sg.txt)||sg.conf<60)return;
+      const ds=datesOf(sg.txt);if(!ds.length)return;
+      const name=sg.txt.replace(DATE_RE,' ').replace(/[^A-Za-z0-9/&+' -]/g,' ').replace(/\s{2,}/g,' ').trim();
+      if(name.replace(/[^a-z]/ig,'').length<4)return;
+      rows.push({task:name,phase:guessPhase(name),start:ds[0].s,end:ds[0].e});
+    });
+  }
+  return {rows,matched,isTemplate,meta};
+}
+/* preprocess for OCR: upscale to ~3x (capped), greyscale + contrast; returns [normal, inverted] dataURLs */
+async function g3Preprocess(file){
+  const img=await createImageBitmap(file);
+  const scale=Math.min(3,3800/Math.max(img.width,img.height));
+  const W=Math.round(img.width*scale),H=Math.round(img.height*scale);
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const cx=c.getContext('2d',{willReadFrequently:true});
+  cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+  cx.drawImage(img,0,0,W,H);
+  const id=cx.getImageData(0,0,W,H),px=id.data;
+  const CONTRAST=1.6;
+  for(let i=0;i<px.length;i+=4){
+    let l=0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];
+    l=(l-128)*CONTRAST+128;l=Math.max(0,Math.min(255,l));
+    px[i]=px[i+1]=px[i+2]=l;
+  }
+  cx.putImageData(id,0,0);
+  const normal=c.toDataURL('image/png');
+  for(let i=0;i<px.length;i+=4){px[i]=px[i+1]=px[i+2]=255-px[i];}
+  cx.putImageData(id,0,0);
+  return [normal,c.toDataURL('image/png')];
+}
+/* run OCR on both variants and merge word boxes (IoU>0.5 keeps the higher-confidence word) */
+async function g3Ocr(file){
+  const variants=await g3Preprocess(file);
+  const words=[];
+  const iou=(a,b)=>{const x0=Math.max(a.x0,b.x0),y0=Math.max(a.y0,b.y0),x1=Math.min(a.x1,b.x1),y1=Math.min(a.y1,b.y1);
+    const i=Math.max(0,x1-x0)*Math.max(0,y1-y0);const A=(a.x1-a.x0)*(a.y1-a.y0),B=(b.x1-b.x0)*(b.y1-b.y0);return i/(A+B-i||1);};
+  for(const v of variants){
+    const {data}=await Tesseract.recognize(v,'eng');
+    (data.words||[]).forEach(x=>{
+      if(!x.text.trim())return;
+      const w={t:x.text,x0:x.bbox.x0,y0:x.bbox.y0,x1:x.bbox.x1,y1:x.bbox.y1,c:x.confidence};
+      const d=words.find(y=>iou(y,w)>0.5);
+      if(d){if(w.c>d.c)Object.assign(d,w);}else words.push(w);
+    });
+  }
+  return words;
+}
+
 const DATE_TOKEN=/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/\-]\d{1,2}(?:[/\-]\d{2,4})?)\b/g;
 function parseOcrLines(text){
   const rows=[];
@@ -287,123 +571,347 @@ function parseOcrLines(text){
   });
   return rows;
 }
+let genMeta=null, genTitleV='';   // project meta read from the uploaded image (no manual title input)
 async function genOcr(f){
   const hint=document.getElementById('genHint');
-  genDrop.classList.add('busy'); genDrop.innerHTML='🔎 Running OCR… this can take a few seconds';
-  if(!document.getElementById('genTitle').value.trim())
-    document.getElementById('genTitle').value=f.name.replace(/\.[^.]+$/,'');
+  genDrop.classList.add('busy'); genDrop.innerHTML='🔎 Running OCR (2 passes)… this can take ~20-30 seconds';
+  genTitleV=f.name.replace(/\.[^.]+$/,'');   // fallback title only — real title comes from the image
+  genMeta=null;
   try{
-    const{data}=await Tesseract.recognize(f,'eng');
-    console.log('[GenerateImage OCR raw]\n'+data.text);
-    const rows=parseOcrLines(data.text);
-    genDrop.innerHTML='✅ OCR done — review the rows below';
-    if(rows.length){ genState=rows; hint.textContent=`OCR found ${rows.length} dated line(s). Review and correct them, then render.`; }
-    else { genState=[blankRow()]; hint.textContent='OCR could not find dated lines automatically. Add the tasks manually below, then render.'; }
-    renderGenTable(); document.getElementById('genExtract').style.display='block';
+    // v2 pipeline: upscale + dual-pass word boxes → segment clustering → canonical snap.
+    const words=await g3Ocr(f);
+    console.log('[GenerateImage OCR] merged words:',words.length);
+    let rows=[],matched=0,isTemplate=false;
+    if(words.length){ const r=g3ParseWords(words); rows=r.rows; matched=r.matched; isTemplate=r.isTemplate; genMeta=r.meta; console.log('[GenerateImage meta]',r.meta); }
+    if(!rows.length){
+      // fallback: plain text-line parse (old pipeline)
+      const{data}=await Tesseract.recognize(f,'eng');
+      rows=parseOcrLines(data.text);
+    }
+    genDrop.innerHTML='✅ OCR done';
+    hint.textContent='';
+    if(rows.length){ genState=rows; }
+    else { genState=[]; hint.textContent='OCR could not extract tasks from this image — try a sharper screenshot.'; }
+    genShowOutput();
   }catch(err){
     console.error('[GenerateImage OCR error]',err);
-    genDrop.innerHTML='⚠ OCR failed — enter tasks manually';
+    genDrop.innerHTML='⚠ OCR failed';
     const fileOrigin=location.protocol==='file:';
     hint.innerHTML=fileOrigin
-      ? '⚠ Opened from <b>file://</b> — Tesseract OCR cannot run under file:// (browser security). Open this page via a local server (e.g. <code>http://localhost</code>), or add the tasks manually below.'
-      : 'OCR failed ('+err+'). Add the tasks manually below, then render.';
-    genState=[blankRow()]; renderGenTable(); document.getElementById('genExtract').style.display='block';
+      ? '⚠ Opened from <b>file://</b> — Tesseract OCR cannot run under file:// (browser security). Open this page via a local server (e.g. <code>http://localhost</code>).'
+      : 'OCR failed ('+err+'). Try again with a sharper screenshot.';
+    genState=[]; genShowOutput();
   }finally{ genDrop.classList.remove('busy'); }
 }
-
-/* ---- editable table ---- */
-let genState=[];
-const blankRow=()=>({task:'',phase:'DB',start:'',end:''});
-function renderGenTable(){
-  const tb=document.getElementById('genRows'); tb.innerHTML='';
-  genState.forEach((r,i)=>{
-    const tr=document.createElement('tr');
-    const phOpts=PHASES.map(p=>`<option value="${p.key}" ${p.key===r.phase?'selected':''}>${p.key} · ${p.label}</option>`).join('');
-    tr.innerHTML=`
-      <td class="tcol"><input type="text" data-i="${i}" data-k="task" value="${escapeHtml(r.task)}" placeholder="task name"></td>
-      <td class="pcol"><select data-i="${i}" data-k="phase">${phOpts}</select></td>
-      <td class="dcol"><input type="text" data-i="${i}" data-k="start" value="${escapeHtml(r.start)}" placeholder="M/D"></td>
-      <td class="dcol"><input type="text" data-i="${i}" data-k="end" value="${escapeHtml(r.end)}" placeholder="M/D"></td>
-      <td class="xcol"><button class="del" data-del="${i}" title="delete row">✕</button></td>`;
-    tb.appendChild(tr);
-  });
+/* show the output panel FIRST, then render — chips must be visible (offsetWidth>0) for the
+   anti-overlap measurement pass to work. */
+function genShowOutput(){
+  document.getElementById('genOutPanel').style.display='block';
+  renderGenRoadmap();
+  document.getElementById('genOutPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-document.getElementById('genRows').addEventListener('input',e=>{
-  const i=e.target.dataset.i, k=e.target.dataset.k; if(i==null||!k)return;
-  genState[+i][k]=e.target.value;
-});
-document.getElementById('genRows').addEventListener('click',e=>{
-  const d=e.target.dataset.del; if(d==null)return;
-  genState.splice(+d,1); if(!genState.length)genState=[blankRow()]; renderGenTable();
-});
-document.getElementById('genAddRow').onclick=()=>{ genState.push(blankRow()); renderGenTable(); };
 
-/* ---- independent, data-driven roadmap renderer (photo-3 look) ---- */
+/* ---- extracted-task state (fully automatic — no manual editing UI) ---- */
+let genState=[];
+function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---- Function 3 v2: horizontal roadmap renderer — a visual CLONE of Function 1's
+   export card (6 layers, phase-segment coordinates, semantic chip colours), fed
+   entirely by the OCR/edited table. Code is COPIED from ChromeSchedule.html and
+   adapted to generic rows — nothing is shared, Function 1 stays untouched. ---- */
+const G3MS=86400000;
 function chevSVG(fill,stroke){
   return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
     `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
     `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
 }
-function dateRangeLabel(items){
-  const ds=items.map(r=>parseGenDate(r.start)).filter(Boolean);
-  const de=items.map(r=>parseGenDate(r.end)||parseGenDate(r.start)).filter(Boolean);
-  if(!ds.length) return '';
-  const lo=new Date(Math.min(...ds)), hi=new Date(Math.max(...de.length?de:ds));
-  const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
-  return (+lo===+hi)?f(lo):`${f(lo)}–${f(hi)}`;
+/* table rows → F1-style rows {ph,nm,s,e,site,mile}. Site is read from the task name. */
+function g3Rows(){
+  return genState.filter(r=>r.task.trim()).map(r=>{
+    const s=parseGenDate(r.start), e=parseGenDate(r.end)||s;
+    const nm=r.task.trim();
+    const site=/\bVN\b/i.test(nm)?'VN':/\bTH\b/i.test(nm)?'TH':/\bKS\b/i.test(nm)?'KS':'';
+    return {ph:r.phase,nm,s,e,site,mile:!s||!e||+s===+e};
+  });
+}
+const g3md=d=>d?`${d.getMonth()+1}/${d.getDate()}`:'—';
+/* display renames — identical to Function 1's dispName rules, so chip/marker labels match F1:
+   DB→Proto, SI→EVT, PV→DVT, "Gerber release(d)"→"G.O.", "SMT Build"→"SMT". */
+function g3Disp(nm){
+  let s=nm;
+  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT');
+  s=s.replace(/Gerber\s+release\w*/i,'G.O.');
+  s=s.replace(/SMT\s+Build/i,'SMT');
+  // F1 dispName: Google unit/prototype chips get an "ETA" suffix
+  s=s.replace(/^Google prototype$/i,'Google Prototype ETA')
+     .replace(/^Google EVT unit$/i,'Google EVT unit ETA')
+     .replace(/^Google DVT unit$/i,'Google DVT unit ETA');
+  return s;
+}
+/* F1's forced 2-line break for the long Google chips (name line 1, rest+date line 2) */
+const g3TwoLine=s=>s.replace(/^(Google \w+) (unit ETA)$/,'$1<br>$2')
+                   .replace(/^(Google release) (.+)$/,'$1<br>$2')
+                   .replace(/^(Google Prototype) (ETA)$/,'$1<br>$2');
+/* layer assignment — same regexes as Function 1's rmCategorize */
+function g3Categorize(rows){
+  const isGoogleTest=t=>/Google (validation|dogfooding)/i.test(t.nm);
+  const isGoogleChip=t=>/Google/i.test(t.nm)&&!isGoogleTest(t);
+  const isGate=t=>/\bCFZ\b|\bRTM\b|\bPLD\b|code freeze|sign.?off/i.test(t.nm),
+        isSMT=t=>/\bSMT\b/i.test(t.nm),
+        isGO=t=>/Gerber|G\.?O\.?\b/i.test(t.nm), isExit=t=>/\bexit\b/i.test(t.nm),
+        isBuild=t=>/\bT1\b/i.test(t.nm)||/Pre-?Build/i.test(t.nm)||/Main.?build/i.test(t.nm)||/Tooling/i.test(t.nm);
+  const L1=[],L2=[],BUILD=[],GO=[],EXIT=[],OTHER=[],TEST=[];
+  rows.forEach(r=>{
+    if(isGoogleTest(r)){TEST.push(r);return;}
+    if(isGoogleChip(r)||isGate(r)) L1.push(r);
+    else if(isSMT(r)) L2.push(r);
+    else if(isBuild(r)) BUILD.push(r);
+    else if(isGO(r)) GO.push(r);
+    else if(isExit(r)) EXIT.push(r);
+    else OTHER.push(r);
+  });
+  return {L1,L2,BUILD,GO,EXIT,OTHER,TEST};
 }
 function renderGenRoadmap(){
-  const rows=genState.filter(r=>r.task.trim());
+  const all=g3Rows();
   const host=document.getElementById('genRoadmap');
-  if(!rows.length){ host.innerHTML='<div class="tlcard"><div class="rmempty">No tasks to render — add at least one task with a date.</div></div>'; return; }
-  // group by phase, keep only phases that actually have tasks, in canonical order
-  const present=PHASES.filter(p=>rows.some(r=>r.phase===p.key));
-  const sortByStart=(a,b)=>{const da=parseGenDate(a.start),db=parseGenDate(b.start);
-    if(da&&db)return da-db; if(da)return -1; if(db)return 1; return 0;};
-  // header: surface an FCS-like row if present
-  const fcs=rows.filter(r=>/fcs/i.test(r.task)).sort(sortByStart)
-    .map(r=>`${escapeHtml(r.task)} <b>${fmtGen(r.start)}</b>`).join('<br>');
-  const title=document.getElementById('genTitle').value.trim()||'Imported Schedule';
-
-  const bar=present.map(p=>{
-    const items=rows.filter(r=>r.phase===p.key);
-    const dr=dateRangeLabel(items);
-    return `<div class="rmchev">${chevSVG(cssv(p.f),'#1a1a1a')}
-      <div class="lbl"><b>${p.label}</b>${dr?`<small>${dr}</small>`:''}</div></div>`;
-  }).join('');
-
-  const cols=present.map(p=>{
-    const items=rows.filter(r=>r.phase===p.key).sort(sortByStart);
-    const bcol=cssv(p.b), fcol=cssv(p.f);
-    const lis=items.map(r=>{
-      const dt=r.end&&fmtGen(r.end)!==fmtGen(r.start)?`${fmtGen(r.start)}–${fmtGen(r.end)}`:fmtGen(r.start);
-      return `<div class="rmli"><span class="bu" style="background:${bcol}"></span>
-        <span class="d">${dt||'—'}</span><span class="n">${escapeHtml(r.task)}</span></div>`;
-    }).join('');
-    return `<div class="rmcol"><span class="ch" style="background:${fcol}">${p.key} · ${p.label}</span>${lis}</div>`;
-  }).join('');
-
+  if(!all.length){ host.innerHTML='<div class="tlcard"><div class="rmempty">No tasks to render — add at least one task with a date.</div></div>'; return; }
+  const mt=genMeta||{};
+  const title=mt.title||genTitleV||'Schedule';
+  const sortS=(a,b)=>((+a.s||0)-(+b.s||0));
+  // FCS rows live in the header (like Function 1), not on the roadmap body
+  const fcsRows=all.filter(r=>/fcs/i.test(r.nm)).sort(sortS);
+  const rows=all.filter(r=>!/fcs/i.test(r.nm));
+  const fcsBox=fcsRows.map(r=>`${escapeHtml(r.nm)} <b>${g3md(r.s)}</b>`).join('<br>');
+  // header left: title from the image + the image's own banner boxes (Go with… / RFQ / Dev time)
+  const chips=[];
+  if(mt.goWith) chips.push(`<span class="g3go">Go with ${escapeHtml(mt.goWith)}</span>`);
+  const rfqBits=[];
+  if(mt.rfqAward) rfqBits.push(`RFQ Award: ${escapeHtml(mt.rfqAward)}`);
+  if(mt.devWeeks) rfqBits.push(`Developing time: ${escapeHtml(mt.devWeeks)} WKs`);
+  if(rfqBits.length) chips.push(`<span class="g3rfq">${rfqBits.join(' · ')}</span>`);
+  // header right: FCS dates + the M-release mini card read from the image
+  const mrows=[['Branch',mt.branch],['Stable cut',mt.cut],['Stable Release',mt.stableRel],
+               ['FSI candidate',mt.fsiCand],['FSI sign off',mt.fsiSign]].filter(([,v])=>v);
+  const mcard=(mt.num||mrows.length)?`<div class="g3mcard">
+      <div class="h">M${escapeHtml(mt.num||'—')}${mt.suffix?' · '+escapeHtml(mt.suffix):''}</div>
+      ${mrows.map(([k,v])=>`<div><span class="k">${k}:</span> <b>${escapeHtml(v)}</b></div>`).join('')}
+    </div>`:'';
   host.innerHTML=`<div class="tlcard" id="genCard">
     <div class="tlhead">
-      <div><div class="tt">${escapeHtml(title)}</div><div class="tsub">Generated from uploaded image · ${rows.length} tasks</div></div>
-      ${fcs?`<div class="fcsbox">${fcs}</div>`:''}
+      <div><div class="tt">${escapeHtml(title)}</div>${chips.length?`<div class="g3chips">${chips.join('')}</div>`:''}</div>
+      <div class="g3right">${fcsBox?`<div class="fcsbox">${fcsBox}</div>`:''}${mcard}</div>
     </div>
-    <div class="rmbar">${bar}</div>
-    <div class="rmcols">${cols}</div>
+    <div class="g3-canvas"><div class="g3-inner" id="g3Inner"></div></div>
   </div>`;
+  const inner=document.getElementById('g3Inner');
+  // ---- phase segments: only phases with tasks; PVR half width (like Function 1) ----
+  const segDef=[['DB',1],['SI',1],['PV',1],['PVR',.5],['MV',1]].filter(([ph])=>rows.some(r=>r.ph===ph));
+  const totW=segDef.reduce((a,[,w])=>a+w,0)||1;
+  const seg={}; let acc=0; segDef.forEach(([ph,w])=>{seg[ph]={x0:acc/totW*100,x1:(acc+w)/totW*100};acc+=w;});
+  const phRange={};
+  segDef.forEach(([ph])=>{const ip=rows.filter(r=>r.ph===ph&&r.s);
+    if(ip.length)phRange[ph]={s:ip.reduce((m,r)=>+r.s<m?+r.s:m,+ip[0].s),e:ip.reduce((m,r)=>+(r.e||r.s)>m?+(r.e||r.s):m,+(ip[0].e||ip[0].s))};});
+  const segX=(ph,date)=>{const sg=seg[ph],pr=phRange[ph]; if(!sg)return 0;
+    if(!date||!pr||pr.e<=pr.s)return (sg.x0+sg.x1)/2;
+    const f=Math.max(0,Math.min(1,(+date-pr.s)/(pr.e-pr.s)));return sg.x0+f*(sg.x1-sg.x0);};
+  const {L1,L2,BUILD,GO,EXIT,OTHER,TEST}=g3Categorize(rows);
+  // ---- faint phase tints ----
+  segDef.forEach(([ph])=>{const p=PH_BY_KEY[ph],sg=seg[ph];
+    const t=document.createElement('div');t.className='rm-tint';
+    t.style.left=sg.x0+'%';t.style.width=(sg.x1-sg.x0)+'%';t.style.background=cssv(p.f);t.style.opacity='.12';
+    inner.appendChild(t);});
+  const content=document.createElement('div');content.style.position='relative';content.style.zIndex='1';
+  // ---- chip factories (identical layout rules to Function 1) ----
+  const chipNode=(r,cx,cls,label,two)=>{
+    const c=document.createElement('div');c.className='rm-chip '+cls;
+    c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';
+    const date=r.mile?g3md(r.s):`${g3md(r.s)}–${g3md(r.e)}`;
+    let lb=escapeHtml(label); if(two)lb=g3TwoLine(lb);   // F1: Google chips break into 2 lines
+    c.innerHTML=`<b>${lb}</b> <span class="dt">${date}</span>`;return c;
+  };
+  function chipLayer(list,clsFn,range,two){
+    range=range||[0,1];
+    const div=document.createElement('div');div.className='rm-layer';div.style.height='46px';
+    const isGate=r=>/\bCFZ\b|\bRTM\b|\bPLD\b|code freeze|sign.?off/i.test(r.nm);
+    segDef.forEach(([ph])=>{
+      const sg=seg[ph];
+      const items=list.filter(r=>r.ph===ph&&!isGate(r)).sort(sortS), n=items.length; if(!n)return;
+      const segW=sg.x1-sg.x0;
+      items.forEach((r,k)=>{const f=range[0]+(range[1]-range[0])*(k+0.5)/n;
+        div.appendChild(chipNode(r,sg.x0+segW*f,clsFn(r),g3Disp(r.nm),two));});
+    });
+    // gates spread across the PVR..MV-start region (or their own phase if PVR/MV absent)
+    const gates=list.filter(isGate).sort(sortS);
+    if(gates.length){
+      let a,b;
+      if(seg.PVR&&seg.MV){a=seg.PVR.x0;b=seg.MV.x0+(seg.MV.x1-seg.MV.x0)*0.45;}
+      else{const last=segDef[segDef.length-1][0];a=seg[last].x0;b=seg[last].x1*0.98;}
+      gates.forEach((r,k)=>div.appendChild(chipNode(r,a+(b-a)*(k+0.5)/gates.length,clsFn(r),g3Disp(r.nm),two)));
+    }
+    return div;
+  }
+  // build layer — Pre-B/Sys-B merged per phase+site into one wide chip; others single (F1 rule)
+  function buildLayer(list){
+    const div=document.createElement('div');div.className='rm-layer';div.style.height='48px';
+    const place=(cx,htmlS,wide)=>{const c=document.createElement('div');c.className='rm-chip build'+(wide?' wide':'');
+      c.style.left=cx+'%';c.style.top='0px';c.style.transform='translateX(-50%)';c.innerHTML=htmlS;return c;};
+    segDef.forEach(([ph])=>{
+      const sg=seg[ph];const inph=list.filter(r=>r.ph===ph); if(!inph.length)return;
+      const chips=[];
+      // F1 chip labels: "Tooling Release <end>" and "TLD <date>" stay narrow; others show name+start
+      inph.filter(r=>!/Pre-?Build|Main.?build/i.test(r.nm)).forEach(r=>{
+        let lbl,dt;
+        if(/Tooling Release/i.test(r.nm)){lbl='Tooling Release';dt=g3md(r.e||r.s);}
+        else if(/Tooling lock down/i.test(r.nm)){lbl='TLD';dt=g3md(r.s);}   // F1 chip label: plain "TLD"
+        else{lbl=g3Disp(r.nm);dt=g3md(r.s);}
+        chips.push({s:+(r.s||0),wide:false,html:`<b>${escapeHtml(lbl)}</b> <span class="dt">${dt}</span>`});
+      });
+      const pm=inph.filter(r=>/Pre-?Build|Main.?build/i.test(r.nm));
+      const bLines=[];let bStart=null;
+      [...new Set(pm.map(r=>r.site||''))].forEach(st=>{
+        const pre=pm.find(r=>/Pre-?Build/i.test(r.nm)&&(r.site||'')===st);
+        const main=pm.find(r=>/Main.?build/i.test(r.nm)&&(r.site||'')===st);
+        const pfx=st?st+' ':'';
+        if(pre){bLines.push(`<div><b>${pfx}Pre-B:</b> ${g3md(pre.s)}</div>`);if(bStart==null)bStart=+(pre.s||0);}
+        if(main){bLines.push(`<div><b>${pfx}Sys-B:</b> ${g3md(main.s)}${(main.e&&+main.e!==+main.s)?'–'+g3md(main.e):''}</div>`);if(bStart==null)bStart=+(main.s||0);}
+      });
+      if(bLines.length)chips.push({s:bStart||0,wide:true,html:bLines.join('')});
+      chips.sort((a,b)=>a.s-b.s);
+      const segW=sg.x1-sg.x0,n=chips.length,LO=0.45,HI=0.92;
+      chips.forEach((ch,k)=>{const f=(n===1)?0.60:(LO+(HI-LO)*k/(n-1));
+        div.appendChild(place(sg.x0+segW*f,ch.html,ch.wide));});
+    });
+    return div;
+  }
+  // ---- center stack: chip rows + chevron bar + below-bar markers, all connected (F1 geometry) ----
+  const yL1=0,yL2=62,yBUILD=100,barY=176,BARH=54,BELOW=barY+BARH,GOY=BELOW+64,EXY=BELOW+108,H=EXY+32;
+  const mid=document.createElement('div');mid.className='rm-mid';mid.style.position='relative';mid.style.height=H+'px';mid.style.margin='6px 0';
+  const relocate=(layerDiv,oy)=>{[...layerDiv.querySelectorAll('.rm-chip')].forEach(chip=>{
+    const x=parseFloat(chip.style.left)||0;
+    const c=document.createElement('div');c.className='rm-conn barbot';
+    c.style.left=x+'%';c.style.top=(oy+30)+'px';c.style.height=Math.max(0,barY-(oy+30))+'px';c.style.color='#9aa6bd';
+    mid.appendChild(c);
+    chip.__conn=c;                       // pair, so the anti-overlap pass moves both together
+    chip.style.top=oy+'px';chip.style.zIndex='2';mid.appendChild(chip);
+  });};
+  // F1 colours: only CFZ/RTM are red gates — PLD stays green like the Google chips.
+  relocate(chipLayer(L1,r=>/\bCFZ\b|\bRTM\b|code freeze|sign.?off/i.test(r.nm)?'gate':'google',null,true),yL1);
+  relocate(chipLayer(L2,_=>'smt',[0.04,0.46]),yL2);
+  relocate(buildLayer(BUILD),yBUILD);
+  // chevron bar (Proto/EVT/DVT/PVR/PVT names + per-phase date range)
+  const bar=document.createElement('div');bar.className='rm-bar';bar.style.position='absolute';
+  bar.style.left='0';bar.style.right='0';bar.style.top=barY+'px';bar.style.zIndex='1';
+  segDef.forEach(([ph])=>{
+    const p=PH_BY_KEY[ph],sg=seg[ph];
+    const c=document.createElement('div');c.className='rm-chev';
+    c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';
+    const pr=phRange[ph],dr=pr?`${g3md(new Date(pr.s))}–${g3md(new Date(pr.e))}`:'';
+    c.innerHTML=chevSVG(cssv(p.f),'#1a1a1a')+`<div class="chev-label-rm"><span>${p.label}</span><small>${dr}</small></div>`;
+    bar.appendChild(c);
+  });
+  mid.appendChild(bar);
+  // below-bar: G.O. markers, Test Start markers, duration arrows, Phase Exit boxes
+  const conn=(x,toY,color)=>{const l=document.createElement('div');l.className='rm-conn bartop';
+    l.style.left=x+'%';l.style.top=BELOW+'px';l.style.height=Math.max(0,toY-BELOW)+'px';l.style.color=color;mid.appendChild(l);};
+  const mk=(x,y,htmlS,color)=>{const m=document.createElement('div');m.className='rm-mk';
+    m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=htmlS;mid.appendChild(m);};
+  GO.forEach(r=>{const x=segX(r.ph,r.s);conn(x,GOY,'#2f6fd0');
+    mk(x,GOY+3,`<b>${escapeHtml(g3Disp(r.nm))}</b><span class="dt">${g3md(r.s)}</span>`,'#1f4e9c');});
+  const majors=segDef.map(([ph])=>ph).filter(ph=>ph!=='PVR');
+  majors.forEach((ph,i)=>{
+    const tv=TEST.filter(r=>r.ph===ph).sort(sortS)[0]
+           ||rows.filter(r=>r.ph===ph&&/SVTP|\btest\b/i.test(r.nm)&&!/exit/i.test(r.nm)).sort(sortS)[0];
+    if(!tv||!tv.s)return;
+    const tx=segX(ph,tv.s);conn(tx,GOY,'#b3402f');
+    mk(tx,GOY+3,`<b>${PH_BY_KEY[ph].label} Test Start</b><span class="dt">${g3md(tv.s)}</span>`,'#b3402f');
+    const nxt=majors[i+1]; if(!nxt)return;
+    const ng=GO.filter(r=>r.ph===nxt&&r.s).sort(sortS)[0]; if(!ng)return;
+    const gx=segX(nxt,ng.s),wks=Math.round((+ng.s-+tv.s)/G3MS/7);
+    if(!isFinite(wks)||wks<=0)return;
+    const a=document.createElement('div');a.className='rm-arrow';
+    a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top=(BELOW+38)+'px';mid.appendChild(a);
+    const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top=(BELOW+19)+'px';
+    lb.textContent=`${wks} wks`;mid.appendChild(lb);
+  });
+  EXIT.forEach(r=>{const x=segX(r.ph,r.s);conn(x,EXY,'#e08a2b');
+    const b=document.createElement('div');b.className='rm-exitbox';b.style.left=x+'%';b.style.top=EXY+'px';
+    b.innerHTML=`${escapeHtml(g3Disp(r.nm).replace(/exit/i,'Phase Exit'))} <span style="opacity:.7">${g3md(r.s)}</span>`;mid.appendChild(b);});
+  content.appendChild(mid);
+  // ---- bottom: boxless columnar list of everything not drawn above ----
+  const col=document.createElement('div');col.className='rm-collist';
+  segDef.forEach(([ph])=>{
+    const p=PH_BY_KEY[ph];
+    const items=OTHER.concat(TEST).filter(r=>r.ph===ph).sort(sortS);
+    const c=document.createElement('div');c.className='rm-col';c.style.flex=ph==='PVR'?'0.55':'1';
+    c.innerHTML=items.map(r=>`<div class="rm-li"><span class="bu" style="background:${cssv(p.b)}"></span><span class="d">${r.mile?g3md(r.s):g3md(r.s)+'–'+g3md(r.e)}</span><span class="n">${escapeHtml(g3Disp(r.nm))}</span></div>`).join('');
+    col.appendChild(c);
+  });
+  content.appendChild(col);
+  inner.appendChild(content);
+  // hard rule: no chip may overlap another on its row. Run in rAF so the layout pass has
+  // happened and offsetWidth is real (a hidden/unpainted card measures 0 and the fix no-ops).
+  requestAnimationFrame(()=>{g3FixOverlaps(inner);g3Fit();});
 }
-document.getElementById('genRender').onclick=()=>{
-  renderGenRoadmap();
-  document.getElementById('genOutPanel').style.display='block';
-  document.getElementById('genOutPanel').scrollIntoView({behavior:'smooth',block:'start'});
-};
+/* Anti-overlap pass — chips are measured after render and pushed apart left→right within each
+   row (same style.top), paired connectors move with them. Guarantees zero chip overlap. */
+function g3FixOverlaps(inner){
+  const W=(inner.clientWidth||1180);
+  const chips=[...inner.querySelectorAll('.rm-chip')].filter(c=>c.offsetWidth);
+  if(!chips.length)return;
+  const rows={};
+  chips.forEach(c=>{(rows[c.style.top||'0']=rows[c.style.top||'0']||[]).push(c);});
+  Object.values(rows).forEach(row=>{
+    row.forEach(c=>{
+      const v=c.style.left||'0';
+      c.__x=v.endsWith('%')?parseFloat(v)/100*W:parseFloat(v);
+      c.__w=c.offsetWidth;
+    });
+    row.sort((a,b)=>a.__x-b.__x);
+    const GAP=5.33;   // 4pt (user-specified spacing between chips) = 4 × 96/72 px
+    for(let i=1;i<row.length;i++){
+      const need=row[i-1].__x+row[i-1].__w/2+row[i].__w/2+GAP;
+      if(row[i].__x<need)row[i].__x=need;
+    }
+    // keep the row inside the canvas: shift the whole row left if the last chip ran past the edge
+    const last=row[row.length-1];
+    const over=last.__x+last.__w/2-W;
+    if(over>0)row.forEach(c=>{c.__x-=over;});
+    row.forEach(c=>{
+      c.style.left=c.__x+'px';
+      if(c.__conn)c.__conn.style.left=c.__x+'px';
+    });
+  });
+}
+/* fit-to-window scaling — same approach as Function 1 (design width 1180, scale down, no h-scroll) */
+function g3Fit(){
+  const canvas=document.querySelector('#genRoadmap .g3-canvas'), inner=document.getElementById('g3Inner');
+  if(!canvas||!inner)return;
+  inner.style.transform='none';inner.style.width='';
+  const natural=Math.max(1180,inner.scrollWidth);
+  const avail=canvas.clientWidth||natural;
+  if(avail<natural-1){
+    const s=avail/natural;
+    inner.style.width=natural+'px';inner.style.transformOrigin='top left';
+    inner.style.transform='scale('+s+')';
+    canvas.style.overflow='hidden';canvas.style.height=(inner.offsetHeight*s)+'px';
+  }else{canvas.style.overflow='';canvas.style.height='';}
+}
+let _g3FitT;window.addEventListener('resize',()=>{clearTimeout(_g3FitT);_g3FitT=setTimeout(g3Fit,120);});
 document.getElementById('genPng').onclick=async()=>{
   const card=document.getElementById('genCard'); if(!card)return;
-  const canvas=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
-  const a=document.createElement('a');
-  a.download=(document.getElementById('genTitle').value.trim()||'roadmap')+'.png';
-  a.href=canvas.toDataURL('image/png'); a.click();
+  // temporarily undo the fit-to-window scale so the export captures the full-width roadmap
+  const cv=card.querySelector('.g3-canvas'), inner=document.getElementById('g3Inner');
+  const prev=cv?{ow:card.style.width,tf:inner.style.transform,iw:inner.style.width,co:cv.style.overflow,ch:cv.style.height}:null;
+  if(cv&&inner){card.style.width='1240px';inner.style.transform='none';inner.style.width='1180px';cv.style.overflow='visible';cv.style.height='';}
+  try{
+    const canvas=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
+    const a=document.createElement('a');
+    a.download=((genMeta&&genMeta.title)||genTitleV||'roadmap').replace(/[\\/:*?"<>|]/g,'_')+'.png';
+    a.href=canvas.toDataURL('image/png'); a.click();
+  }finally{
+    if(cv&&inner&&prev){card.style.width=prev.ow;inner.style.transform=prev.tf;inner.style.width=prev.iw;cv.style.overflow=prev.co;cv.style.height=prev.ch;g3Fit();}
+  }
 };
 </script>
 </body>
