@@ -1009,6 +1009,7 @@ function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
     const c=document.createElement('div');c.className='rm-conn barbot';
     c.style.left=x+'%';c.style.top=(oy+30)+'px';c.style.height=Math.max(0,barY-(oy+30))+'px';c.style.color='#9aa6bd';
     div.appendChild(c);
+    chip.__conn=c;   // pair chip+connector so the anti-overlap pass moves both (display only)
     chip.style.top=oy+'px';chip.style.zIndex='2';div.appendChild(chip);
   });};
   relocate(L1div,yL1);relocate(L2div,yL2);relocate(BUILDdiv,yBUILD);
@@ -1124,7 +1125,39 @@ function renderRoadmapPreview(model){
   const host=document.getElementById('rmPreview'); if(!host)return;
   if(!model.hasAnchor){host.innerHTML='<div class="hint" style="padding:6px 2px">Enter a Stable Release to display the roadmap.</div>';return;}
   renderRoadmap2(model,host,'A');
-  requestAnimationFrame(fitRoadmap);   // scale the whole roadmap to fit the window — no manual scroll
+  // anti-overlap (display only) must run after layout so offsetWidth is real, then fit-to-window
+  requestAnimationFrame(()=>{fixChipOverlaps(host.querySelector('#rmInnerExp'));fitRoadmap();});
+}
+/* Anti-overlap pass (display only — no scheduling impact): chips are measured after render and
+   pushed apart left→right within each row (same style.top), paired connectors move with them.
+   Keeps a 4pt gap between chips; whole row shifts left if it runs past the canvas edge. */
+function fixChipOverlaps(inner){
+  if(!inner)return;
+  const W=(inner.clientWidth||1180);
+  const chips=[...inner.querySelectorAll('.rm-chip')].filter(c=>c.offsetWidth);
+  if(!chips.length)return;
+  const rows={};
+  chips.forEach(c=>{(rows[c.style.top||'0']=rows[c.style.top||'0']||[]).push(c);});
+  Object.values(rows).forEach(row=>{
+    row.forEach(c=>{
+      const v=c.style.left||'0';
+      c.__x=v.endsWith('%')?parseFloat(v)/100*W:parseFloat(v);
+      c.__w=c.offsetWidth;
+    });
+    row.sort((a,b)=>a.__x-b.__x);
+    const GAP=5.33;   // 4pt = 4 × 96/72 px
+    for(let i=1;i<row.length;i++){
+      const need=row[i-1].__x+row[i-1].__w/2+row[i].__w/2+GAP;
+      if(row[i].__x<need)row[i].__x=need;
+    }
+    const last=row[row.length-1];
+    const over=last.__x+last.__w/2-W;
+    if(over>0)row.forEach(c=>{c.__x-=over;});
+    row.forEach(c=>{
+      c.style.left=c.__x+'px';
+      if(c.__conn)c.__conn.style.left=c.__x+'px';
+    });
+  });
 }
 /* fit the roadmap to its container width so the entire chart is visible (screenshot-ready).
    Keeps a fixed design width (1180) and scales DOWN with a transform when the window is narrower;
