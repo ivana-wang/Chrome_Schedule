@@ -1,6 +1,7 @@
 # RefreshBoard_Spec — Function 2 「Refresh Board」排程模擬（草稿 / DRAFT）
 
-> **狀態 / Status:** 已實作於 `RefreshBoard.html`（獨立引擎，iframe 崁入 index.html）。以下 §0–§7 為原始 spec；**§8 為實作後追加的 5 項功能（req1–5）**。
+> **狀態 / Status:** 已實作於 `RefreshBoard.html`（獨立引擎，iframe 崁入 index.html）。以下 §0–§7 為原始 spec；**§8 為實作後追加功能（req1–8）**。
+> ⚠️ **§9 為 authoritative v2 golden（`Validation/refreshboard_schedule.jpg`，Low-Touch 2-Phase，27 wks）——與 §4/§8 衝突處以 §9 為準**。
 > 本文件是 Function 2（PCB Refresh Board）的工作規格，做法 = **沿用 Function 1（`ChromeSchedule.html` / `Chrome_Spec.md`）的引擎邏輯，但移除所有 ME 機構 task**。
 > ⚠️ Function 1 (`ChromeSchedule.html`) 為 **frozen golden，不可更動**（見 memory `function1-do-not-touch`）。Function 2 另起**獨立引擎 / 獨立檔案**，不共用 Function 1 的 engine/renderer 程式碼。
 
@@ -247,3 +248,139 @@ Refresh Board = **PCB 換板改版**，沿用現有機構（外殼 / 模具 / ID
 - 實作：`Layout` 與 `DB Gerber released` 改為 `tryAnchor` 工作日錨（`addWorkdays`）；`KICK_LAYOUT_WD=10 / LAYOUT_GO_WD=10`，override = `kickToLayoutOverride / layoutToGoOverride`。
 - **G.O. 接著做 PCB FAB**：`DB PCB FAB` 改為 G.O. + 1 工作日起（消除原本 golden 的 13 天 CNY 空檔）。因 `PCB FAB` 名稱 DB/SI/PV 共用，`tryAnchor` 對非 DB 回傳 `'DEP'` sentinel、resolve loop fall-through 讓 SI/PV 仍走原 DEP。SMT 仍接在 FAB 之後（FS）。
 - Node harness：fallback G.O. 1/20→FAB 1/21→SMT 2/4；mid-year(kick 5/4) G.O. 6/1→FAB 6/2→SMT 6/16;SI/PV PCB FAB 照常;unresolved 0。
+
+---
+
+## 9. Refresh Golden v2 — `Validation/refreshboard_schedule.jpg`（authoritative）
+
+> **來源 = Burmilla2/Manx2/Himalayan2 Low-Touch Dev Schedule (2-Phases)**：Kick-off **2024/6/28** → FCS **2025/1/10**，M131 image（Stable cut 11/5、**OS Stable Release 12/3**），**Developing time = 27 wks**（vs ground-up 38 wks）。
+> 這是真實 refresh-board 的 golden example；**總 lead time 縮短的來源是結構性的**，不只是單點 duration。
+
+### 9.1 結構性優化（supersede 先前拍板）
+
+| # | 變更 | 取代 |
+|---|---|---|
+| **S1** | **移除整個 SI/EVT phase** — 2-Phase 結構 `DB → PV → PVR → MV`，DB Test Start **+4 wks** 直接到 PV G.O. | §4 的 SI 段、req2 的 `siToPvDays`（EVT→DVT handoff 不存在了） |
+| ~~S2~~ ❌ | ~~Kick-off = DB G.O. 同一天~~ — **user 否決（不合理）**。**維持原規則：Kick-off → DB G.O. 固定 4 週**（`Kick-off +10wd → Layout(10wd) → G.O.`，§8 req8 不變）。golden 圖的 6/28 同日視為該案 layout 已於 RFQ 期間預先完成的特例，不納入 rule。 | —（不取代） |
+| **S3** | **單一工廠**（golden 無 KS/VN 分流、無 region offset 鏈） | §1 的 KS/VN 雙站（是否保留為選配待確認 Q-R3） |
+| ~~S4~~ ❌ | ~~PLD = CFZ − 7~~ — **user 否決**。PLD 維持原規則 `SR − 21`。 | —（不取代） |
+| ~~S5~~ ❌ | ~~FW chain 改 M-image 導向（FW Qual→FW Lock Down）~~ — **user 否決**。FW chain 維持原規則（FW Candidate 單日 → FW Candidate Testing → PLD）。 | —（不取代） |
+
+> ✅ **user 拍板（總則）**：**SR-locked 前向 block 一律用原規則、不修改**——FW Candidate / Sign off、FW Qual/Lock Down（不採用）、CFZ、RTM、PLD、**MV 全鏈**、PR、FCS 全部維持現行引擎公式。**golden 圖只取 HW task duration**（見 §9.2 標 ✅HW 的列）。
+
+### 9.2 Task duration 逐筆對照（§4 舊值 → golden 新值）
+
+> ✅ **本次修改範圍 = 只有下面 DB / handoff / PV 三張表的 HW task duration**；Gate、MV 全鏈、PR、FCS 維持原規則（見表內標註）。
+
+**DB / Proto（純 PCB；前段維持原 4 週規則 — S2 否決）**
+| Task | 舊（§4/§8） | **新** | 依據 |
+|---|---|---|---|
+| Kick-off | 輸入欄，+10wd 到 Layout | **不變**（輸入欄；Kick-off +10wd → Layout） | ❌S2，keep §8 req8 |
+| Layout | 10 wd 活動 | **不變**（10 工作日） | ❌S2 |
+| DB G.O. | Layout end | **不變**（= Layout end；**Kick-off → G.O. 固定 4 週**） | ❌S2 |
+| DB PCB FAB | 14 天（G.O.+1 起） | **17 天，從 G.O. 當天起跑**（6/28→7/15） | 圖 ✅fix |
+| DB SMT | 3/11–3/15 span | **里程碑 = FAB end 同日** → **DB G.O.→DB SMT = 正好 17 天**（任何 Stable Release 輸入皆適用；FAB Days 可編輯即直接改此間隔） | 圖 ✅fix |
+| **Bring Up**（新 task） | — | **SMT + 7 天**（7/22） | 圖 |
+| DB Test Start | Ship ETA 隔日 | **= Bring Up + 1 wk**（7/29，圖上「1 wks」箭頭） | 圖 |
+| Google photo type ETA | Google prototype 3/23 | **Test Start + 7 天**（8/5） | 圖 |
+| DB Test span / Phase Exit | 4/26 / 4/23 | **Test 4 wks → DB Phase Exit ≈ PV G.O.（8/23）** | 圖 |
+
+**DB → PV handoff**
+| 邊 | 舊 | **新** |
+|---|---|---|
+| 下一 phase G.O. | DB Test +6wks→SI、SI Test +21d→PV | **DB Test Start + 4 wks = PV G.O.**（7/29→8/23） |
+
+**PV / DVT（單輪 build）**
+| Task | 舊 | **新（golden）** |
+|---|---|---|
+| PV G.O. | 6/18 | **8/23**（handoff 4wks） |
+| PV PCB FAB | 15 天（G.O.+1 起） | **14 天，從 G.O. 當天起跑**（8/23→9/6） ✅fix |
+| PV SMT | 7/7–7/10 | **里程碑 = FAB end 同日** → **PV G.O.→PV SMT = 正好 14 天**（任何 SR 輸入皆適用） ✅fix |
+| PV Pre-B | 單日 | **SMT+3 起、3 天**（9/9–9/11） |
+| PV Sys-B | 2 天 | **9 天**（9/12–9/20） |
+| PV Test Start | Ship ETA 隔日 | **Sys-B end + 3 天**（9/23） |
+| Google release DVT image | 7/2 | **8/30**（PV FAB 期間） |
+| Google DVT unit ETA | 7/22 | **Test Start + 7 天**（9/30） |
+
+**Gate — 全部維持原規則（user 拍板：SR-locked 前向 block 不修改）**
+| Gate | 規則 | 狀態 |
+|---|---|---|
+| CFZ / FSI Candidate | SR + 3 → 週五 | **原規則 ✓ 不變**（golden 12/6 本來就吻合） |
+| RTM / FSI Sign Off | CFZ + 7 → 週五 | **原規則 ✓ 不變**（golden 12/13 吻合） |
+| PLD | SR − 21 | **原規則不變**（❌S4） |
+| FW Candidate / FW Candidate Testing | PLD−7 單日 / 隔日起至 PLD−1 | **原規則不變**（❌S5；圖上 FW Qual/Lock Down 不採用） |
+| SW PVR / PV Regression | 依 §3 R3（CFZ 錨、~3-4 天） | **不變** |
+
+**PV → MV handoff — ✅ user 修正 v2（2026-07-16，SR 唯一定錨版）**
+| 邊 | 規則 | 狀態 |
+|---|---|---|
+| MV G.O.（PVT G.O.） | **lock 模式：MV G.O. = SR − 5（`MVGO_SR_LAG`，原 F1 關係 8/20 vs 8/25），固定不動**；`mvGoDays`（**預設 40 工作日 = 8 ww，排除假日**，可編輯）定義的是 **DVT Test Start 必須提早的量**＝由 MV G.O. **往前推** `subWorkdays(8ww)` → 回推整條 HW 鏈與 Kick-off | **已改** — FCS 永不因 handoff 延後；調大 `mvGoDays` 只會讓回推的 Kick-off 更早（驗證：40→60wd 時 FCS 9/24 不動、Kick 2/13→1/15）。slip 模式才是 live test + 8ww 前推（FCS 浮動）。 |
+
+> ✅ **SR 唯一定錨總則（user 拍板）**：往後 task 一律 SR + duration；往前 HW task 一律由 SR 回推。**驗證 case SR=2024/12/3**：Kick-off 回推 **2024/5/31**（提早、非延後 FCS）、DVT Test 10/3 → PVT G.O. 11/28 = 正好 40 工作日、CFZ 12/6 / RTM 12/13（**與 golden 卡 FSI candidate/sign-off 完全一致**）、FCS 2025/1/2。
+
+**MV / PVT + FCS — 全鏈維持原規則（user 拍板；MV SMT 間隔除外）**
+| Task | 狀態 |
+|---|---|
+| **MV SMT** | ✅ **user 修正（jpg）：MV G.O. → MV SMT = 正好 14 天**（11/29→12/13；任何 SR 輸入皆適用）。Pre-Build 仍 `MAX(SMT+1,RTM+1)` → FCS 不受影響。 |
+| Pre-Build `MAX(SMT+1,RTM+1)` / Main build / Marketing OOBA / Mini Regression -1 | **原規則、原 duration 不變** |
+| Product release / First Order Drop / **FCS = PR+7** | **原規則不變** |
+| VN 系列（SMT/Pre/Main/PR/FCS） | 保留與否 = Q-R3（雙站選配），**非本次修改範圍** |
+
+**假日（2024/2025，golden 圖列）**：Dragon Boat 6/8–6/10 · Moon Festival 9/15–9/17 · China Golden Week 10/1–10/7 · Double Tenth 10/10 · New Year 1/1–1/2 · CNY 1/28–2/2。⚠️ 引擎假日表需支援**跨年 + 依年份**（目前寫死 2026）。
+
+### 9.3 Overall 驗證合約（S2/S4/S5 否決後修訂）
+- **SR-locked 前向 block：原規則、原公式，不比對 golden 圖**——CFZ=SR+3→週五、RTM=CFZ+7→週五、PLD=SR−21、FW Candidate/Testing、MV 全鏈（MAX(SMT+1,RTM+1) 等）、PR、FCS=PR+7，全部照現行引擎跑（給 SR 12/3 時 CFZ 12/6、RTM 12/13 自然吻合圖）。
+- **HW backward block（本次唯一修改）**：duration 合約 = §9.2 的 golden 值——`Kick-off +10wd → Layout(10wd) → G.O.`（原規則）→ **FAB 17d → SMT → Bring Up +7d → Test Start +7d → (+4wks) PV G.O. → FAB 14d → SMT → Pre-B（SMT+3 起、3d）→ Sys-B 9d → PV Test（Sys-B end +3）**；2-Phase（無 SI，S1）。
+- **Overall WKs** = Kick-off → FCS 實算（HW 縮短反映在對 SR 的 buffer 變大；feasibility / FCS 模式照 req4–6 運作）。
+- self-validation oracle：HW block 比對 §9.2 duration/間隔；前向 block 照原引擎 golden 規則自我檢查。
+
+### 9.4 待確認（Q-R*，衝突須拍板）
+| # | 問題 |
+|---|---|
+| **Q-R1** | 確認**移除整個 SI/EVT phase**（2-Phase 結構）？這 supersede 先前「SI 段保留」的拍板。 |
+| ~~Q-R2~~ ✅ | **維持原規則**：Kick-off → DB G.O. 固定 4 週（+10wd → Layout 10wd → G.O.），user 已拍板否決「同日」。 |
+| **Q-R3** | **KS/VN 雙站是否保留為選配**？golden 為單站；若拿掉，region 選單與 VN 系 task 一併移除。 |
+| ~~Q-R4~~ ✅ | **維持原 FW chain / PLD 規則**（user 拍板：SR-locked 前向 block 全部不修改；FW Qual/Lock Down、PLD=CFZ−7 不採用）。 |
+
+### 9.5 SR 回推 Kick-off（user 修正 — 實裝）
+- **主基準 = Stable Release，HW task 往前回推**。User **未輸入 Kick-off 時，引擎自動回推出 just-in-time Kick-off**（`deriveKickFromSR`：迭代前向鏈直到 live DVT Test Start 落在 SR-nominal 目標、buffer→0 不為負），不再套用「golden 框架平移」的過早開跑。
+- 連帶修正：①phase 帶起訖恢復合理（Proto/DVT 相接，無死縫）；②**DVT Test Start → PVT G.O. 恢復 4 wks**（原本 no-kick 時出現 17 wks 假縫）；③`DB exit` golden 對齊 spec = PV G.O. 日。
+- **SR-nominal DVT test = SR − 33**（`DVT_SR_LAG`，取自 F1 原始關係 7/23 vs 8/25）：lock 模式 MV G.O. 與 feasibility 目標都以 SR 直接定義，與 HW golden 框架脫鉤。
+- 驗證：SR 8/25 無 Kick-off → 回推 Kick-off **3/19**、Proto 3/19–6/20 → DVT 6/20–9/4（相接）、兩段 handoff 各 4wks、buffer 0、FCS 9/24、**Overall 27 wks（= jpg golden）**；SR 9/8 → Kick 4/1、28 wks；手動早 kick 1/6 → buffer +75、38 wks（gap 如實顯示為 slack）。
+
+### 9.6 假日迴避規則（user 拍板 — 實裝）
+- **任何 task 的 start 不可落在國定假日**：lead 端（工廠所在國，default China）避 **中國＋台灣** 合併假日表；region task（site=VN/TH，依 Project Setup 選擇）避**所選 region 國別假日**（越南或泰國），一律**順延到下一個工作日**。
+- **週末規則沿用 F1 working-day contract**：build 類 task（SMT / Pre-Build / Main build / OOBIP / PCB FAB / Bring Up / Regression）**週六可作業**（只避週日＋假日）；其他 task（test / G.O. / gate 類）避整個週末。
+- gate 端補強：PV/MV G.O. snap 到下一工作日；PLD / FW Candidate **往前** snap（不可越過 CFZ）；回推的 Kick-off 也落在工作日。
+- 驗證（全 task 逐筆稽核，bad starts = 0）：SR 12/3 → DVT Test **9/21**（避開 Golden Week 10/1–7，修正原本落在 10/3 的錯誤）；SR 8/25 → FCS 9/24 不變（build 週六保留）；TH region、跨 CNY 情境皆乾淨。
+- ⚠️ 已知限制：假日表目前為 2026 年值；跨到其他年份只避週末（年度假日表待擴充）。
+
+### 9.7 8 ww 規則在假日跨越 case 的精確化（user 回報 M145 case — 實裝）
+- **問題**：SR 2/24（M145）時 SR−5 落在 CNY → PVT G.O. snap 到 2/23,但 8ww 回推基準仍用未 snap 的 2/19;且回推 Kick-off 因鏈上假日量化殘留 buffer;箭頭標籤用日曆週 → 顯示 10 wks。
+- **修正**：
+  1. **8ww 基準 = snap 後的 PVT G.O.**（`mvGoNominal`）;
+  2. **lock 模式 DVT Test Start 釘在 nominal**：`test = MAX(鏈上最早可測日, PVT G.O. − 8ww 工作日)`——料可以等、測試不會晚 → **任何 case 都精確 8 ww**;鏈上最早可測日（`chainReady`）保留給 feasibility 顯示真實 margin;
+  3. 回推 Kick-off 加逐日 refine（收斂到 just-in-time）;
+  4. **DVT→PVT 箭頭標籤改用工作週**（40wd/5 → 顯示 8 wks）,Proto→DVT 維持日曆週。
+- 驗證：M145(SR 2/24, 跨 CNY)、SR 8/25(跨端午)、12/3、10/12(跨 Golden Week)、手動早 kick、slip 模式——**全部 DVT Test → PVT G.O. = 正好 40 工作日**;假日稽核 bad starts = 0。
+
+### 9.8 移除 Kick-off 輸入欄（user 拍板）
+- Kick-off 一律由 Stable Release 回推（§9.5 just-in-time），手動輸入已無意義 → **Project Setup 的 Kick-off date 輸入欄移除**（含 auto-format/監聽/reset 清理）。
+- Kick-off 仍以 **task 形式**顯示在 task list 與 roadmap（標示 back-derived from SR）；`Kick-off→Layout(10wd)`、`Layout→G.O.(10wd)` 兩個工作日 gate 仍可在 task list 編輯（會連動回推結果）。
+
+### 9.9 移除 FCS mode 開關（user 拍板）
+- Kick-off 恆為 SR 回推後，**slip 模式已無適用情境**（不可行狀態不會發生、lock/slip 產出實質相同）→ **FCS mode 開關（req6）整組移除**，排程**永遠 SR-locked**。
+- 引擎內 `fcsMode` 分支全數移除：PVT G.O. 恆 = `mvGoNominal`（SR−5 snap），DVT Test 恆釘 `MAX(chainReady, PVT G.O.−8ww)`。feasibility 機制保留（req4/5，含 modal），供日後 duration 編輯造成不可行時使用。
+- Project Setup 最終輸入 = **Branch 圖/Stable Release（唯一錨）+ Lead/Region 工廠**。
+
+### 9.10 PRODUCT_SPEC-style Task Board（F1+F2 共同換皮 — user 拍板 4 點）
+- **UI 對齊 `Validation/PRODUCT_SPEC.md` 的 task list**：頂部 Testing→G.O. **ww pill**（可編輯）、藍漸層 chevron 標頭（FCS 綠）、每 phase 一直欄（`• 日期 | task | chips`，日期欄固定 114px）、duration **d/wd chip**（可編輯）、gate chip、`⚠ Hol/Sun` 警示列、**Phase Exit 卡**、FCS 欄（CHINA L10 FCS / REGION FCS 卡 + `+ Add region` 可編輯清單）。
+- **編輯即連動**：date（`dateOverride` 釘住 start，沿 DAG 傳遞下游；rule-anchored task 鎖定不可改）、duration、ww/gate pill——任一修改立即 `run()` 全鏈重排。
+- **task 內容不變**（只套 UI）；F1 為 6 欄（DB/SI/PV/PVR/MV/FCS）、F2 為 §9 的 2-Phase 5 欄（Proto/DVT/PVR/PVT/FCS）。
+- F1 增量（frozen 檔內、user 授權）：`dateOverride` / `dbSiDaysOverride` / `siPvDaysOverride`，預設全空 → **golden 驗證 PASS（38 WKs、0 偏差）**。F2 的 `dateOverride` 走 snapStart（假日規則仍適用）。
+- 驗證：雙檔語法 OK；board 煙霧（F1 65 行+3 Exit 卡、F2 43 行+2 Exit 卡）；dateOverride/ww 連動 harness（pin FAB +7 → 下游 +7、gate/FCS 鎖定）；F2 假日稽核 0 違規；standalone 重建（380KB，內嵌 byte-identical）。
+
+### 9.11 編輯連動 self-test 與修正（user 回報）
+- **真 bug（F2）**：每次 `run()` 都重新回推 Kick-off（JIT），duration/日期一改，Kick-off 就平移抵消 → 下游看似「沒連動」。**修正：derived Kick-off 依 SR 快取**（只在 SR 變更或 Reset 時重推；編輯期間固定）→ 編輯如實傳遞下游，buffer 縮放、不足時觸發 feasibility 警告。
+- **F1 無 bug**（兩-block 規則下 HW 編輯連動、gate 鎖定皆正確）。
+- **Self-test harness**（`edit_selftest.js`）：對 F1/F2 **逐一**模擬每個可編輯 duration（+5d）與日期（pin +7d），驗證 (a) 自身 end 位移、(b) 所有 FS('e')/OFF dependents 正向位移且滿足**依賴不變式 `dep.start ≥ pred.end`**、(c) HW 編輯下 CFZ/RTM/FCS 鎖定不動。結果：**F1 ALL LINKED ✓、F2 ALL LINKED ✓**（初測 F2 的 2 條殘餘為假警報——端午假日 snap 吸收了部分差值，依賴不變式成立）。

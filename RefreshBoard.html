@@ -208,6 +208,47 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rmA .rm-band{position:relative;padding-left:0;margin-bottom:2px}
 .editpanel{margin-top:16px}
 .editpanel summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:8px 0}
+
+/* ===== PRODUCT_SPEC-style task board (renderer only — engine rules unchanged). §user req ===== */
+.tb-hand{display:flex;gap:26px;margin:0 2px 12px;flex-wrap:wrap}
+.tb-hand .hd{font-family:'JetBrains Mono';font-size:12.5px;color:#3a4253;display:flex;align-items:center;gap:6px;font-weight:600}
+.tb-hand .arr{color:#7b8497}
+.tb-ww{background:#eef2fb;border:1px solid #9ab0d8;border-radius:100px;padding:1px 8px;display:inline-flex;align-items:center;gap:2px;color:#2b3a63;font-weight:700;font-family:'JetBrains Mono';font-size:12px}
+.tb-ww input{width:2.4ch;border:0;background:transparent;font:inherit;color:inherit;text-align:right;outline:none}
+.tb-head,.tb-cols{display:grid;gap:0}
+/* chevron colours come from the Chrome_Spec §5.2 pastel palette (--proto-f etc.), set inline per phase */
+.tb-chev{position:relative;height:46px;display:flex;align-items:center;justify-content:center;color:#1a1f2b;font-weight:700;font-size:15.5px;letter-spacing:.5px;
+  clip-path:polygon(0 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,0 100%,13px 50%)}
+.tb-chev:first-child{clip-path:polygon(0 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,0 100%)}
+.tb-chev.fcs{font-size:12.5px;letter-spacing:.8px}
+.tb-col{padding:12px 10px 8px;border-right:1px dashed #e6ebf3;display:flex;flex-direction:column}
+.tb-col:last-child{border-right:0}
+.tb-row{display:flex;align-items:flex-start;gap:8px;padding:3.5px 2px;font-size:13px;border-radius:6px}
+.tb-date{flex:0 0 114px;font-family:'JetBrains Mono';font-size:12.5px;color:#2f6fb0;line-height:1.4;display:flex;gap:5px}
+.tb-date .bu{color:#2f6fb0;flex:0 0 auto;line-height:1.5}
+.tb-date .din{display:flex;flex-direction:column;min-width:0;flex:1}
+.tb-date input{width:100%;border:0;background:transparent;font:inherit;color:inherit;outline:none;padding:0}
+.tb-date input:focus{background:#eef4fc;border-radius:4px}
+.tb-date input[disabled]{color:#2f6fb0;-webkit-text-fill-color:#2f6fb0;opacity:1}
+.tb-name{flex:1;color:#22293a;line-height:1.4;padding-top:1px;min-width:0}
+.tb-row.gate .tb-name{font-weight:700}
+.tb-row.warn{background:#fdecec}
+.tb-row.warn .tb-name{color:#b02a2a;font-weight:600}
+.tb-chip{flex:0 0 auto;font-family:'JetBrains Mono';font-size:11px;background:#eef1f5;border:1px solid #cfd7e3;border-radius:100px;padding:1px 8px;color:#3a4757;display:inline-flex;align-items:center;margin-top:1px;white-space:nowrap}
+.tb-chip input{width:3ch;border:0;background:transparent;font:inherit;color:inherit;text-align:right;outline:none}
+.tb-chip.satwarn{background:#fdecec;border-color:#e2a0a0;color:#b02a2a;font-weight:700}
+.tb-exit{margin:12px auto 4px;background:#fff;border:1px solid #e3e8f0;border-radius:10px;box-shadow:0 5px 16px rgba(20,30,60,.13);padding:9px 16px;text-align:center;font-size:11.5px;color:#5d6b8a;min-width:150px}
+.tb-exit b{display:block;font-family:'JetBrains Mono';color:#2f56c9;font-size:14.5px;margin-top:3px;font-weight:700}
+.tb-fcscard{background:#eaf6ec;border:1px solid #bfe3c8;border-radius:10px;padding:10px 13px;margin-bottom:10px}
+.tb-fcscard .k{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.7px;color:#2e7d43;font-weight:700}
+.tb-fcscard .v{font-family:'JetBrains Mono';font-size:17px;font-weight:700;color:#175c2c;margin-top:3px}
+.tb-fcscard.region{background:#f4faf1;border-color:#d5e8cf}
+.tb-reg{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-family:'JetBrains Mono';font-size:12px;color:#2a3142}
+.tb-reg input{border:1px solid #e2e6ee;border-radius:6px;padding:3px 6px;font:inherit;color:inherit;background:#fff;outline:none}
+.tb-reg input.rn{width:86px}.tb-reg input.rd{width:96px}
+.tb-reg .rx{cursor:pointer;color:#b02a2a;background:none;border:0;font-size:14px;padding:0 2px}
+.tb-addreg{font-size:11.5px;color:#5d6b8a;background:none;border:1px dashed #cfd7e3;border-radius:8px;cursor:pointer;padding:4px 10px;margin-top:2px}
+.tb-addreg:hover{color:#2f56c9;border-color:#9ab0d8}
 /* feasibility modal (§RefreshBoard req4/5) */
 .modal-ov{position:fixed;inset:0;background:rgba(4,8,18,.62);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
 .modal-ov.on{display:flex}
@@ -236,10 +277,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
       <label>Project Name</label>
       <input type="text" id="proj" value="" placeholder="">
 
-      <label>Kick-off date — project start</label>
-      <input type="text" id="kick" value="" placeholder="Just type numbers — e.g. 20260106 → 2026-01-06">
-      <div class="hint">Layout starts <b>10 working days (2 weeks)</b> after Kick-off, and runs <b>10 working days</b> to G.O.; then PCB FAB → SMT. Kick-off→Layout and Layout→G.O. are editable in the task list. If Kick-off is blank, the start is derived from the Stable Release anchor.</div>
-
       <label>Chromiumdash Branch number</label>
       <input type="text" id="branch" value="" placeholder="152">
 
@@ -259,13 +296,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 
       <label>Region site factory</label>
       <select id="region"><option value="VN">Vietnam</option><option value="TH">Thailand</option></select>
-
-      <label>FCS mode</label>
-      <div class="seg" id="fcsModeSeg">
-        <button type="button" data-mode="lock" class="on">FCS locked</button>
-        <button type="button" data-mode="slip">FCS slips</button>
-      </div>
-      <div class="hint"><b>FCS locked</b>: MV/FCS fixed to the Stable-Release target; if the Kick-off HW chain is too long it's flagged infeasible. <b>FCS slips</b>: MV/FCS float to the real Kick-off-driven completion dates (no warning).</div>
 
       <button class="btn ghost" id="reset">Reset to defaults</button>
       <div class="hint">Changing Project Name / Branch / Stable Release / factory instantly recomputes the schedule.</div>
@@ -394,49 +424,35 @@ const G_PROJ=D(2026,1,6);           // golden project start
 const G_FCS_KS=D(2026,9,24), G_FCS_VN=D(2026,10,2);
 const T=(ph,nm,gs,ge,o={})=>({ph,nm,gs:D(2026,gs[0],gs[1]),ge:D(2026,ge[0],ge[1]),site:o.site||'',mile:!!o.mile,gate:!!o.gate});
 const GOLDEN=[
-  // DB / Proto — PCB only (all ME tasks removed for Refresh Board: ID Lock / ME design /
-  // Mockup review / DFM review / Tooling Release / T1+T2). Layout is now the project start.
-  // Kick-off marker = 20 working days before Layout (anchor-driven, see tryAnchor). gs just sorts it first.
+  // DB / Proto — Refresh Golden v2 (§9, Validation/refreshboard_schedule.jpg): 2-Phase Low-Touch,
+  // HW durations from the jpg; gates / MV chain keep the original rules untouched.
+  // Chain: Kick-off +10wd → Layout(10wd) → G.O. → FAB 17d → SMT → Bring Up 7d → Test(+7d).
   T('DB','Kick-off',[1,5],[1,5],{mile:1}),
-  T('DB','Layout',[1,6],[2,11]),
-  T('DB','DB Gerber released',[2,12],[2,12],{mile:1}),
-  T('DB','PCB FAB',[2,25],[3,10]),
-  T('DB','DB SMT Build',[3,11],[3,15]),
-  T('DB','Ship DB PCBA ETA to TPE RD & HP',[3,23],[3,23],{mile:1}),
-  T('DB','DB SVTP test',[3,23],[4,26]),
-  T('DB','Google validation',[3,23],[4,26]),
-  T('DB','Google prototype',[3,23],[3,23],{mile:1}),
-  T('DB','DB exit',[4,23],[4,23],{mile:1}),
-  // SI / EVT
-  T('SI','SI Gerber release',[4,27],[4,27],{mile:1}),
-  T('SI','PCB FAB',[4,27],[5,11]),
-  T('SI','SI SMT build',[5,12],[5,24]),   // C5 fix: full-lot SMT end = 5/24 (Milestone_FCS). Pre-Build gates on SMT *first-article* (≈ SMT start), not full-lot end.
-  T('SI','SI Pre-Build',[5,15],[5,15],{mile:1}),
-  T('SI','SI Main build',[5,19],[5,20]),
-  T('SI','OOBIP',[5,20],[5,27]),
-  T('SI','Ship SI unit ETA to NSDD (PCBA Only)',[5,22],[5,22],{mile:1}),
-  T('SI','Ship SI unit ETA to QAD/TPE RD & HP',[5,27],[5,27],{mile:1}),
-  T('SI','SI SVTP test',[5,28],[6,24]),
-  T('SI','Google release SI image',[5,7],[5,7],{mile:1}),
-  T('SI','Google EVT unit',[5,27],[5,27],{mile:1}),
-  T('SI','Google dogfooding',[5,28],[6,24]),
-  T('SI','SI exit',[7,2],[7,2],{mile:1}),
-  // PV / DVT
-  T('PV','PV Gerber release',[6,18],[6,18],{mile:1}),
-  T('PV','PCB FAB',[6,19],[7,6]),
-  T('PV','PV SMT Build',[7,7],[7,10]),
-  T('PV','VN SMT build',[7,21],[7,22],{site:'VN'}),
-  T('PV','PV Pre-Build',[7,10],[7,10],{mile:1}),
-  T('PV','VN Pre-build',[7,27],[7,27],{mile:1,site:'VN'}),
-  T('PV','PV Main build',[7,14],[7,15]),
-  T('PV','VN Main-build',[7,29],[7,29],{site:'VN'}),
-  T('PV','OOBIP',[7,11],[7,31]),
-  T('PV','Ship PV unit ETA to NSDD (PCBA Only)',[7,15],[7,15],{mile:1}),
-  T('PV','Ship PV unit ETA to QAD/TPE RD & HP',[7,22],[7,22],{mile:1}),
-  T('PV','PV SVTP test',[7,23],[8,19]),
-  T('PV','Google release PV image',[7,2],[7,2],{mile:1}),
-  T('PV','Google DVT unit',[7,22],[7,22],{mile:1}),
-  T('PV','Google dogfooding',[7,23],[8,19]),
+  T('DB','Layout',[1,6],[1,20]),
+  T('DB','DB Gerber released',[1,20],[1,20],{mile:1}),
+  T('DB','PCB FAB',[1,20],[2,6]),                    // §9 fix: FAB 從 G.O. 當天起、17 天 (jpg 6/28→7/15)
+  T('DB','DB SMT Build',[2,6],[2,6],{mile:1}),       // SMT = FAB end 同日 → G.O.→SMT = 17 天 (jpg)
+  T('DB','Bring Up',[2,6],[2,13]),                   // SMT + 7 天 (§9.2)
+  T('DB','DB SVTP test',[2,20],[3,20]),              // Test Start = Bring Up + 7 天
+  T('DB','Google validation',[2,20],[3,20]),
+  T('DB','Google prototype',[2,27],[2,27],{mile:1}), // photo type ETA = Test Start + 7 天
+  T('DB','DB exit',[3,20],[3,20],{mile:1}),          // = PV G.O. day (jpg DB Phase Exit ≈ PV G/O)
+  // PV / DVT — 2nd (final) build phase; PV G.O. = DB Test Start + 4 wks (§9.2, no SI phase)
+  T('PV','PV Gerber release',[3,20],[3,20],{mile:1}),
+  T('PV','PCB FAB',[3,20],[4,3]),                    // §9 fix: FAB 從 G.O. 當天起、14 天 (jpg 8/23→9/6)
+  T('PV','PV SMT Build',[4,3],[4,3],{mile:1}),       // SMT = FAB end 同日 → G.O.→SMT = 14 天 (jpg)
+  T('PV','VN SMT build',[4,14],[4,15],{site:'VN'}),
+  T('PV','PV Pre-Build',[4,6],[4,8]),                // SMT+3 起、3 天 (jpg 9/9–9/11)
+  T('PV','VN Pre-build',[4,25],[4,25],{mile:1,site:'VN'}),
+  T('PV','PV Main build',[4,9],[4,17]),              // Sys-B 9 天 (jpg 9/12–9/20)
+  T('PV','VN Main-build',[5,1],[5,1],{site:'VN'}),
+  T('PV','OOBIP',[4,9],[4,29]),
+  T('PV','Ship PV unit ETA to NSDD (PCBA Only)',[4,17],[4,17],{mile:1}),
+  T('PV','Ship PV unit ETA to QAD/TPE RD & HP',[4,24],[4,24],{mile:1}),
+  T('PV','PV SVTP test',[4,20],[5,18]),              // Test Start = Sys-B end + 3 (jpg 9/23)
+  T('PV','Google release PV image',[3,27],[3,27],{mile:1}),
+  T('PV','Google DVT unit',[4,27],[4,27],{mile:1}),  // = Test Start + 7 天 (jpg 9/30)
+  T('PV','Google dogfooding',[4,20],[5,18]),
   // FW chain — golden: FW Lock Down(PLD)=8/4; FW Candidate = lock-1wk = 7/28 (single day);
   //   FW Candidate Testing = cand+1 .. lock-1 = 7/29–8/3; lock = test end + 1. §user req
   T('PV','FW Candidate',[7,28],[7,28],{mile:1}),
@@ -450,8 +466,8 @@ const GOLDEN=[
   // SW-only regression that occupies the DVT-band PVR sub-segment. Anchored on CFZ, ~3-4 days.
   T('PVR','SW PVR',[8,31],[9,3]),
   // MV
-  T('MV','MV Gerber release',[8,20],[8,20],{mile:1}),   // MV G.O. = DVT Test Start + 4wk (editable)
-  T('MV','MV SMT',[9,2],[9,2],{mile:1,site:'KS'}),
+  T('MV','MV Gerber release',[8,20],[8,20],{mile:1}),   // PVT G.O. = SR − 5 (lock), see tryAnchor
+  T('MV','MV SMT',[9,3],[9,3],{mile:1,site:'KS'}),      // §9 fix: MV G.O.→MV SMT = 14 天 (jpg 11/29→12/13)
   T('MV','VN SMT build',[9,11],[9,13],{site:'VN'}),
   T('MV','MV Pre-Build',[9,5],[9,5],{mile:1,site:'KS'}),
   T('MV','VN Pre-build',[9,15],[9,15],{mile:1,site:'VN'}),
@@ -465,7 +481,7 @@ const GOLDEN=[
   T('FCS','KS FCS',[9,24],[9,24],{mile:1,gate:1,site:'KS'}),
   T('FCS','VN FCS',[10,2],[10,2],{mile:1,gate:1,site:'VN'}),
 ];
-const PHASE_ORDER=['DB','SI','PV','PVR','MV','FCS'];
+const PHASE_ORDER=['DB','PV','PVR','MV','FCS'];   // §9 S1: 2-Phase — no SI/EVT
 const PHASE_META={
   DB:{label:'Proto',sub:'Proto',f:'--proto-f',b:'--proto-b'},
   SI:{label:'EVT',sub:'EVT',f:'--evt-f',b:'--evt-b'},
@@ -474,10 +490,9 @@ const PHASE_META={
   MV:{label:'MV',sub:'PVT',f:'--pvt-f',b:'--pvt-b'},
   FCS:{label:'FCS',sub:'Final',f:'--fcs-f',b:'--fcs-b'},
 };
-/* phase bar = Develop phase graph.png — 4 pastel chevrons, names Proto/EVT/DVT/PVT */
+/* phase bar — §9 S1 2-Phase: Proto / DVT / PVT (no EVT chevron) */
 const BAR=[
   {name:'Proto',phs:['DB'],     f:'--proto-f',b:'--proto-b'},
-  {name:'EVT',  phs:['SI'],     f:'--evt-f',  b:'--evt-b'},
   {name:'DVT',  phs:['PV','PVR'],f:'--dvt-f', b:'--dvt-b'},
   {name:'PVT',  phs:['MV'],     f:'--pvt-f',  b:'--pvt-b'},
 ];
@@ -495,20 +510,32 @@ const HOL_LABELS={
 
 /* per-task editable duration override (calendar days). key=index */
 let durOverride={};
+/* per-task editable START-date override (ISO). key=index. Additive layer — a pinned date
+   propagates to all dependents; anchor/pinned tasks ignore it; holiday snap still applies. */
+let dateOverride={};
+/* user-added Region FCS rows (display layer: date = lead FCS + leadDays cal). {name, leadDays} */
+let regionFcsList=[];
+/* derived Kick-off cache — re-derived only when the SR changes or on Reset (edits keep it fixed). */
+let derivedKickISO='', derivedKickForSR='';
 /* user-adjustable gate gaps (calendar days). null = use default formula.
    cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM ;
-   siToPvDaysOverride = EVT Test Start → DVT G.O. (default 21 = 3 weeks, from Function 1 golden) ;
-   mvGoDaysOverride  = DVT Test Start → PVT G.O. (default 28 = 4 weeks, from Function 1 golden). */
+   siToPvDaysOverride = Proto Test Start → DVT G.O. (§9 2-Phase handoff, default 28 = 4 weeks, jpg) ;
+   mvGoDaysOverride  = DVT Test Start → PVT G.O. (default 28 = 4 weeks, original rule — unchanged). */
 let cfzDaysOverride=null, rtmDaysOverride=null, siToPvDaysOverride=null, mvGoDaysOverride=null;
-/* default handoff durations carried over from Function 1's golden (calendar days). */
-const SIPV_DEFAULT=21, MVGO_DEFAULT=28;
+/* default handoff durations. SIPV = DB→PV handoff, calendar days (4 wks per refresh golden).
+   MVGO = DVT Test Start → PVT G.O., WORKING days excluding holidays (§user: 8 ww = 40 wd). */
+const SIPV_DEFAULT=28, MVGO_DEFAULT=40;
+/* MV G.O. position relative to SR — the ORIGINAL F1 relationship (golden MV Gerber 8/20 =
+   SR 8/25 − 5). SR is the ONLY anchor: the forward block (MV G.O. → MV chain → FCS) hangs off
+   SR and NEVER moves; the 8-ww handoff (`mvGoDays`, working days) is applied BACKWARD from
+   MV G.O. to define where DVT Test must start — pulling the HW chain / Kick-off EARLIER,
+   never delaying FCS. §user rule. */
+const MVGO_SR_LAG=5;
 /* front-end WORKING-day durations (§RefreshBoard): Kick-off→Layout and Layout→G.O., both 2 weeks. */
 let kickToLayoutOverride=null, layoutToGoOverride=null;
 const KICK_LAYOUT_WD=10, LAYOUT_GO_WD=10;
-/* FCS mode (§RefreshBoard req: switchable). 'lock' = MV/FCS anchored to SR-nominal DVT test
-   (fixed target dates; infeasibility flagged). 'slip' = MV G.O. anchored to the LIVE (Kick-off-
-   driven) DVT test, so MV/FCS float to the real completion dates (no infeasibility warning). */
-let fcsMode='lock';
+/* (FCS mode toggle removed — with the Kick-off always back-derived from SR, "slip" had no
+   remaining scenario; the schedule is permanently SR-locked. §user) */
 /* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
 let BRANCH_INFO=null;
 let lastValidSrISO='';
@@ -540,7 +567,8 @@ function gdate(ref,anchor){
 /* gates handled by tryAnchor (formula-anchored), NOT via the plain DEP lag. Includes the two
    editable phase-handoff G.O. gates: PV Gerber (EVT test→DVT G.O.) and MV Gerber (DVT test→PVT G.O.). */
 const ANCHOR_NAMES=new Set(['Kick-off','Layout','DB Gerber released','PCB FAB','Code Freeze (FSI candidate) = CFZ',
-  'RTM Ties-1 = RTM','PLD','FW Candidate','FW Candidate Testing','PV Gerber release','MV Gerber release','KS FCS','VN FCS']);
+  'RTM Ties-1 = RTM','PLD','FW Candidate','FW Candidate Testing','PV Gerber release','MV Gerber release',
+  'PV SVTP test','Google dogfooding','KS FCS','VN FCS']);
 /* dependency edges, keyed by "ph/nm".
    ['P']                     = project start (Kick-off)
    ['FS', predKey, a?]       = finish/start-to-start: start = pred[a] + lag   (a='e' end | 's' start; default 'e')
@@ -552,40 +580,25 @@ const DEP={
   // Layout & DB Gerber (G.O.) are working-day anchors (see tryAnchor): Layout = Kick-off + kickToLayoutWd,
   // G.O. = Layout + layoutToGoWd. PCB FAB → SMT keep the FS chain (G.O. → PCB FAB → SMT start).
   'DB/PCB FAB':['FS','DB/DB Gerber released'], 'DB/DB SMT Build':['FS','DB/PCB FAB'],
-  'DB/Ship DB PCBA ETA to TPE RD & HP':['FS','DB/DB SMT Build'],
-  'DB/DB SVTP test':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
-  'DB/Google validation':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
-  'DB/Google prototype':['FS','DB/Ship DB PCBA ETA to TPE RD & HP'],
+  'DB/Bring Up':['FS','DB/DB SMT Build','s'],                  // §9: Bring Up = SMT 起、7 天
+  'DB/DB SVTP test':['FS','DB/Bring Up'],                      // Test Start = Bring Up end + 7 天
+  'DB/Google validation':['FS','DB/Bring Up'],
+  'DB/Google prototype':['FS','DB/Google validation','s'],     // photo type ETA = Test Start + 7
   'DB/DB exit':['FS','DB/Google validation','s'],
-  // ---- SI / EVT ----
-  'SI/SI Gerber release':['FS','DB/Google validation','s'],   // phase handoff off DB Testing(Google) start
-  'SI/PCB FAB':['FS','SI/SI Gerber release'], 'SI/SI SMT build':['FS','SI/PCB FAB'],
-  // Refresh Board: no SI ME parts → Pre-Build gates on SMT first-article only (SMT single gate).
-  'SI/SI Pre-Build':['MAX',[['SI/SI SMT build','s']]],
-  'SI/SI Main build':['FS','SI/SI Pre-Build'],
-  'SI/OOBIP':['FS','SI/SI Pre-Build'],
-  'SI/Ship SI unit ETA to NSDD (PCBA Only)':['FS','SI/SI Main build'],          // PCBA-only → off Main build
-  'SI/Ship SI unit ETA to QAD/TPE RD & HP':['FS','SI/SI Main build','e'],        // full unit → drives test
-  'SI/SI SVTP test':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
-  'SI/Google release SI image':['FS','SI/SI Gerber release'],
-  'SI/Google EVT unit':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
-  'SI/Google dogfooding':['FS','SI/Ship SI unit ETA to QAD/TPE RD & HP'],
-  'SI/SI exit':['FS','SI/Google dogfooding','e'],
-  // ---- PV / DVT ----
-  // PV Gerber (DVT G.O.) is now an editable handoff gate (EVT Test Start + siToPvDays) → see tryAnchor.
+  // ---- PV / DVT (§9 S1: 2-Phase — SI removed; PV G.O. = live DB Test Start + siToPvDays, see tryAnchor) ----
   'PV/PCB FAB':['FS','PV/PV Gerber release'], 'PV/PV SMT Build':['FS','PV/PCB FAB'],
   'PV/VN SMT build':['OFF','PV/PV SMT Build'],
-  'PV/PV Pre-Build':['MAX',[['PV/PV SMT Build','s']]],        // no PV ME parts task → SMT-gated
+  'PV/PV Pre-Build':['MAX',[['PV/PV SMT Build','s']]],        // SMT first-article + 3 (golden lag)
   'PV/VN Pre-build':['OFF','PV/PV Pre-Build'],
   'PV/PV Main build':['FS','PV/PV Pre-Build'],
   'PV/VN Main-build':['OFF','PV/PV Main build'],
   'PV/OOBIP':['FS','PV/PV Pre-Build'],
   'PV/Ship PV unit ETA to NSDD (PCBA Only)':['FS','PV/PV Main build'],
   'PV/Ship PV unit ETA to QAD/TPE RD & HP':['FS','PV/PV Main build','e'],
-  'PV/PV SVTP test':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
+  'PV/PV SVTP test':['FS','PV/PV Main build'],                 // §9: Test Start = Sys-B end + 3
   'PV/Google release PV image':['FS','PV/PV Gerber release'],
-  'PV/Google DVT unit':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
-  'PV/Google dogfooding':['FS','PV/Ship PV unit ETA to QAD/TPE RD & HP'],
+  'PV/Google DVT unit':['FS','PV/Google dogfooding','s'],      // DVT unit ETA = Test Start + 7
+  'PV/Google dogfooding':['FS','PV/PV Main build'],
   'PV/PV Regression':['FS','@CFZ'], 'PV/PV exit':['FS','PV/PV Regression','e'],
   // ---- PVR — SW-only regression, anchored on CFZ (~3-4 days) ----
   'PVR/SW PVR':['FS','@CFZ'],
@@ -607,7 +620,7 @@ function build(srISO,kickISO){
   if(!hasAnchor){
     const rows=GOLDEN.map((t,i)=>({...t,i,s:null,e:null,warn:''}));
     return {hasAnchor:false,SR:null,CFZ:null,RTM:null,rows,projStart:null,kickoff:null,fcsKS:null,fcsVN:null,
-            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7),mvGoDays:(mvGoDaysOverride??28)};
+            cfzDays:(cfzDaysOverride??3),rtmDays:(rtmDaysOverride??7),mvGoDays:(mvGoDaysOverride??MVGO_DEFAULT)};
   }
   const SR=parseISO(srISO);
   const shift=calDiff(G_SR,SR);
@@ -629,14 +642,34 @@ function build(srISO,kickISO){
   // §user: every anchor point derives from the ChromeOS Stable Release ONLY (never Chrome Browser,
   // never an independently-OCR'd cut). Stable Cut = ChromeOS SR − 2 weeks → FW Lock(PLD) = −1wk → FW Candidate = −1wk.
   const earlyCut=addCal(SR,-14);
-  const fwLock=addCal(earlyCut,-7), fwCand=addCal(fwLock,-7);
-  const siToPvDays=(siToPvDaysOverride!=null)?siToPvDaysOverride:SIPV_DEFAULT;  // EVT test → DVT G.O.
+  // FW gates snap BACKWARD to a working day (they must not slip past CFZ). §user holiday rule
+  const fwLock=skipNonWorkBack(addCal(earlyCut,-7),LEADHOL), fwCand=skipNonWorkBack(addCal(fwLock,-7),LEADHOL);
+  const siToPvDays=(siToPvDaysOverride!=null)?siToPvDaysOverride:SIPV_DEFAULT;  // Proto test → DVT G.O. (§9)
   const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:MVGO_DEFAULT;         // DVT test → PVT G.O.
+  // PVT G.O. (lock) = SR − 5, snapped FORWARD to a working day. The 8-ww rule is measured from
+  // THIS snapped date, so DVT-test → PVT G.O. is exactly mvGoDays working days even when SR−5
+  // falls inside CNY/holidays (§user: the 8 ww excl. holidays must hold in every case).
+  const mvGoNominal=skipNonWork(addCal(SR,-MVGO_SR_LAG),LEADHOL);
   // ---- DAG nodes ----
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
   const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
   const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
-  const setSE=(r,s)=>{ r.s=s; r.e=r.mile?s:addCal(s,spanOf(r)); };
+  // §user rule: NO task may start on a statutory holiday — lead-side tasks skip the China+Taiwan
+  // (KS) holidays, region tasks (site VN, displayed VN/TH) skip the selected region's holidays;
+  // the start defers to the next working day. Weekend handling follows F1's working-day contract:
+  // build-track tasks run Saturdays ('build' mode: only Sundays+holidays off), all other tasks
+  // (tests / G.O. / gates) skip the full weekend.
+  const holFor=r=> r.site==='VN'?REGIONHOL:LEADHOL;
+  const isBuildTask=r=>/SMT|Pre-?Build|Main.?build|OOBIP|PCB FAB|Bring Up|Regression/i.test(r.nm);
+  const snapStart=(d,r)=>{const hol=holFor(r);let c=new Date(d);
+    if(isBuildTask(r)){while(dow(c)===0||isHol(c,hol))c=addCal(c,1);}
+    else c=skipNonWork(c,hol);
+    return c;};
+  const setSE=(r,s)=>{
+    if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
+    const s2=snapStart(s,r);                                      // holiday rule still applies
+    r.s=s2; r.e=r.mile?s2:addCal(s2,spanOf(r));
+  };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
   const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
   const resolved=new Set();
@@ -661,28 +694,35 @@ function build(srISO,kickISO){
       case 'Layout': r.s=projStart; r.e=addWorkdays(projStart,layoutToGoWd,LEADHOL); return true;
       case 'DB Gerber released': { if(!resolved.has('DB/Layout'))return false; r.s=r.e=byKey['DB/Layout'].e; return true; }
       case 'PCB FAB': {
-        // DB PCB FAB starts right after G.O. (§RefreshBoard: "G.O. 接著做 PCB FAB"); SI/PV keep their DEP.
+        // §9 fix (jpg): DB PCB FAB starts ON the G.O. day; SMT = FAB end same day →
+        // G.O.→SMT = FAB duration exactly (DB 17d), for ANY Stable Release input. PV keeps its DEP
+        // (same rule encoded via golden lag 0).
         if(r.ph!=='DB') return 'DEP';
         if(!resolved.has('DB/DB Gerber released')) return false;
-        setSE(r, skipNonWork(addCal(byKey['DB/DB Gerber released'].e,1),LEADHOL)); return true; }
+        setSE(r, byKey['DB/DB Gerber released'].e); return true; }
       case 'Code Freeze (FSI candidate) = CFZ': r.s=r.e=CFZ; return true;
       case 'RTM Ties-1 = RTM': r.s=r.e=RTM; return true;
       case 'PLD': r.s=r.e=fwLock; return true;
       case 'FW Candidate': r.s=r.e=fwCand; return true;
-      case 'FW Candidate Testing': r.s=addCal(fwCand,1); r.e=addCal(fwLock,-1); return true;
+      case 'FW Candidate Testing': r.s=skipNonWork(addCal(fwCand,1),LEADHOL); r.e=addCal(fwLock,-1); return true;
       case 'PV Gerber release': {
-        // DVT G.O. = live EVT (SI) Test Start (Google dogfooding) + siToPvDays. Kick-off-driven
-        // (flows from the live HW chain) — the handoff lever the feasibility check reacts to. §req2
-        const k='SI/Google dogfooding'; if(!resolved.has(k)) return false;
-        r.s=r.e=addCal(byKey[k].s, siToPvDays); return true; }
+        // §9 2-Phase: DVT G.O. = live Proto (DB) Test Start (Google validation) + siToPvDays (4wks).
+        // Kick-off-driven — the handoff lever the feasibility check reacts to.
+        const k='DB/Google validation'; if(!resolved.has(k)) return false;
+        r.s=r.e=skipNonWork(addCal(byKey[k].s, siToPvDays),LEADHOL); return true; }
+      case 'PV SVTP test': case 'Google dogfooding': {
+        // DVT test — chain-ready = Sys-B end + 3 (§9). In lock mode the START is PINNED to
+        // "PVT G.O. − mvGoDays working days", so DVT Test → PVT G.O. is EXACTLY 8 ww excluding
+        // holidays in every case (parts may wait; the test can never start late). The chain-ready
+        // date is kept on the row for the feasibility margin. §user rule
+        const k='PV/PV Main build'; if(!resolved.has(k)) return false;
+        const s0=skipNonWork(addCal(byKey[k].e,3),LEADHOL);
+        const nomT=subWorkdays(mvGoNominal,mvGoDays,LEADHOL);
+        r.chainReady=s0; r.s=(+s0<+nomT)?nomT:s0; r.e=addCal(r.s,spanOf(r)); return true; }
       case 'MV Gerber release': {
-        // PVT G.O. = DVT Test Start + mvGoDays. FCS mode picks which DVT test start:
-        //  'lock' → SR-nominal (fixed target; HW edits never leak past SR → FCS stays locked, §13.1);
-        //  'slip' → LIVE Kick-off-driven DVT test (MV/FCS float to the real completion dates).
-        let dvt;
-        if(fcsMode==='slip'){ const k='PV/Google dogfooding'; if(!resolved.has(k)) return false; dvt=byKey[k].s; }
-        else dvt=addCal(GKEY['PV/Google dogfooding'].gs, shift);
-        r.s=r.e=addCal(dvt, mvGoDays); return true; }
+        // SR is THE anchor: PVT G.O. = SR − MVGO_SR_LAG, fixed — mvGoDays edits move the
+        // REQUIRED DVT-test start backward instead (kick-off earlier), FCS never delayed. §user rule
+        r.s=r.e=mvGoNominal; return true; }
       case 'KS FCS': { const k='MV/Product release - KS'; if(!resolved.has(k))return false;
         r.s=r.e=skipNonWork(addCal(byKey[k].s,7),LEADHOL); return true; }
       case 'VN FCS': { const k='MV/Product release - VN'; if(!resolved.has(k))return false;
@@ -711,18 +751,50 @@ function build(srISO,kickISO){
   // ---- Feasibility (§RefreshBoard req4/5): the Kick-off-driven HW chain must reach the DVT
   // junction no later than the SR-locked schedule assumes. liveDvt = live EVT/DVT test start
   // (Kick-off driven); nominalDvt = SR-nominal DVT test start that PVT G.O. / MV / FCS hang off. ----
-  const liveDvt=byKey['PV/Google dogfooding'].s;
-  const nominalDvt=addCal(GKEY['PV/Google dogfooding'].gs,shift);
+  // feasibility uses the CHAIN-READY date (pre-pin), so the true HW margin stays visible even
+  // though the displayed test start is pinned to the 8-ww nominal in lock mode.
+  const dvtRow=byKey['PV/Google dogfooding'];
+  const liveDvt=dvtRow.chainReady||dvtRow.s;
+  // required DVT-test start = the SNAPPED PVT G.O. minus mvGoDays WORKING days (8 ww, holidays excl.)
+  const nominalDvt=subWorkdays(mvGoNominal, mvGoDays, LEADHOL);
   const bufferDays=calDiff(liveDvt,nominalDvt);        // >=0 feasible (run-up finishes in time); <0 late
   const feasible=bufferDays>=0;
   // levers (which durations actually pull the DVT junction earlier) are computed by numeric
   // sensitivity in feasLevers() — NOT here — because phase handoffs anchor on test START, so test
   // durations are off the critical path; only build tasks + the EVT→DVT G.O. handoff move it. §req5
-  const feas={feasible,bufferDays,overflow:feasible?0:-bufferDays,liveDvt,nominalDvt,mode:fcsMode,levers:[]};
+  const feas={feasible,bufferDays,overflow:feasible?0:-bufferDays,liveDvt,nominalDvt,levers:[]};
   return {hasAnchor:true,SR,CFZ,RTM,rows,projStart,kickoff,kickoffDisp,fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,siToPvDays,mvGoDays,
           kickToLayoutWd,layoutToGoWd,cfzRule,rtmRule,cfzPullIn,rtmPullIn,feas,unresolved:rows.length-resolved.size};
 }
 function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
+
+/* Back-derive a just-in-time Kick-off from Stable Release (§9): iterate the forward chain until
+   the live DVT Test Start lands on the SR-nominal target (buffer → 0, never negative). Converges
+   in a few passes; workday snapping may leave a small positive buffer, which is fine. */
+function deriveKickFromSR(srISO){
+  const SR=parseISO(srISO);
+  let k=addCal(SR,-260);                              // generous early first guess
+  for(let i=0;i<6;i++){
+    const m=build(srISO,iso(k));
+    if(!m.feas||m.feas.bufferDays===0)break;
+    k=addCal(k,m.feas.bufferDays);                    // buffer>0 → kick later; <0 → earlier
+  }
+  k=skipNonWorkBack(k,LEADHOL);                       // Kick-off itself lands on a working day
+  let m=build(srISO,iso(k)),guard=0;
+  while(m.feas&&m.feas.bufferDays<0&&guard++<30){k=skipNonWorkBack(addCal(k,-1),LEADHOL);m=build(srISO,iso(k));}
+  // refine: the coarse jumps can leave residual positive buffer when holidays sit in the window
+  // (e.g. CNY) — walk the kick-off LATER day-by-day until the buffer is minimal (just-in-time).
+  guard=0;
+  while(m.feas&&m.feas.bufferDays>0&&guard++<60){
+    const k2=addCal(k,1), m2=build(srISO,iso(k2));
+    if(!m2.feas||m2.feas.bufferDays<0)break;
+    k=k2;m=m2;
+  }
+  // snap FORWARD: a weekend/holiday kick is equivalent to the next working day (Layout starts
+  // with skipNonWork), so this changes nothing in the chain — buffer stays exactly minimal.
+  k=skipNonWork(k,LEADHOL);
+  return iso(k);
+}
 
 /* Numeric sensitivity — which editable durations, reduced by 1 day, actually pull the DVT
    junction (liveDvt) earlier. These are the true feasibility levers. Phase handoffs anchor on
@@ -730,7 +802,7 @@ function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
 function feasLevers(srISO,kickISO,baseLive){
   const levs=[]; const isTest=nm=>/SVTP test|Google (validation|dogfooding)/i.test(nm);
   GOLDEN.forEach((t,i)=>{
-    if(!['DB','SI','PV'].includes(t.ph)||t.mile) return;
+    if(!['DB','PV'].includes(t.ph)||t.mile) return;
     const had=Object.prototype.hasOwnProperty.call(durOverride,i), cur=durOverride[i];
     const base=(cur!=null)?cur:calDiff(t.gs,t.ge); if(base<=1) return;
     durOverride[i]=base-1; const m2=build(srISO,kickISO);
@@ -738,10 +810,10 @@ function feasLevers(srISO,kickISO,baseLive){
     const gain=calDiff(m2.feas.liveDvt,baseLive);              // baseLive − newLive; >0 = pulled earlier
     if(gain>0) levs.push({nm:t.nm,ph:t.ph,i,days:base,gain,test:isTest(t.nm)});
   });
-  { const cur=siToPvDaysOverride, base=(cur!=null)?cur:SIPV_DEFAULT;   // EVT Test Start → DVT G.O. handoff
+  { const cur=siToPvDaysOverride, base=(cur!=null)?cur:SIPV_DEFAULT;   // Proto Test Start → DVT G.O. handoff
     if(base>1){ siToPvDaysOverride=base-1; const m2=build(srISO,kickISO); siToPvDaysOverride=cur;
       const gain=calDiff(m2.feas.liveDvt,baseLive);
-      if(gain>0) levs.push({nm:'EVT Test Start → DVT G.O. (handoff)',ph:'PV',i:null,days:base,gain,test:false}); } }
+      if(gain>0) levs.push({nm:'Proto Test Start → DVT G.O. (handoff)',ph:'PV',i:null,days:base,gain,test:false}); } }
   return levs.sort((a,b)=>b.gain-a.gain||b.days-a.days);
 }
 
@@ -825,87 +897,177 @@ function render(model,val,srISO){
   document.getElementById('out').style.display='block';
   document.getElementById('tlTitle').textContent=document.getElementById('proj').value||'Refresh Board Schedule';
   document.getElementById('tlSub').textContent= has
-    ? `Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Kick-off ${md(model.kickoffDisp)}${model.kickoff?'':' (derived)'} · Layout ${md(model.projStart)} · ${val.wkAll} WKs`
+    ? `Stable Release ${ymd(model.SR)} · CFZ ${md(model.CFZ)} · RTM ${md(model.RTM)} · Kick-off ${md(model.kickoffDisp)}${model.kickDerived?' (back-derived from SR)':''} · Layout ${md(model.projStart)} · ${val.wkAll} WKs`
     : 'No Stable Release (anchor) entered yet · showing task structure and adjustable Days only; dates compute automatically once entered';
   document.getElementById('tlFcs').innerHTML= has
     ? `${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b>` : '';
-  // ---- phase bar = Develop phase graph.png (Proto/EVT/DVT/PVT) ----
-  const cont=document.getElementById('chevrons');cont.innerHTML='';
-  BAR.forEach(b=>{
-    const inph=model.rows.filter(r=>b.phs.includes(r.ph));
-    const div=document.createElement('div');div.className='chev';
-    let range='';
-    if(has && inph.length){const s=inph.reduce((m,r)=>r.s<m?r.s:m,inph[0].s), e=inph.reduce((m,r)=>r.e>m?r.e:m,inph[0].e);range=`${md(s)}–${md(e)}`;}
-    div.innerHTML=chevSVG(cssv(b.f),'#1a1a1a')+
-      `<div class="chev-label"><span>${b.name}</span>${range?`<small>${range}</small>`:''}</div>`;
-    cont.appendChild(div);
-  });
-  // ---- on-screen: editable columnar task list ----
-  const host=document.getElementById('phases');host.innerHTML='';
-  PHASE_ORDER.forEach(ph=>{
-    const meta=PHASE_META[ph];
-    const inph=model.rows.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s||a.gs-b.gs);
-    if(!inph.length)return;
-    const block=document.createElement('div');block.className='phaseblock';
-    const head=document.createElement('div');head.className='ph';
-    head.style.background=cssv(meta.f);head.style.color='#23303f';
-    head.innerHTML=`<span>${meta.label}${meta.sub&&meta.sub!==meta.label?' · '+meta.sub:''}</span>`;
-    block.appendChild(head);
-    const ch=document.createElement('div');ch.className='colhead';
-    ch.innerHTML=`<div>Task</div><div>Start</div><div>End</div><div>Days</div>`;block.appendChild(ch);
-    inph.forEach(r=>{
-      const row=document.createElement('div');
-      row.className='task'+(r.mile?' mile':'')+(r.gate?' gate':'');
-      const nm=dispName(r.nm), code=dispSite(r.site);
-      // only show the factory pill when the task name doesn't already carry the code
-      const site=(r.site && !nm.includes(code))?`<span class="site ${r.site}">${code}</span>`:'';
-      const defSpan=goldenSpan(r);
-      let durCell;
-      if(r.nm==='Kick-off')
-        durCell=`<div class="dur"><input data-gate="k2l" value="${model.kickToLayoutWd}" title="Kick-off → Layout (working days, 10=2wk) — adjustable"></div>`;
-      else if(r.nm==='Layout')
-        durCell=`<div class="dur"><input data-gate="l2g" value="${model.layoutToGoWd}" title="Layout → G.O. (working days, 10=2wk) — adjustable"></div>`;
-      else if(r.nm==='Code Freeze (FSI candidate) = CFZ')
-        durCell=`<div class="dur"><input data-gate="cfz" value="${model.cfzDays}" title="Stable Release → CFZ (cal days) — adjustable"></div>`;
-      else if(r.nm==='RTM Ties-1 = RTM')
-        durCell=`<div class="dur"><input data-gate="rtm" value="${model.rtmDays}" title="CFZ → RTM (cal days) — adjustable"></div>`;
-      else if(r.nm==='PV Gerber release')
-        durCell=`<div class="dur"><input data-gate="sipv" value="${model.siToPvDays}" title="EVT Test Start → DVT G.O. (cal days, 21=3wk) — adjustable"></div>`;
-      else if(r.nm==='MV Gerber release')
-        durCell=`<div class="dur"><input data-gate="mvgo" value="${model.mvGoDays}" title="DVT Test Start → PVT G.O. (cal days, 28=4wk) — adjustable"></div>`;
-      else if(r.mile)
-        durCell=`<div class="dur" style="color:#b8c">◆</div>`;
-      else
-        durCell=`<div class="dur"><input data-i="${r.i}" value="${durOverride[r.i]??defSpan}" title="duration (cal days)"></div>`;
-      const sCell=has?md(r.s):'';
-      const eCell=has?(r.mile?'—':md(r.e)):'';
-      row.innerHTML=`<div class="nm">${nm}${site}</div>
-        <div class="d">${sCell}</div>
-        <div class="d${r.mile?' m':''}">${eCell}</div>${durCell}`;
-      block.appendChild(row);
-    });
-    host.appendChild(block);
-  });
-  host.querySelectorAll('input[data-i]').forEach(inp=>{
-    inp.addEventListener('change',()=>{
-      const i=+inp.dataset.i, v=parseInt(inp.value,10);
-      if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
-      run();
-    });
-  });
-  host.querySelectorAll('input[data-gate]').forEach(inp=>{
-    inp.addEventListener('change',()=>{
-      const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
-      if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
-      else if(inp.dataset.gate==='mvgo') mvGoDaysOverride=ok?v:null;
-      else if(inp.dataset.gate==='sipv') siToPvDaysOverride=ok?v:null;
-      else if(inp.dataset.gate==='k2l') kickToLayoutOverride=ok?v:null;
-      else if(inp.dataset.gate==='l2g') layoutToGoOverride=ok?v:null;
-      else rtmDaysOverride=ok?v:null;
-      run();
-    });
-  });
+  // ---- PRODUCT_SPEC-style task board (renderer only — §9 engine rules unchanged) ----
+  document.getElementById('chevrons').style.display='none';
+  window._lastModelRows=model.rows; window._lastFcsKS=model.fcsKS||null;
+  renderTaskBoard(model,has);
   renderVal(val,model);
+}
+
+/* =====================================================================
+   TASK BOARD — PRODUCT_SPEC-style UI: handoff ww-pills, gradient chevron
+   header, one COLUMN per phase with `date | task | chips` rows (dates &
+   durations inline-editable → any edit reflows every dependent via run()),
+   Phase Exit cards, FCS column with L10/Region cards. 2-Phase layout. §user
+   ===================================================================== */
+const TB_COLS=[['DB','Proto'],['PV','DVT'],['PVR','PVR'],['MV','PVT'],['FCS','FCS']];
+const TB_GRID='1.15fr 1.15fr .6fr 1.15fr .82fr';
+function tbFmt(d){return d?ymd(d):'—';}
+function renderTaskBoard(model,has){
+  const host=document.getElementById('phases');host.innerHTML='';
+  const rows=model.rows;
+  const get=(ph,nm)=>rows.find(r=>r.ph===ph&&r.nm===nm);
+  // --- top handoff strip (Proto→DVT in cal weeks; DVT→PVT in WORKING weeks excl. holidays) ---
+  const strip=document.createElement('div');strip.className='tb-hand';
+  if(has){
+    strip.innerHTML=
+      `<span class="hd">Proto Testing <span class="arr">–</span> <span class="tb-ww" title="Proto Test Start → DVT G.O. (weeks) — editable"><input data-ww="sipv" value="${Math.round(model.siToPvDays/7)}">ww</span> <span class="arr">→</span> DVT G.O.</span>`+
+      `<span class="hd">DVT Testing <span class="arr">–</span> <span class="tb-ww" title="DVT Test Start → PVT G.O. (WORKING weeks excl. holidays) — editable"><input data-ww="mvgo" value="${Math.round(model.mvGoDays/5)}">ww</span> <span class="arr">→</span> PVT G.O.</span>`;
+    host.appendChild(strip);
+  }
+  // --- gradient chevron header ---
+  const head=document.createElement('div');head.className='tb-head';head.style.gridTemplateColumns=TB_GRID;
+  TB_COLS.forEach(([ph,label])=>{
+    const c=document.createElement('div');c.className='tb-chev'+(ph==='FCS'?' fcs':'');
+    c.textContent=label;
+    // Chrome_Spec §5.2 pastel palette per phase (NOT the PRODUCT_SPEC blue gradient). §user req
+    const meta=PHASE_META[ph];
+    c.style.background=cssv(meta.f);
+    head.appendChild(c);
+  });
+  host.appendChild(head);
+  // --- columns ---
+  const cols=document.createElement('div');cols.className='tb-cols';cols.style.gridTemplateColumns=TB_GRID;
+  TB_COLS.forEach(([ph])=>{
+    const col=document.createElement('div');col.className='tb-col';
+    if(ph==='FCS'){ col.innerHTML=tbFcsColumn(model,has); cols.appendChild(col); return; }
+    const inph=rows.filter(r=>r.ph===ph).sort((a,b)=>(a.s&&b.s)?(a.s-b.s||a.gs-b.gs):(a.gs-b.gs));
+    const exit=inph.find(r=>/\bexit\b/i.test(r.nm));
+    inph.forEach(r=>{
+      if(r===exit)return;
+      col.insertAdjacentHTML('beforeend',tbRow(r,model,has));
+    });
+    if(exit) col.insertAdjacentHTML('beforeend',
+      `<div class="tb-exit">${dispName(exit.nm).replace(/\s*exit\s*$/i,'').trim()} Phase Exit<b>${has?tbFmt(exit.s):'—'}</b></div>`);
+    cols.appendChild(col);
+  });
+  host.appendChild(cols);
+  tbWire(host);
+}
+/* one task row: • date(s) | name | chips. Date pins are blocked on rule-anchored tasks
+   (gates, G.O.s, Kick-off/Layout, pinned DVT tests) — everything else is editable. */
+function tbLocked(r){
+  if(!ANCHOR_NAMES.has(r.nm))return false;
+  if(r.nm==='PCB FAB'&&r.ph!=='DB')return false;   // PV FAB is DEP-driven (name collision only)
+  return true;
+}
+function tbRow(r,model,has){
+  const nm=dispName(r.nm), code=dispSite(r.site);
+  const site=(r.site && !nm.includes(code))?` <span class="site ${r.site}">${code}</span>`:'';
+  const locked=tbLocked(r);
+  const sVal=has?tbFmt(r.s):'', eVal=has?tbFmt(r.e):'';
+  const dateCell = r.mile
+    ? `<input data-ds="${r.i}" value="${sVal}" ${(!has||locked)?'disabled':''}>`
+    : `<input data-ds="${r.i}" value="${sVal ? sVal+' ~':''}" ${(!has||locked)?'disabled':''}>
+       <input data-de="${r.i}" value="${eVal}" ${!has?'disabled':''}>`;
+  const chips=[];
+  if(r.nm==='Kick-off')
+    chips.push(`<span class="tb-chip" title="Kick-off → Layout (working days)"><input data-gate="k2l" value="${model.kickToLayoutWd}">wd</span>`);
+  else if(r.nm==='Layout')
+    chips.push(`<span class="tb-chip" title="Layout → G.O. (working days)"><input data-gate="l2g" value="${model.layoutToGoWd}">wd</span>`);
+  else if(r.nm==='Code Freeze (FSI candidate) = CFZ')
+    chips.push(`<span class="tb-chip" title="Stable Release → CFZ (cal days)"><input data-gate="cfz" value="${model.cfzDays}">d</span>`);
+  else if(r.nm==='RTM Ties-1 = RTM')
+    chips.push(`<span class="tb-chip" title="CFZ → RTM (cal days)"><input data-gate="rtm" value="${model.rtmDays}">d</span>`);
+  else if(r.nm==='PV Gerber release')
+    chips.push(`<span class="tb-chip" title="Proto Test Start → DVT G.O. (cal days)"><input data-gate="sipv" value="${model.siToPvDays}">d</span>`);
+  else if(r.nm==='MV Gerber release')
+    chips.push(`<span class="tb-chip" title="DVT Test Start → PVT G.O. (working days excl. holidays)"><input data-gate="mvgo" value="${model.mvGoDays}">wd</span>`);
+  else if(!r.mile)
+    chips.push(`<span class="tb-chip" title="duration (cal days) — editable"><input data-i="${r.i}" value="${durOverride[r.i]??goldenSpan(r)}">d</span>`);
+  let warn='';
+  if(has&&r.s){
+    const hol=isHol(r.s,r.site==='VN'?REGIONHOL:LEADHOL);
+    if(hol){warn=' warn';chips.push(`<span class="tb-chip satwarn">⚠ Hol</span>`);}
+    else if(dow(r.s)===0){warn=' warn';chips.push(`<span class="tb-chip satwarn">⚠ Sun</span>`);}
+  }
+  return `<div class="tb-row${r.gate?' gate':''}${warn}">
+    <div class="tb-date"><span class="bu">•</span><span class="din">${dateCell}</span></div>
+    <div class="tb-name">${nm}${site}</div>${chips.join('')}
+  </div>`;
+}
+/* FCS column: L10 card + Region card + user-added region rows (display layer). */
+function tbFcsColumn(model,has){
+  if(!has)return `<div class="tb-fcscard"><div class="k">L10 FCS</div><div class="v">—</div></div>`;
+  const l10=LEADNAME==='KS'?'CHINA L10 FCS':LEADNAME+' L10 FCS';
+  const regs=regionFcsList.map((rg,k)=>{
+    const d=addCal(model.fcsKS,rg.leadDays);
+    return `<div class="tb-reg"><input class="rn" data-regn="${k}" value="${rg.name||''}" placeholder="Region FCS">
+      <input class="rd" data-regd="${k}" value="${ymd(d)}">
+      <button class="rx" data-regx="${k}" title="remove">✕</button></div>`;
+  }).join('');
+  return `<div class="tb-fcscard"><div class="k">${l10}</div><div class="v">${ymd(model.fcsKS)}</div></div>
+    <div class="tb-fcscard region"><div class="k">REGION FCS · ${REGIONNAME}</div><div class="v">${ymd(model.fcsVN)}</div></div>
+    ${regs}<button class="tb-addreg" data-addreg>+ Add region</button>`;
+}
+/* wire every inline control — any change immediately reruns the engine (full dependency reflow). */
+function tbWire(host){
+  host.querySelectorAll('input[data-i]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.i, v=parseInt(inp.value,10);
+    if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
+    run();
+  }));
+  host.querySelectorAll('input[data-gate]').forEach(inp=>inp.addEventListener('change',()=>{
+    const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
+    if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
+    else if(inp.dataset.gate==='mvgo') mvGoDaysOverride=ok?v:null;
+    else if(inp.dataset.gate==='sipv') siToPvDaysOverride=ok?v:null;
+    else if(inp.dataset.gate==='k2l') kickToLayoutOverride=ok?v:null;
+    else if(inp.dataset.gate==='l2g') layoutToGoOverride=ok?v:null;
+    else rtmDaysOverride=ok?v:null;
+    run();
+  }));
+  // handoff ww pills (sipv in cal weeks; mvgo in WORKING weeks)
+  host.querySelectorAll('input[data-ww]').forEach(inp=>inp.addEventListener('change',()=>{
+    const w=parseInt(inp.value,10), ok=!(isNaN(w)||w<0);
+    if(inp.dataset.ww==='sipv') siToPvDaysOverride=ok?w*7:null;
+    else mvGoDaysOverride=ok?w*5:null;
+    run();
+  }));
+  // start-date pins (dateOverride) & end-date → duration
+  const parseTb=s=>{const t=String(s||'').replace(/~/g,'').trim();return parseInputDate(t);};
+  host.querySelectorAll('input[data-ds]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.ds, d=parseTb(inp.value);
+    if(d) dateOverride[i]=iso(d); else delete dateOverride[i];
+    run();
+  }));
+  host.querySelectorAll('input[data-de]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.de, d=parseTb(inp.value);
+    if(d){
+      const cur=(window._lastModelRows&&window._lastModelRows[i]&&window._lastModelRows[i].s)||GOLDEN[i].gs;
+      const span=calDiff(cur,d);
+      if(span>0)durOverride[i]=span;
+    }
+    run();
+  }));
+  // region FCS rows (display layer)
+  host.querySelectorAll('input[data-regn]').forEach(inp=>inp.addEventListener('change',()=>{
+    regionFcsList[+inp.dataset.regn].name=inp.value.trim(); run();
+  }));
+  host.querySelectorAll('input[data-regd]').forEach(inp=>inp.addEventListener('change',()=>{
+    const k=+inp.dataset.regd, d=parseInputDate(inp.value.trim());
+    if(d&&window._lastFcsKS){regionFcsList[k].leadDays=calDiff(window._lastFcsKS,d);}
+    run();
+  }));
+  host.querySelectorAll('button[data-regx]').forEach(b=>b.addEventListener('click',()=>{
+    regionFcsList.splice(+b.dataset.regx,1); run();
+  }));
+  const add=host.querySelector('button[data-addreg]');
+  if(add)add.addEventListener('click',()=>{regionFcsList.push({name:'',leadDays:14});run();});
 }
 
 /* ============ horizontal roadmap (refined, 6-layer, 2 styles) — preview + Export PNG ============ */
@@ -950,7 +1112,7 @@ function renderRoadmap2(model,host,style){
   // PHASE-SEGMENT coordinate system: x is driven by the (decorative) phase bar segments,
   // NOT raw date — so every chip/marker sits above its OWN phase. Within a phase, position
   // is the task's date mapped into that phase's segment. §user req (align to phase bar)
-  const PHSEG=[['DB',1],['SI',1],['PV',1],['PVR',.5],['MV',1]], totW=4.5;
+  const PHSEG=[['DB',1.15],['PV',1.15],['PVR',.5],['MV',1.15]], totW=3.95;   // §9 2-Phase (no SI)
   const seg={}; let acc=0; PHSEG.forEach(([ph,w])=>{seg[ph]={x0:acc/totW*100,x1:(acc+w)/totW*100};acc+=w;});
   const phRange={};
   PHSEG.forEach(([ph])=>{const ip=rows.filter(r=>r.ph===ph);
@@ -1030,7 +1192,7 @@ function renderRoadmap2(model,host,style){
   // boxless columnar list per phase (like the reference): date + name, no frames.
   function phaseColList(list){
     const div=document.createElement('div');div.className='rm-collist';
-    [['DB','Proto','--proto-b'],['SI','EVT','--evt-b'],['PV','DVT','--dvt-b'],
+    [['DB','Proto','--proto-b'],['PV','DVT','--dvt-b'],
      ['PVR','PVR','--pvr-b'],['MV','PVT','--pvt-b']].forEach(([ph,name,bv])=>{
       const items=list.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s);
       const col=document.createElement('div');col.className='rm-col';col.style.flex=ph==='PVR'?'0.55':'1';
@@ -1102,12 +1264,16 @@ function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
     m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=html;div.appendChild(m);};
   GO.forEach(r=>{const x=segX(r.ph,r.s);conn(x,GOY,'#2f6fd0');
     mk(x,GOY+3,`<b>${dispName(r.nm)}</b><span class="dt">${md(r.s)}</span>`,'#1f4e9c');});
-  ['DB','SI','PV'].forEach((ph,i)=>{
+  ['DB','PV'].forEach((ph,i)=>{                                   // §9 2-Phase: Proto→DVT→PVT
     const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm)); if(!gv)return;
     const tx=segX(ph,gv.s);conn(tx,GOY,'#b3402f');
     mk(tx,GOY+3,`<b>${dispName(ph)} Test Start</b><span class="dt">${md(gv.s)}</span>`,'#b3402f');
-    const ng=model.rows.find(r=>r.ph===['SI','PV','MV'][i] && /G\.O\.|Gerber/i.test(dispName(r.nm)+r.nm));
-    if(ng){const gx=segX(ng.ph,ng.s),wks=Math.round((ng.s-gv.s)/MS/7);
+    const ng=model.rows.find(r=>r.ph===['PV','MV'][i] && /G\.O\.|Gerber/i.test(dispName(r.nm)+r.nm));
+    if(ng){const gx=segX(ng.ph,ng.s);
+      // DVT→PVT arrow shows WORKING weeks (matches the 8-ww-excl-holidays rule); Proto→DVT stays calendar.
+      let wks;
+      if(ng.ph==='MV'){let c=new Date(gv.s),n=0;while(+c<+ng.s){c=addCal(c,1);if(!(dow(c)===0||dow(c)===6||isHol(c,LEADHOL)))n++;}wks=Math.round(n/5);}
+      else wks=Math.round((ng.s-gv.s)/MS/7);
       const a=document.createElement('div');a.className='rm-arrow';
       a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top=(BELOW+38)+'px';div.appendChild(a);
       const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top=(BELOW+19)+'px';
@@ -1160,24 +1326,17 @@ function renderVal(val,model){
   // ---- Feasibility bar (§RefreshBoard req4/5): can the Kick-off-driven HW chain hit the SR schedule? ----
   const feas=model&&model.feas; let feasBar='';
   if(feas){
-    if(feas.mode==='slip'){
-      // FCS floats to real dates — no infeasibility warning; just report the slip vs SR-aligned target.
-      const slip=-feas.bufferDays;   // >0 later, <0 earlier, 0 on target
-      const rel = slip>0?`<b>${slip} day(s) later</b> than the SR-aligned target`
-                : slip<0?`<b>${-slip} day(s) earlier</b> than the SR-aligned target` : 'on the SR-aligned target';
-      feasBar=`<div class="vbar"><span class="dot" style="color:var(--accent2)"></span><div>🛈 <b>FCS mode: slips to real dates</b> — MV/FCS follow the Kick-off-driven HW chain. ${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b> · ${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b> (DVT Test Start ${md(feas.liveDvt)}, ${rel} of ${md(feas.nominalDvt)}).</div></div>`;
-    }else if(feas.feasible){
-      feasBar=`<div class="vbar ok"><span class="dot"></span><div>✅ <b>Schedule is feasible</b> — the Kick-off-driven HW chain reaches DVT Test Start (${md(feas.liveDvt)}) with <b>${Math.round(feas.bufferDays)} day(s)</b> of buffer before the Stable Release schedule needs it (${md(feas.nominalDvt)}). FCS stays locked to ${ymd(model.fcsKS)}.</div></div>`;
+    if(feas.feasible){
+      feasBar=`<div class="vbar ok"><span class="dot"></span><div>✅ <b>Schedule is feasible</b> — the back-derived HW chain reaches DVT Test Start (${md(feas.liveDvt)}) with <b>${Math.round(feas.bufferDays)} day(s)</b> of buffer before the Stable Release schedule needs it (${md(feas.nominalDvt)}). FCS stays locked to ${ymd(model.fcsKS)}.</div></div>`;
     }else{
       const lvName=l=> l.i===null? l.nm : dispName(l.nm);
       const top=feas.levers.slice(0,3).map(l=>`${lvName(l)} (${l.days}d)`).join(', ');
-      feasBar=`<div class="vbar bad"><span class="dot"></span><div>⛔ <b>Schedule NOT feasible</b> — from Kick-off, DVT Test Start lands on <b>${md(feas.liveDvt)}</b>, but Stable Release ${md(model.SR)} needs it by <b>${md(feas.nominalDvt)}</b> (<b>${feas.overflow} day(s) short</b>). Shorten critical-path build/handoff durations (${top||'—'}) by ~${feas.overflow} day(s) total, move Kick-off earlier, or switch to <b>FCS slips</b> mode.</div></div>`;
+      feasBar=`<div class="vbar bad"><span class="dot"></span><div>⛔ <b>Schedule NOT feasible</b> — DVT Test Start lands on <b>${md(feas.liveDvt)}</b>, but Stable Release ${md(model.SR)} needs it by <b>${md(feas.nominalDvt)}</b> (<b>${feas.overflow} day(s) short</b>). Shorten critical-path build/handoff durations (${top||'—'}) by ~${feas.overflow} day(s) total.</div></div>`;
     }
   }
   // user-facing: feasibility + pull-in flag (if any) + the overall development duration.
   w.innerHTML=feasBar+pullBar+`<div class="vbar ok"><span class="dot"></span><div>Overall development duration <b>${val.wkAll} WKs</b> (Kick-off → ${LEADNAME} FCS).</div></div>`;
-  // modals only fire in 'lock' mode; 'slip' mode never blocks with an infeasibility popup.
-  if(feas && feas.mode==='lock') feasibilityAlert(feas,model); else _prevFeasible=null;
+  if(feas) feasibilityAlert(feas,model);
 }
 /* Pop a modal on feasibility state CHANGE: infeasible → warn + optimization hint (req4/5);
    infeasible → feasible after an edit → success/opportunity confirmation (req5). */
@@ -1233,11 +1392,18 @@ function run(){
   } else {
     hint.textContent='Supports png / jpg. OCR auto-detects the ChromeOS Stable Release date; if OCR fails, enter it manually below. Either method triggers the schedule.';
   }
-  const kickRaw=document.getElementById('kick').value.trim();
-  const kickDate=parseInputDate(kickRaw);
-  const kickISO=kickDate?iso(kickDate):'';
+  // §user: no Kick-off input — the Kick-off is back-derived from Stable Release (just-in-time).
+  // CACHED per SR: it is derived when the SR is (re)entered or on Reset, and stays FIXED while
+  // the user edits durations/dates — so an edit visibly reflows every downstream task instead of
+  // being silently absorbed by a re-derived kick (self-test bug fix).
+  let kickISO='';
+  if(srISO){
+    if(derivedKickForSR!==srISO){ derivedKickISO=deriveKickFromSR(srISO); derivedKickForSR=srISO; }
+    kickISO=derivedKickISO;
+  }
   const model=build(srISO,kickISO);
-  if(model.feas) model.feas.levers = (model.feas.feasible||model.feas.mode==='slip') ? [] : feasLevers(srISO,kickISO,model.feas.liveDvt);
+  model.kickDerived=!!kickISO;
+  if(model.feas) model.feas.levers = model.feas.feasible ? [] : feasLevers(srISO,kickISO,model.feas.liveDvt);
   const val=validate(model,srISO);
   render(model,val,srISO);
   renderRoadmapPreview(model);
@@ -1304,13 +1470,7 @@ document.getElementById('region').addEventListener('change',reflow);
 document.getElementById('lead').addEventListener('change',reflow);
 document.getElementById('leadCustom').addEventListener('input',reflow);
 document.getElementById('branch').addEventListener('input',reflow);
-// FCS mode toggle (lock ↔ slip). §RefreshBoard req
-document.querySelectorAll('#fcsModeSeg button').forEach(b=>b.addEventListener('click',()=>{
-  fcsMode=b.dataset.mode;
-  document.querySelectorAll('#fcsModeSeg button').forEach(x=>x.classList.toggle('on',x===b));
-  _prevFeasible=null;   // switching back to lock while infeasible should re-pop the warning
-  run();
-}));
+// (FCS mode toggle removed — schedule is permanently SR-locked. §user)
 const srInput=document.getElementById('sr');
 // friendly date entry: the user just types digits (e.g. 20260923) and the YYYY-MM-DD
 // dashes are inserted automatically — no need to type "-" or "/". If they instead type
@@ -1335,31 +1495,17 @@ srInput.addEventListener('blur',()=>{
     run();
   }
 });
-// Kick-off date — same digit-only auto-format (20260106 → 2026-01-06) and reflow. §RefreshBoard.
-const kickInput=document.getElementById('kick');
-function autoFormatKick(){
-  const v=kickInput.value;
-  if(/[^0-9-]/.test(v)) return;
-  const digits=v.replace(/\D/g,'').slice(0,8);
-  let out=digits;
-  if(digits.length>6) out=digits.slice(0,4)+'-'+digits.slice(4,6)+'-'+digits.slice(6);
-  else if(digits.length>4) out=digits.slice(0,4)+'-'+digits.slice(4);
-  if(out!==v) kickInput.value=out;
-}
-kickInput.addEventListener('input',()=>{autoFormatKick();reflow();});
-kickInput.addEventListener('change',reflow);
-kickInput.addEventListener('blur',()=>{const d=parseInputDate(kickInput.value.trim());
-  if(d){const n=iso(d); if(n!==kickInput.value.trim())kickInput.value=n; run();}});
+// (Kick-off input removed — the Kick-off is always back-derived from the Stable Release. §user)
 document.getElementById('reset').onclick=()=>{
   uploadToken++;                 // invalidate any in-flight OCR so it can't repopulate after reset
   durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;siToPvDaysOverride=null;mvGoDaysOverride=null;
   kickToLayoutOverride=null;layoutToGoOverride=null;
-  _prevFeasible=null; fcsMode='lock';
-  document.querySelectorAll('#fcsModeSeg button').forEach(x=>x.classList.toggle('on',x.dataset.mode==='lock'));
+  dateOverride={};regionFcsList=[];
+  derivedKickISO='';derivedKickForSR='';
+  _prevFeasible=null;
   BRANCH_INFO=null;lastValidSrISO='';
   document.getElementById('proj').value='';
   document.getElementById('branch').value='';
-  document.getElementById('kick').value='';
   srInput.value='';
   document.getElementById('lead').value='KS';
   document.getElementById('leadCustom').value='';
