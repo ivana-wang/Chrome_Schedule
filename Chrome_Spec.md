@@ -700,6 +700,11 @@ ME 線 : ME design → … → T1+T2 → <phase> ME parts → ME ETA ┘
    讀起來有時間先後感，不再上下直接疊在同一 x。（build 已合併為單一方塊，見第 2 點。）
    ⚠️ 採 **phase-segment 座標**（chip 落在「被指派的 phase」區段內，依日期在段內排序），
    **非全域真實日期座標**（曾試過 `dateToX` 全域時間定位，視覺效果不佳，已回退）。
+   **v3（2026-07-17 user 修正，取代短命的 v2 日期比例方案）**：chip **維持原 band 等距配置**
+   （v2 的段內日期比例讓 Proto SMT 與 Tooling Release 相撞，已回退；**F2 座標本來就正確、完全未動**）。
+   唯一改動：**G.O. 標記（bar 下方）x 座標上限鎖在該 phase 段前緣 ≤10% 處**（`goX` cap；
+   首個 SMT chip 中心最左為段 14.5%）→ **G.O. 恆畫在 SMT 左邊**（G.O. 先於 SMT 的時序不再倒置）；
+   Testing→G.O. 週數箭頭端點同步使用 cap 後座標。僅 F1（隔離鐵則）。
 4. **連線**：chip↔bar 用**實線**（非虛線），並在**碰到 bar 的那一端加實心圓點**（`.rm-conn.barbot/.bartop`）。
 5. **版面間距**：**SMT 層比 Google 層下移**（與第一層 Google chip 在垂直空間上錯開，避免擁擠）；
    **build 層上移、與 phase bar 之間保留間隙**（4 行的合併 build chip 不可壓到 / 蓋到 bar）；
@@ -737,7 +742,12 @@ ME 線 : ME design → … → T1+T2 → <phase> ME parts → ME ETA ┘
 
 > 沿革：461f5c1 曾把 **F2 的**假日 snap 移植進 F1（違反「**F1/F2 規則永不互相移植/覆寫**」鐵則，且造成 SR=4/1 時 DVT→MV G.O. 4 週縮成 2 週的 bug）→ 已撤銷。之後 owner 決定 **F1 自己也要**「週日與法定假日不排工作、順延到工作日」——以下為 **F1 原生規則**（非移植；與 F2 §9.6 的規則刻意不同）。
 
-- **規則**：任何 task 的 **start 不得落在週日或法定假日**，順延到下一個工作日。**週六為工作日（全部 task 皆可，無 build/非build 之分——這是與 F2 規則的刻意差異）**。lead 側查 KS（中國+台灣）假日表、site=VN 的 region task 查所選 region 假日表。
+- **規則（v3，2026-07-17 owner 再修訂）**：任何 task 的 **start 不得落在週六、週日或法定假日**。**方向 = 先往前（backward-first）**：先試**前一個工作日**（允許吃掉 lag 的 1–2 天 slack、交付提前），但**受依賴 floor 保護**——絕不早於前置任務的錨點日（如 PCB FAB 不早於 G.O.、Pre-Build 不早於 RTM）；floor 擋住時才**順延到下一個工作日**。lead 側查 KS（中國+台灣）假日表、site=VN 的 region task 查所選 region 假日表。
+  > 沿革：v2 曾「只避週日+假日、週六可工作」；owner 檢視後認定 Tooling Release / T1+T2 / Pre-Build / Ship ETA / PCB FAB / By part / VN SMT 等落在週六不合理（部分源自 golden 本身即含週六：Tooling Release 3/7、T1+T2 4/18、PVT Pre-Build 9/5；部分源自 SR 平移改變星期對位）→ v3 將週六納入迴避並改為 backward-first。
+- **v4 補強（2026-07-17 鐵紀律「Holiday 不能排工作」）**：
+  1. **Gate 也要避假日**——gate 走 `tryAnchor` 繞過 setSE，先前只顯示 ⚠ 未順延（SR 2/24 時 PVT G.O. 落在 CNY 2/19 的 bug）。修正：**PVT G.O. 順延向後**（skipNonWork；4 週間距在被假日推移時 >28d 屬正確行為）、**PLD / FW Candidate 向前 snap**（不可滑向 CFZ）、FW Testing start 向後 snap；CFZ/RTM/FCS 本已 holiday-aware。
+  2. **Span 遇國定假日自動延展**——假日不計入 span 工作天（end 順延同天數；週末維持日曆語意；golden 豁免 byte-exact）。例：34d 測試窗跨端午 3 天 → 實跨 37 日曆天。
+  3. **常駐 self-test `holiday_selftest.js`（repo 根目錄）**：每次引擎改動必跑——稽核 F1+F2 全 task start / gate / span end 無假日、F1 gap≥28、F2 40wd、F1 golden byte-exact，違規即 exit 1。
 - **不影響其他規則（實作保證）**：
   1. **duration 不變**——snap 只移 start，end = start + span；
   2. **dependency lag 不變**——下游仍由（snap 後的）前置日期 + 原 lag 推得；

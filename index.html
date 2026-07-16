@@ -620,9 +620,13 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','
    entirely by the OCR/edited table. Code is COPIED from ChromeSchedule.html and
    adapted to generic rows — nothing is shared, Function 1 stays untouched. ---- */
 const G3MS=86400000;
-function chevSVG(fill,stroke){
+function chevSVG(fill,stroke,t){
+  // t = horizontal arrow extent in viewBox units (default 9.3). Narrow segments (PVR) pass a
+  // larger t so the on-screen tip width/sharpness matches the full-width phases. §user fix
+  t=t||9.3;
+  const b=(99.3-t).toFixed(2), n=(0.7+t).toFixed(2);
   return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
-    `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
+    `<polygon points="0.7,0.7 ${b},0.7 99.3,23 ${b},45.3 0.7,45.3 ${n},23" fill="${fill}" stroke="${stroke}" `+
     `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
 }
 /* table rows → F1-style rows {ph,nm,s,e,site,mile}. Site is read from the task name. */
@@ -802,12 +806,15 @@ function renderGenRoadmap(){
   // chevron bar (Proto/EVT/DVT/PVR/PVT names + per-phase date range)
   const bar=document.createElement('div');bar.className='rm-bar';bar.style.position='absolute';
   bar.style.left='0';bar.style.right='0';bar.style.top=barY+'px';bar.style.zIndex='1';
+  // arrow extent compensated per segment width so the on-screen tip is IDENTICAL on every phase
+  const maxSegW=Math.max(...segDef.map(([ph])=>seg[ph].x1-seg[ph].x0));
   segDef.forEach(([ph])=>{
     const p=PH_BY_KEY[ph],sg=seg[ph];
     const c=document.createElement('div');c.className='rm-chev';
     c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';
     const pr=phRange[ph],dr=pr?`${g3md(new Date(pr.s))}–${g3md(new Date(pr.e))}`:'';
-    c.innerHTML=chevSVG(cssv(p.f),'#1a1a1a')+`<div class="chev-label-rm"><span>${p.label}</span><small>${dr}</small></div>`;
+    const t=Math.min(30, 9.3*maxSegW/(sg.x1-sg.x0));
+    c.innerHTML=chevSVG(cssv(p.f),'#1a1a1a',t)+`<div class="chev-label-rm"><span>${p.label}</span><small>${dr}</small></div>`;
     bar.appendChild(c);
   });
   mid.appendChild(bar);

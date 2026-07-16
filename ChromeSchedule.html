@@ -391,6 +391,7 @@ const isHol=(x,set)=>set.has(iso(x));
 const isWknd=(x,mode)=> mode==='build'?dow(x)===0:(dow(x)===0||dow(x)===6);
 const nextWork=(x,mode,hol)=>{let c=new Date(x);while(isWknd(c,mode)||isHol(c,hol))c=addCal(c,1);return c;};
 const skipNonWork=(x,hol)=>{let c=new Date(x);while(dow(c)===0||dow(c)===6||isHol(c,hol))c=addCal(c,1);return c;};
+const skipNonWorkBack=(x,hol)=>{let c=new Date(x);while(dow(c)===0||dow(c)===6||isHol(c,hol))c=addCal(c,-1);return c;};
 const nextFriday=x=>{let c=new Date(x);while(dow(c)!==5)c=addCal(c,1);return c;};
 const fridayOrPrev=(x,hol)=>{let f=nextFriday(x);while(isHol(f,hol)||dow(f)===0||dow(f)===6)f=addCal(f,-1);return f;};
 /* earliest (on-or-before) Friday, then back off holidays — used for CFZ/RTM gate snap. */
@@ -648,7 +649,9 @@ function build(srISO){
   // §user: every anchor point derives from the ChromeOS Stable Release ONLY (never Chrome Browser,
   // never an independently-OCR'd cut). Stable Cut = ChromeOS SR − 2 weeks → FW Lock(PLD) = −1wk → FW Candidate = −1wk.
   const earlyCut=addCal(SR,-14);
-  const fwLock=addCal(earlyCut,-7), fwCand=addCal(fwLock,-7);
+  // §IRON RULE: gates must not land on weekends/holidays either. FW gates snap BACKWARD (they
+  // must never slip toward/past CFZ); at golden SR these are workdays so golden stays exact.
+  const fwLock=skipNonWorkBack(addCal(earlyCut,-7),LEADHOL), fwCand=skipNonWorkBack(addCal(fwLock,-7),LEADHOL);
   const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:28;
   // SR-nominal DVT Test Start — the fixed reference MV G.O. hangs off (§13.1); exported on the
   // model so a typed MV G.O. date can be translated back into an mvGoDays offset (task board).
@@ -677,27 +680,43 @@ function build(srISO){
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
   const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
   const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
-  // §F1-NATIVE holiday rule (owner-decided 2026-07-17 — NOT a port; F1/F2 rules stay strictly
-  // independent, see the isolation iron rule): no task may START on a SUNDAY or a statutory
-  // holiday — the start defers to the next working day. Saturday is a working day for EVERY F1
-  // task (unlike F2's build/non-build split — deliberately different rules per function).
-  // Durations and dependency lags are untouched: the snap only places the start; end = start +
-  // span. EXEMPTION: golden-reproduction mode (golden SR + zero edits) skips the snap because
-  // the frozen xlsx GOLDEN itself contains Sunday/holiday starts (SI ME parts Sun 4/26, PV FAB
-  // Dragon-Boat 6/19) and §4.2 demands byte-exact reproduction.
+  // §F1-NATIVE holiday rule v2 (owner-decided 2026-07-17 — NOT a port; F1/F2 rules stay strictly
+  // independent): no task may START on a SATURDAY, SUNDAY or statutory holiday. Direction is
+  // BACKWARD-FIRST: try the PREVIOUS working day (this may eat 1-2 days of lag slack but keeps
+  // deliverables early); if that would cross the dependency FLOOR (the predecessor's anchor
+  // date — a task can never start before what it depends on), defer FORWARD instead.
+  // Durations and dependency lags stay untouched (the snap only places the start; end = start +
+  // span). EXEMPTION: golden-reproduction mode (golden SR + zero edits) skips the snap because
+  // the frozen xlsx GOLDEN itself contains weekend/holiday starts (Tooling Release Sat 3/7,
+  // T1+T2 Sat 4/18, SI ME parts Sun 4/26, PV FAB Dragon-Boat 6/19) and §4.2 demands byte-exact
+  // reproduction.
   const anyEdit=Object.keys(durOverride).length>0||Object.keys(dateOverride).length>0
     ||dbSiDaysOverride!=null||siPvDaysOverride!=null
     ||cfzDaysOverride!=null||rtmDaysOverride!=null||mvGoDaysOverride!=null;
   const goldenMode=(shift===0&&!anyEdit);
   const holFor=r=> r.site==='VN'?REGIONHOL:LEADHOL;
-  const snapStart=(d,r)=>{ if(goldenMode)return d;
-    let c=new Date(d); const hol=holFor(r);
-    while(dow(c)===0||isHol(c,hol)) c=addCal(c,1);
-    return c; };
-  const setSE=(r,s)=>{
+  const snapStart=(d,r,floor)=>{ if(goldenMode)return d;
+    const hol=holFor(r);
+    const bad=x=>dow(x)===0||dow(x)===6||isHol(x,hol);
+    if(!bad(d))return d;
+    let back=new Date(d); while(bad(back))back=addCal(back,-1);
+    if(floor==null||+back>=+floor) return back;                   // backward-first, floor-guarded
+    let fwd=new Date(d); while(bad(fwd))fwd=addCal(fwd,1);
+    return fwd;
+  };
+  const setSE=(r,s,floor)=>{
     if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
-    const s2=snapStart(s,r);                                      // Sun/holiday deferral (F1-native)
-    r.s=s2; r.e=r.mile?s2:addCal(s2,spanOf(r));
+    const s2=snapStart(s,r,floor);                                // Sat/Sun/holiday snap (F1-native)
+    r.s=s2;
+    if(r.mile){ r.e=s2; return; }
+    // §IRON RULE: statutory holidays are NON-working inside a span too — the end extends by the
+    // holiday days the window crosses (weekends keep the original calendar-span semantics; the
+    // golden windows were calibrated that way). goldenMode reproduces the xlsx golden verbatim.
+    if(goldenMode){ r.e=addCal(s2,spanOf(r)); return; }
+    const hol=holFor(r);
+    let e=new Date(s2), n=spanOf(r);
+    while(n>0){ e=addCal(e,1); if(!isHol(e,hol)) n--; }
+    r.e=e;
   };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
   const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
@@ -709,18 +728,23 @@ function build(srISO){
     return [];                                  // 'P'
   };
   const computeDep=(r,dep)=>{
-    if(dep[0]==='P'){ setSE(r, addCal(projStart, calDiff(G_PROJ,r.gs))); }
+    // each edge passes its dependency FLOOR (the predecessor anchor) so the backward-first
+    // weekend/holiday snap can never move a task before what it depends on.
+    if(dep[0]==='P'){ setSE(r, addCal(projStart, calDiff(G_PROJ,r.gs)), projStart); }
     else if(dep[0]==='FS'){ const pk=dep[1], a=dep[2]||'e';
       let lag=calDiff(gdate(pk,a),r.gs);
       // editable Testing→G.O. handoffs (task-board ww pills); null = golden lag
       const key=r.ph+'/'+r.nm;
       if(key==='SI/SI Gerber release'&&dbSiDaysOverride!=null) lag=dbSiDaysOverride;
       else if(key==='PV/PV Gerber release'&&siPvDaysOverride!=null) lag=siPvDaysOverride;
-      setSE(r, addCal(curRef(pk,a), lag)); }
+      const ref=curRef(pk,a);
+      setSE(r, addCal(ref, lag), ref); }
     else if(dep[0]==='MAX'){ const refs=dep[1];
       const lag=calDiff(maxD(refs.map(([k,a])=>gdate(k,a||'e'))), r.gs);
-      setSE(r, addCal(maxD(refs.map(([k,a])=>curRef(k,a||'e'))), lag)); }
-    else if(dep[0]==='OFF'){ const lk=dep[1]; setSE(r, addCal(byKey[lk].e, calDiff(GKEY[lk].ge, r.gs))); }
+      const ref=maxD(refs.map(([k,a])=>curRef(k,a||'e')));
+      setSE(r, addCal(ref, lag), ref); }
+    else if(dep[0]==='OFF'){ const lk=dep[1];
+      setSE(r, addCal(byKey[lk].e, calDiff(GKEY[lk].ge, r.gs)), byKey[lk].e); }
   };
   const tryAnchor=r=>{
     switch(r.nm){
@@ -728,12 +752,14 @@ function build(srISO){
       case 'RTM Ties-1 = RTM': r.s=r.e=RTM; return true;
       case 'PLD': r.s=r.e=fwLock; return true;
       case 'FW Candidate': r.s=r.e=fwCand; return true;
-      case 'FW Candidate Testing': r.s=addCal(fwCand,1); r.e=addCal(fwLock,-1); return true;
+      case 'FW Candidate Testing': r.s=skipNonWork(addCal(fwCand,1),LEADHOL); r.e=addCal(fwLock,-1); return true;
       case 'MV Gerber release': {
         // §13.1 two-block rule: the forward (MV/FCS) block is anchored to Stable Release, NOT to
         // the live (HW-editable) DVT test. So MV G.O. = SR-nominal DVT Test Start + N — HW/Days
         // edits in the backward chain never leak past SR into CFZ/RTM/FCS. (mvGoDays editable.)
-        r.s=r.e=addCal(dvtNominal, mvGoDays); return true; }
+        // §IRON RULE: a gate landing on a weekend/holiday DEFERS to the next working day
+        // (fixes PVT G.O. landing inside CNY at SR 2/24 while only showing a ⚠ chip).
+        r.s=r.e=skipNonWork(addCal(dvtNominal, mvGoDays),LEADHOL); return true; }
       case 'KS FCS': { const k='MV/Product release - KS'; if(!resolved.has(k))return false;
         r.s=r.e=skipNonWork(addCal(byKey[k].s,7),LEADHOL); return true; }
       case 'VN FCS': { const k='MV/Product release - VN'; if(!resolved.has(k))return false;
@@ -803,9 +829,15 @@ function validate(model,srISO){
    ===================================================================== */
 function cssv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 /* crisp SVG chevron (notched left + pointed right, same shape every phase). */
-function chevSVG(fill,stroke){
+function chevSVG(fill,stroke,t){
+  // t = horizontal arrow extent in viewBox units (default 9.3 = the original shape). Because the
+  // SVG stretches non-uniformly (preserveAspectRatio:none), narrow segments (PVR = half width)
+  // must pass a LARGER t so the arrow's on-screen pixel width — and thus its sharpness — matches
+  // the full-width phases. §user fix 2026-07-17
+  t=t||9.3;
+  const b=(99.3-t).toFixed(2), n=(0.7+t).toFixed(2);
   return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
-    `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
+    `<polygon points="0.7,0.7 ${b},0.7 99.3,23 ${b},45.3 0.7,45.3 ${n},23" fill="${fill}" stroke="${stroke}" `+
     `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
 }
 /* greedy lane packing — items {x0,x1(px-frac)}; returns lane index per item */
@@ -1225,13 +1257,17 @@ function renderRoadmap2(model,host,style){
    so chips/markers above & below line up with their phase. */
 function barLayer2(model,seg,phRange){
   const div=document.createElement('div');div.className='rm-bar';div.style.position='relative';
+  // arrow extent compensated per segment width so the on-screen tip is IDENTICAL on every phase
+  // (PVR is half-width → gets a proportionally larger viewBox extent). §user fix
+  const maxW=Math.max(...Object.values(seg).map(s=>s.x1-s.x0));
   [['DB','Proto','--proto-f'],['SI','EVT','--evt-f'],['PV','DVT','--dvt-f'],
    ['PVR','PVR','--pvr-f'],['MV','PVT','--pvt-f']].forEach(([ph,name,v])=>{
     const sg=seg[ph]; if(!sg)return;
     const c=document.createElement('div');c.className='rm-chev';
     c.style.position='absolute';c.style.top='0';c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';c.style.height='54px';
     const pr=phRange[ph], dr=pr?`${md(new Date(pr.s))}–${md(new Date(pr.e))}`:'';
-    c.innerHTML=chevSVG(cssv(v),'#1a1a1a')+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
+    const t=Math.min(30, 9.3*maxW/(sg.x1-sg.x0));
+    c.innerHTML=chevSVG(cssv(v),'#1a1a1a',t)+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
     div.appendChild(c);
   });
   return div;
@@ -1262,14 +1298,20 @@ function centerStack(model,segX,seg,phRange,L1div,L2div,BUILDdiv,GO,EXIT){
     l.style.left=x+'%';l.style.top=BELOW+'px';l.style.height=Math.max(0,toY-BELOW)+'px';l.style.color=color;div.appendChild(l);};
   const mk=(x,y,html,color)=>{const m=document.createElement('div');m.className='rm-mk';
     m.style.left=x+'%';m.style.top=y+'px';m.style.color=color;m.innerHTML=html;div.appendChild(m);};
-  GO.forEach(r=>{const x=segX(r.ph,r.s);conn(x,GOY,'#2f6fd0');
+  // G.O. markers are capped to the HEAD of their phase segment (≤10% in) so the G.O. always
+  // renders LEFT of the SMT chip band (first SMT chip center ≥14.5%) — G.O. happens before SMT.
+  // Chips keep the banded layout (date-proportional chips reverted: Proto SMT collided with
+  // Tooling Release). §user fix 2026-07-17 v3
+  const goX=r=>{const sg=seg[r.ph];const x=segX(r.ph,r.s);
+    return sg?Math.min(x,sg.x0+(sg.x1-sg.x0)*0.10):x;};
+  GO.forEach(r=>{const x=goX(r);conn(x,GOY,'#2f6fd0');
     mk(x,GOY+3,`<b>${dispName(r.nm)}</b><span class="dt">${md(r.s)}</span>`,'#1f4e9c');});
   ['DB','SI','PV'].forEach((ph,i)=>{
     const gv=model.rows.find(r=>r.ph===ph && /Google (validation|dogfooding)/.test(r.nm)); if(!gv)return;
     const tx=segX(ph,gv.s);conn(tx,GOY,'#b3402f');
     mk(tx,GOY+3,`<b>${dispName(ph)} Test Start</b><span class="dt">${md(gv.s)}</span>`,'#b3402f');
     const ng=model.rows.find(r=>r.ph===['SI','PV','MV'][i] && /G\.O\.|Gerber/i.test(dispName(r.nm)+r.nm));
-    if(ng){const gx=segX(ng.ph,ng.s),wks=Math.round((ng.s-gv.s)/MS/7);
+    if(ng){const gx=goX(ng),wks=Math.round((ng.s-gv.s)/MS/7);
       const a=document.createElement('div');a.className='rm-arrow';
       a.style.left=Math.min(tx,gx)+'%';a.style.width=Math.abs(gx-tx)+'%';a.style.top=(BELOW+38)+'px';div.appendChild(a);
       const lb=document.createElement('div');lb.className='rm-arlbl';lb.style.left=((tx+gx)/2)+'%';lb.style.top=(BELOW+19)+'px';

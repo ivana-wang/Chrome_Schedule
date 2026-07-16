@@ -673,7 +673,14 @@ function build(srISO,kickISO){
   const setSE=(r,s)=>{
     if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
     const s2=snapStart(s,r);                                      // holiday rule still applies
-    r.s=s2; r.e=r.mile?s2:addCal(s2,spanOf(r));
+    r.s=s2;
+    if(r.mile){ r.e=s2; return; }
+    // §IRON RULE: statutory holidays are NON-working inside a span too — the end extends by the
+    // holiday days the window crosses (weekend handling stays per-task via the F2 rules).
+    const hol=holFor(r);
+    let e=new Date(s2), n=spanOf(r);
+    while(n>0){ e=addCal(e,1); if(!isHol(e,hol)) n--; }
+    r.e=e;
   };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
   const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
@@ -842,9 +849,13 @@ function validate(model,srISO){
    ===================================================================== */
 function cssv(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 /* crisp SVG chevron (notched left + pointed right, same shape every phase). */
-function chevSVG(fill,stroke){
+function chevSVG(fill,stroke,t){
+  // t = horizontal arrow extent in viewBox units (default 9.3). Narrow segments (PVR) pass a
+  // larger t so the on-screen tip width/sharpness matches the full-width phases. §user fix
+  t=t||9.3;
+  const b=(99.3-t).toFixed(2), n=(0.7+t).toFixed(2);
   return `<svg class="chev-svg" viewBox="0 0 100 46" preserveAspectRatio="none">`+
-    `<polygon points="0.7,0.7 90,0.7 99.3,23 90,45.3 0.7,45.3 10,23" fill="${fill}" stroke="${stroke}" `+
+    `<polygon points="0.7,0.7 ${b},0.7 99.3,23 ${b},45.3 0.7,45.3 ${n},23" fill="${fill}" stroke="${stroke}" `+
     `stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
 }
 /* greedy lane packing — items {x0,x1(px-frac)}; returns lane index per item */
@@ -1269,13 +1280,16 @@ function renderRoadmap2(model,host,style){
    so chips/markers above & below line up with their phase. */
 function barLayer2(model,seg,phRange){
   const div=document.createElement('div');div.className='rm-bar';div.style.position='relative';
+  // arrow extent compensated per segment width so the on-screen tip is IDENTICAL on every phase
+  const maxW=Math.max(...Object.values(seg).map(s=>s.x1-s.x0));
   [['DB','Proto','--proto-f'],['SI','EVT','--evt-f'],['PV','DVT','--dvt-f'],
    ['PVR','PVR','--pvr-f'],['MV','PVT','--pvt-f']].forEach(([ph,name,v])=>{
     const sg=seg[ph]; if(!sg)return;
     const c=document.createElement('div');c.className='rm-chev';
     c.style.position='absolute';c.style.top='0';c.style.left=sg.x0+'%';c.style.width=(sg.x1-sg.x0)+'%';c.style.height='54px';
     const pr=phRange[ph], dr=pr?`${md(new Date(pr.s))}–${md(new Date(pr.e))}`:'';
-    c.innerHTML=chevSVG(cssv(v),'#1a1a1a')+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
+    const t=Math.min(30, 9.3*maxW/(sg.x1-sg.x0));
+    c.innerHTML=chevSVG(cssv(v),'#1a1a1a',t)+`<div class="chev-label rm"><span>${name}</span><small>${dr}</small></div>`;
     div.appendChild(c);
   });
   return div;
