@@ -372,3 +372,15 @@ Refresh Board = **PCB 換板改版**，沿用現有機構（外殼 / 模具 / ID
 - Kick-off 恆為 SR 回推後，**slip 模式已無適用情境**（不可行狀態不會發生、lock/slip 產出實質相同）→ **FCS mode 開關（req6）整組移除**，排程**永遠 SR-locked**。
 - 引擎內 `fcsMode` 分支全數移除：PVT G.O. 恆 = `mvGoNominal`（SR−5 snap），DVT Test 恆釘 `MAX(chainReady, PVT G.O.−8ww)`。feasibility 機制保留（req4/5，含 modal），供日後 duration 編輯造成不可行時使用。
 - Project Setup 最終輸入 = **Branch 圖/Stable Release（唯一錨）+ Lead/Region 工廠**。
+
+### 9.10 PRODUCT_SPEC-style Task Board（F1+F2 共同換皮 — user 拍板 4 點）
+- **UI 對齊 `Validation/PRODUCT_SPEC.md` 的 task list**：頂部 Testing→G.O. **ww pill**（可編輯）、藍漸層 chevron 標頭（FCS 綠）、每 phase 一直欄（`• 日期 | task | chips`，日期欄固定 114px）、duration **d/wd chip**（可編輯）、gate chip、`⚠ Hol/Sun` 警示列、**Phase Exit 卡**、FCS 欄（CHINA L10 FCS / REGION FCS 卡 + `+ Add region` 可編輯清單）。
+- **編輯即連動**：date（`dateOverride` 釘住 start，沿 DAG 傳遞下游；rule-anchored task 鎖定不可改）、duration、ww/gate pill——任一修改立即 `run()` 全鏈重排。
+- **task 內容不變**（只套 UI）；F1 為 6 欄（DB/SI/PV/PVR/MV/FCS）、F2 為 §9 的 2-Phase 5 欄（Proto/DVT/PVR/PVT/FCS）。
+- F1 增量（frozen 檔內、user 授權）：`dateOverride` / `dbSiDaysOverride` / `siPvDaysOverride`，預設全空 → **golden 驗證 PASS（38 WKs、0 偏差）**。F2 的 `dateOverride` 走 snapStart（假日規則仍適用）。
+- 驗證：雙檔語法 OK；board 煙霧（F1 65 行+3 Exit 卡、F2 43 行+2 Exit 卡）；dateOverride/ww 連動 harness（pin FAB +7 → 下游 +7、gate/FCS 鎖定）；F2 假日稽核 0 違規；standalone 重建（380KB，內嵌 byte-identical）。
+
+### 9.11 編輯連動 self-test 與修正（user 回報）
+- **真 bug（F2）**：每次 `run()` 都重新回推 Kick-off（JIT），duration/日期一改，Kick-off 就平移抵消 → 下游看似「沒連動」。**修正：derived Kick-off 依 SR 快取**（只在 SR 變更或 Reset 時重推；編輯期間固定）→ 編輯如實傳遞下游，buffer 縮放、不足時觸發 feasibility 警告。
+- **F1 無 bug**（兩-block 規則下 HW 編輯連動、gate 鎖定皆正確）。
+- **Self-test harness**（`edit_selftest.js`）：對 F1/F2 **逐一**模擬每個可編輯 duration（+5d）與日期（pin +7d），驗證 (a) 自身 end 位移、(b) 所有 FS('e')/OFF dependents 正向位移且滿足**依賴不變式 `dep.start ≥ pred.end`**、(c) HW 編輯下 CFZ/RTM/FCS 鎖定不動。結果：**F1 ALL LINKED ✓、F2 ALL LINKED ✓**（初測 F2 的 2 條殘餘為假警報——端午假日 snap 吸收了部分差值，依賴不變式成立）。

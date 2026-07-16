@@ -208,6 +208,47 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .rmA .rm-band{position:relative;padding-left:0;margin-bottom:2px}
 .editpanel{margin-top:16px}
 .editpanel summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:8px 0}
+
+/* ===== PRODUCT_SPEC-style task board (renderer only — engine untouched). §user req ===== */
+.tb-hand{display:flex;gap:26px;margin:0 2px 12px;flex-wrap:wrap}
+.tb-hand .hd{font-family:'JetBrains Mono';font-size:12.5px;color:#3a4253;display:flex;align-items:center;gap:6px;font-weight:600}
+.tb-hand .arr{color:#7b8497}
+.tb-ww{background:#eef2fb;border:1px solid #9ab0d8;border-radius:100px;padding:1px 8px;display:inline-flex;align-items:center;gap:2px;color:#2b3a63;font-weight:700;font-family:'JetBrains Mono';font-size:12px}
+.tb-ww input{width:2.4ch;border:0;background:transparent;font:inherit;color:inherit;text-align:right;outline:none}
+.tb-head,.tb-cols{display:grid;gap:0}
+/* chevron colours come from the Chrome_Spec §5.2 pastel palette (--proto-f etc.), set inline per phase */
+.tb-chev{position:relative;height:46px;display:flex;align-items:center;justify-content:center;color:#1a1f2b;font-weight:700;font-size:15.5px;letter-spacing:.5px;
+  clip-path:polygon(0 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,0 100%,13px 50%)}
+.tb-chev:first-child{clip-path:polygon(0 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,0 100%)}
+.tb-chev.fcs{font-size:12.5px;letter-spacing:.8px}
+.tb-col{padding:12px 10px 8px;border-right:1px dashed #e6ebf3;display:flex;flex-direction:column}
+.tb-col:last-child{border-right:0}
+.tb-row{display:flex;align-items:flex-start;gap:8px;padding:3.5px 2px;font-size:13px;border-radius:6px}
+.tb-date{flex:0 0 114px;font-family:'JetBrains Mono';font-size:12.5px;color:#2f6fb0;line-height:1.4;display:flex;gap:5px}
+.tb-date .bu{color:#2f6fb0;flex:0 0 auto;line-height:1.5}
+.tb-date .din{display:flex;flex-direction:column;min-width:0;flex:1}
+.tb-date input{width:100%;border:0;background:transparent;font:inherit;color:inherit;outline:none;padding:0}
+.tb-date input:focus{background:#eef4fc;border-radius:4px}
+.tb-date input[disabled]{color:#2f6fb0;-webkit-text-fill-color:#2f6fb0;opacity:1}
+.tb-name{flex:1;color:#22293a;line-height:1.4;padding-top:1px;min-width:0}
+.tb-row.gate .tb-name{font-weight:700}
+.tb-row.warn{background:#fdecec}
+.tb-row.warn .tb-name{color:#b02a2a;font-weight:600}
+.tb-chip{flex:0 0 auto;font-family:'JetBrains Mono';font-size:11px;background:#eef1f5;border:1px solid #cfd7e3;border-radius:100px;padding:1px 8px;color:#3a4757;display:inline-flex;align-items:center;margin-top:1px;white-space:nowrap}
+.tb-chip input{width:3ch;border:0;background:transparent;font:inherit;color:inherit;text-align:right;outline:none}
+.tb-chip.satwarn{background:#fdecec;border-color:#e2a0a0;color:#b02a2a;font-weight:700}
+.tb-exit{margin:12px auto 4px;background:#fff;border:1px solid #e3e8f0;border-radius:10px;box-shadow:0 5px 16px rgba(20,30,60,.13);padding:9px 16px;text-align:center;font-size:11.5px;color:#5d6b8a;min-width:150px}
+.tb-exit b{display:block;font-family:'JetBrains Mono';color:#2f56c9;font-size:14.5px;margin-top:3px;font-weight:700}
+.tb-fcscard{background:#eaf6ec;border:1px solid #bfe3c8;border-radius:10px;padding:10px 13px;margin-bottom:10px}
+.tb-fcscard .k{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.7px;color:#2e7d43;font-weight:700}
+.tb-fcscard .v{font-family:'JetBrains Mono';font-size:17px;font-weight:700;color:#175c2c;margin-top:3px}
+.tb-fcscard.region{background:#f4faf1;border-color:#d5e8cf}
+.tb-reg{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-family:'JetBrains Mono';font-size:12px;color:#2a3142}
+.tb-reg input{border:1px solid #e2e6ee;border-radius:6px;padding:3px 6px;font:inherit;color:inherit;background:#fff;outline:none}
+.tb-reg input.rn{width:86px}.tb-reg input.rd{width:96px}
+.tb-reg .rx{cursor:pointer;color:#b02a2a;background:none;border:0;font-size:14px;padding:0 2px}
+.tb-addreg{font-size:11.5px;color:#5d6b8a;background:none;border:1px dashed #cfd7e3;border-radius:8px;cursor:pointer;padding:4px 10px;margin-top:2px}
+.tb-addreg:hover{color:#2f56c9;border-color:#9ab0d8}
 </style>
 </head>
 <body>
@@ -467,6 +508,15 @@ const HOL_LABELS={
 
 /* per-task editable duration override (calendar days). key=index */
 let durOverride={};
+/* per-task editable START-date override (ISO). key=index. Additive layer: with no overrides the
+   schedule is byte-identical to golden; a pinned date propagates to all dependents via the DAG.
+   SR-locked gates (ANCHOR_NAMES) ignore it. §user task-board req */
+let dateOverride={};
+/* Testing→G.O. handoff overrides (calendar days; null = golden-calibrated lag).
+   dbSiDaysOverride: DB Testing start → SI G.O. ; siPvDaysOverride: SI Testing start → PV G.O. */
+let dbSiDaysOverride=null, siPvDaysOverride=null;
+/* user-added Region FCS rows (display layer: date = KS FCS + leadDays cal). {name, leadDays} */
+let regionFcsList=[];
 /* user-adjustable gate gaps (calendar days). null = use default formula.
    cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM ;
    mvGoDaysOverride = DVT Test Start → MV G.O. (default 28 = 4 weeks). */
@@ -595,7 +645,10 @@ function build(srISO){
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
   const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
   const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
-  const setSE=(r,s)=>{ r.s=s; r.e=r.mile?s:addCal(s,spanOf(r)); };
+  const setSE=(r,s)=>{
+    if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
+    r.s=s; r.e=r.mile?s:addCal(s,spanOf(r));
+  };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
   const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
   const resolved=new Set();
@@ -607,7 +660,13 @@ function build(srISO){
   };
   const computeDep=(r,dep)=>{
     if(dep[0]==='P'){ setSE(r, addCal(projStart, calDiff(G_PROJ,r.gs))); }
-    else if(dep[0]==='FS'){ const pk=dep[1], a=dep[2]||'e'; setSE(r, addCal(curRef(pk,a), calDiff(gdate(pk,a),r.gs))); }
+    else if(dep[0]==='FS'){ const pk=dep[1], a=dep[2]||'e';
+      let lag=calDiff(gdate(pk,a),r.gs);
+      // editable Testing→G.O. handoffs (task-board ww pills); null = golden lag
+      const key=r.ph+'/'+r.nm;
+      if(key==='SI/SI Gerber release'&&dbSiDaysOverride!=null) lag=dbSiDaysOverride;
+      else if(key==='PV/PV Gerber release'&&siPvDaysOverride!=null) lag=siPvDaysOverride;
+      setSE(r, addCal(curRef(pk,a), lag)); }
     else if(dep[0]==='MAX'){ const refs=dep[1];
       const lag=calDiff(maxD(refs.map(([k,a])=>gdate(k,a||'e'))), r.gs);
       setSE(r, addCal(maxD(refs.map(([k,a])=>curRef(k,a||'e'))), lag)); }
@@ -670,6 +729,7 @@ const ORACLE={
 function validate(model,srISO){
   if(!model.hasAnchor) return {noAnchor:true,atGolden:false,miss:[],wkAll:0,durOK:true,pass:true};
   const atGolden = srISO==='2026-08-25' && Object.keys(durOverride).length===0
+    && Object.keys(dateOverride).length===0 && dbSiDaysOverride==null && siPvDaysOverride==null
     && cfzDaysOverride==null && rtmDaysOverride==null && mvGoDaysOverride==null;
   const miss=[];
   if(model.unresolved) miss.push(`DAG: ${model.unresolved} task(s) unresolved (cyclic/missing dep)`);
@@ -758,74 +818,172 @@ function render(model,val,srISO){
     : 'No Stable Release (anchor) entered yet · showing task structure and adjustable Days only; dates compute automatically once entered';
   document.getElementById('tlFcs').innerHTML= has
     ? `${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b>` : '';
-  // ---- phase bar = Develop phase graph.png (Proto/EVT/DVT/PVT) ----
-  const cont=document.getElementById('chevrons');cont.innerHTML='';
-  BAR.forEach(b=>{
-    const inph=model.rows.filter(r=>b.phs.includes(r.ph));
-    const div=document.createElement('div');div.className='chev';
-    let range='';
-    if(has && inph.length){const s=inph.reduce((m,r)=>r.s<m?r.s:m,inph[0].s), e=inph.reduce((m,r)=>r.e>m?r.e:m,inph[0].e);range=`${md(s)}–${md(e)}`;}
-    div.innerHTML=chevSVG(cssv(b.f),'#1a1a1a')+
-      `<div class="chev-label"><span>${b.name}</span>${range?`<small>${range}</small>`:''}</div>`;
-    cont.appendChild(div);
-  });
-  // ---- on-screen: editable columnar task list ----
-  const host=document.getElementById('phases');host.innerHTML='';
-  PHASE_ORDER.forEach(ph=>{
-    const meta=PHASE_META[ph];
-    const inph=model.rows.filter(r=>r.ph===ph).sort((a,b)=>a.s-b.s||a.gs-b.gs);
-    if(!inph.length)return;
-    const block=document.createElement('div');block.className='phaseblock';
-    const head=document.createElement('div');head.className='ph';
-    head.style.background=cssv(meta.f);head.style.color='#23303f';
-    head.innerHTML=`<span>${meta.label}${meta.sub&&meta.sub!==meta.label?' · '+meta.sub:''}</span>`;
-    block.appendChild(head);
-    const ch=document.createElement('div');ch.className='colhead';
-    ch.innerHTML=`<div>Task</div><div>Start</div><div>End</div><div>Days</div>`;block.appendChild(ch);
-    inph.forEach(r=>{
-      const row=document.createElement('div');
-      row.className='task'+(r.mile?' mile':'')+(r.gate?' gate':'');
-      const nm=dispName(r.nm), code=dispSite(r.site);
-      // only show the factory pill when the task name doesn't already carry the code
-      const site=(r.site && !nm.includes(code))?`<span class="site ${r.site}">${code}</span>`:'';
-      const defSpan=goldenSpan(r);
-      let durCell;
-      if(r.nm==='Code Freeze (FSI candidate) = CFZ')
-        durCell=`<div class="dur"><input data-gate="cfz" value="${model.cfzDays}" title="Stable Release → CFZ (cal days) — adjustable"></div>`;
-      else if(r.nm==='RTM Ties-1 = RTM')
-        durCell=`<div class="dur"><input data-gate="rtm" value="${model.rtmDays}" title="CFZ → RTM (cal days) — adjustable"></div>`;
-      else if(r.nm==='MV Gerber release')
-        durCell=`<div class="dur"><input data-gate="mvgo" value="${model.mvGoDays}" title="DVT Test Start → MV G.O. (cal days, 28=4wk) — adjustable"></div>`;
-      else if(r.mile)
-        durCell=`<div class="dur" style="color:#b8c">◆</div>`;
-      else
-        durCell=`<div class="dur"><input data-i="${r.i}" value="${durOverride[r.i]??defSpan}" title="duration (cal days)"></div>`;
-      const sCell=has?md(r.s):'';
-      const eCell=has?(r.mile?'—':md(r.e)):'';
-      row.innerHTML=`<div class="nm">${nm}${site}</div>
-        <div class="d">${sCell}</div>
-        <div class="d${r.mile?' m':''}">${eCell}</div>${durCell}`;
-      block.appendChild(row);
-    });
-    host.appendChild(block);
-  });
-  host.querySelectorAll('input[data-i]').forEach(inp=>{
-    inp.addEventListener('change',()=>{
-      const i=+inp.dataset.i, v=parseInt(inp.value,10);
-      if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
-      run();
-    });
-  });
-  host.querySelectorAll('input[data-gate]').forEach(inp=>{
-    inp.addEventListener('change',()=>{
-      const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
-      if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
-      else if(inp.dataset.gate==='mvgo') mvGoDaysOverride=ok?v:null;
-      else rtmDaysOverride=ok?v:null;
-      run();
-    });
-  });
+  // ---- PRODUCT_SPEC-style task board (renderer only — engine & task set untouched) ----
+  document.getElementById('chevrons').style.display='none';
+  window._lastModelRows=model.rows; window._lastFcsKS=model.fcsKS||null;
+  renderTaskBoard(model,has);
   renderVal(val,model);
+}
+
+/* =====================================================================
+   TASK BOARD — the on-screen task list re-skinned to the PRODUCT_SPEC UI:
+   handoff ww-pills on top, gradient chevron header, one COLUMN per phase
+   with `date | task | chips` rows (dates and durations inline-editable,
+   any edit reflows every dependent immediately via run()), Phase Exit
+   cards, and an FCS column with L10 + Region cards. §user req
+   ===================================================================== */
+const TB_COLS=[['DB','DB'],['SI','SI'],['PV','PV'],['PVR','PVR'],['MV','MV'],['FCS','FCS']];
+const TB_GRID='1.05fr 1.05fr 1.05fr .58fr 1.05fr .78fr';
+function tbFmt(d){return d?ymd(d):'—';}
+function tbWkChip(id,weeks,title){
+  return `<span class="tb-ww" title="${title}"><input data-ww="${id}" value="${weeks}">ww</span>`;
+}
+function renderTaskBoard(model,has){
+  const host=document.getElementById('phases');host.innerHTML='';
+  const rows=model.rows;
+  const get=(ph,nm)=>rows.find(r=>r.ph===ph&&r.nm===nm);
+  // --- top handoff strip (Testing start → next G.O., editable in weeks) ---
+  const wk=(a,b)=>(a&&b)?Math.round(calDiff(a,b)/7):'—';
+  const dbT=get('DB','Google validation'), siGo=get('SI','SI Gerber release');
+  const siT=get('SI','Google dogfooding'), pvGo=get('PV','PV Gerber release');
+  const pvT=get('PV','Google dogfooding'), mvGo=get('MV','MV Gerber release');
+  const strip=document.createElement('div');strip.className='tb-hand';
+  if(has){
+    strip.innerHTML=
+      `<span class="hd">Proto Testing <span class="arr">–</span> ${tbWkChip('dbsi',wk(dbT&&dbT.s,siGo&&siGo.s),'DB Testing start → EVT G.O. (weeks) — editable')} <span class="arr">→</span> EVT G.O.</span>`+
+      `<span class="hd">EVT Testing <span class="arr">–</span> ${tbWkChip('sipv',wk(siT&&siT.s,pvGo&&pvGo.s),'SI Testing start → DVT G.O. (weeks) — editable')} <span class="arr">→</span> DVT G.O.</span>`+
+      `<span class="hd">DVT Testing <span class="arr">–</span> ${tbWkChip('mvgo',wk(pvT&&pvT.s,mvGo&&mvGo.s),'DVT Testing start → PVT G.O. (weeks) — editable')} <span class="arr">→</span> PVT G.O.</span>`;
+    host.appendChild(strip);
+  }
+  // --- gradient chevron header ---
+  const head=document.createElement('div');head.className='tb-head';head.style.gridTemplateColumns=TB_GRID;
+  TB_COLS.forEach(([ph])=>{
+    const c=document.createElement('div');c.className='tb-chev'+(ph==='FCS'?' fcs':'');
+    c.textContent=ph==='FCS'?'FCS':dispName(ph);
+    // Chrome_Spec §5.2 pastel palette per phase (NOT the PRODUCT_SPEC blue gradient). §user req
+    const meta=PHASE_META[ph];
+    c.style.background=cssv(meta.f);
+    head.appendChild(c);
+  });
+  host.appendChild(head);
+  // --- columns ---
+  const cols=document.createElement('div');cols.className='tb-cols';cols.style.gridTemplateColumns=TB_GRID;
+  TB_COLS.forEach(([ph])=>{
+    const col=document.createElement('div');col.className='tb-col';
+    if(ph==='FCS'){ col.innerHTML=tbFcsColumn(model,has); cols.appendChild(col); return; }
+    const inph=rows.filter(r=>r.ph===ph).sort((a,b)=>(a.s&&b.s)?(a.s-b.s||a.gs-b.gs):(a.gs-b.gs));
+    const exit=inph.find(r=>/\bexit\b/i.test(r.nm));
+    inph.forEach(r=>{
+      if(r===exit)return;
+      col.insertAdjacentHTML('beforeend',tbRow(r,model,has));
+    });
+    if(exit) col.insertAdjacentHTML('beforeend',
+      `<div class="tb-exit">${dispName(r0nm(exit))} Phase Exit<b>${has?tbFmt(exit.s):'—'}</b></div>`);
+    cols.appendChild(col);
+  });
+  host.appendChild(cols);
+  tbWire(host);
+}
+function r0nm(r){return dispName(r.nm).replace(/\s*exit\s*$/i,'').trim();}
+/* one task row: • date(s) | name | chips (duration / gate / weekend-warning) */
+function tbRow(r,model,has){
+  const nm=dispName(r.nm), code=dispSite(r.site);
+  const site=(r.site && !nm.includes(code))?` <span class="site ${r.site}">${code}</span>`:'';
+  const locked=ANCHOR_NAMES.has(r.nm);
+  const sVal=has?tbFmt(r.s):'', eVal=has?tbFmt(r.e):'';
+  const dateCell = r.mile
+    ? `<input data-ds="${r.i}" value="${sVal}" ${(!has||locked)?'disabled':''}>`
+    : `<input data-ds="${r.i}" value="${sVal ? sVal+' ~':''}" ${(!has||locked)?'disabled':''}>
+       <input data-de="${r.i}" value="${eVal}" ${!has?'disabled':''}>`;
+  const chips=[];
+  if(r.nm==='Code Freeze (FSI candidate) = CFZ')
+    chips.push(`<span class="tb-chip" title="Stable Release → CFZ (cal days)"><input data-gate="cfz" value="${model.cfzDays}">d</span>`);
+  else if(r.nm==='RTM Ties-1 = RTM')
+    chips.push(`<span class="tb-chip" title="CFZ → RTM (cal days)"><input data-gate="rtm" value="${model.rtmDays}">d</span>`);
+  else if(r.nm==='MV Gerber release')
+    chips.push(`<span class="tb-chip" title="DVT Test Start → MV G.O. (cal days)"><input data-gate="mvgo" value="${model.mvGoDays}">d</span>`);
+  else if(!r.mile)
+    chips.push(`<span class="tb-chip" title="duration (cal days) — editable"><input data-i="${r.i}" value="${durOverride[r.i]??goldenSpan(r)}">d</span>`);
+  let warn='';
+  if(has&&r.s){
+    const wknd=dow(r.s)===0||dow(r.s)===6, hol=isHol(r.s,r.site==='VN'?REGIONHOL:LEADHOL);
+    if(hol){warn=' warn';chips.push(`<span class="tb-chip satwarn">⚠ Hol</span>`);}
+    else if(wknd){warn=' warn';chips.push(`<span class="tb-chip satwarn">⚠ ${dow(r.s)===6?'Sat':'Sun'}</span>`);}
+  }
+  return `<div class="tb-row${r.gate?' gate':''}${warn}">
+    <div class="tb-date"><span class="bu">•</span><span class="din">${dateCell}</span></div>
+    <div class="tb-name">${nm}${site}</div>${chips.join('')}
+  </div>`;
+}
+/* FCS column: L10 card + Region card + user-added region rows (display layer). */
+function tbFcsColumn(model,has){
+  if(!has)return `<div class="tb-fcscard"><div class="k">L10 FCS</div><div class="v">—</div></div>`;
+  const l10=LEADNAME==='KS'?'CHINA L10 FCS':LEADNAME+' L10 FCS';
+  const regs=regionFcsList.map((rg,k)=>{
+    const d=addCal(model.fcsKS,rg.leadDays);
+    return `<div class="tb-reg"><input class="rn" data-regn="${k}" value="${rg.name||''}" placeholder="Region FCS">
+      <input class="rd" data-regd="${k}" value="${ymd(d)}">
+      <button class="rx" data-regx="${k}" title="remove">✕</button></div>`;
+  }).join('');
+  return `<div class="tb-fcscard"><div class="k">${l10}</div><div class="v">${ymd(model.fcsKS)}</div></div>
+    <div class="tb-fcscard region"><div class="k">REGION FCS · ${REGIONNAME}</div><div class="v">${ymd(model.fcsVN)}</div></div>
+    ${regs}<button class="tb-addreg" data-addreg>+ Add region</button>`;
+}
+/* wire every inline control — any change immediately reruns the engine (full dependency reflow). */
+function tbWire(host){
+  host.querySelectorAll('input[data-i]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.i, v=parseInt(inp.value,10);
+    if(isNaN(v)||v<0){delete durOverride[i];}else{durOverride[i]=v;}
+    run();
+  }));
+  host.querySelectorAll('input[data-gate]').forEach(inp=>inp.addEventListener('change',()=>{
+    const v=parseInt(inp.value,10), ok=!(isNaN(v)||v<0);
+    if(inp.dataset.gate==='cfz') cfzDaysOverride=ok?v:null;
+    else if(inp.dataset.gate==='mvgo') mvGoDaysOverride=ok?v:null;
+    else rtmDaysOverride=ok?v:null;
+    run();
+  }));
+  // Testing→G.O. ww pills
+  host.querySelectorAll('input[data-ww]').forEach(inp=>inp.addEventListener('change',()=>{
+    const w=parseInt(inp.value,10), ok=!(isNaN(w)||w<0);
+    if(inp.dataset.ww==='dbsi') dbSiDaysOverride=ok?w*7:null;
+    else if(inp.dataset.ww==='sipv') siPvDaysOverride=ok?w*7:null;
+    else mvGoDaysOverride=ok?w*7:null;
+    run();
+  }));
+  // start-date pins (dateOverride) & end-date → duration
+  const parseTb=s=>{const t=String(s||'').replace(/~/g,'').trim();return parseInputDate(t);};
+  host.querySelectorAll('input[data-ds]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.ds, d=parseTb(inp.value);
+    if(d) dateOverride[i]=iso(d); else delete dateOverride[i];
+    run();
+  }));
+  host.querySelectorAll('input[data-de]').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.dataset.de, d=parseTb(inp.value);
+    if(d){const t=GOLDEN[i];
+      const sIso=dateOverride[i]!=null?dateOverride[i]:null;
+      // duration = typed end − current start (cal days)
+      const curS=sIso?parseISO(sIso):null;
+      const base=curS|| (window._lastModelRows&&window._lastModelRows[i]&&window._lastModelRows[i].s) || t.gs;
+      const span=calDiff(base,d);
+      if(span>0)durOverride[i]=span;
+    }
+    run();
+  }));
+  // region FCS rows (display layer)
+  host.querySelectorAll('input[data-regn]').forEach(inp=>inp.addEventListener('change',()=>{
+    regionFcsList[+inp.dataset.regn].name=inp.value.trim(); run();
+  }));
+  host.querySelectorAll('input[data-regd]').forEach(inp=>inp.addEventListener('change',()=>{
+    const k=+inp.dataset.regd, d=parseInputDate(inp.value.trim());
+    if(d&&window._lastFcsKS){regionFcsList[k].leadDays=calDiff(window._lastFcsKS,d);}
+    run();
+  }));
+  host.querySelectorAll('button[data-regx]').forEach(b=>b.addEventListener('click',()=>{
+    regionFcsList.splice(+b.dataset.regx,1); run();
+  }));
+  const add=host.querySelector('button[data-addreg]');
+  if(add)add.addEventListener('click',()=>{regionFcsList.push({name:'',leadDays:14});run();});
 }
 
 /* ============ horizontal roadmap (refined, 6-layer, 2 styles) — preview + Export PNG ============ */
@@ -1210,6 +1368,7 @@ srInput.addEventListener('blur',()=>{
 document.getElementById('reset').onclick=()=>{
   uploadToken++;                 // invalidate any in-flight OCR so it can't repopulate after reset
   durOverride={};cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;
+  dateOverride={};dbSiDaysOverride=null;siPvDaysOverride=null;regionFcsList=[];
   BRANCH_INFO=null;lastValidSrISO='';
   document.getElementById('proj').value='';
   document.getElementById('branch').value='';
