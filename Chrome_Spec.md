@@ -733,13 +733,18 @@ ME 線 : ME design → … → T1+T2 → <phase> ME parts → ME ETA ┘
 > 本節記錄 user 於 2026-07-16 明確授權對 Function 1 的修改（原「F1 = frozen golden 不可更動」規則自此
 > 以「修改後 golden self-validation 必須維持綠燈」為新驗收條件取代）。
 
-### 16.1 假日 snap（自 F2 RefreshBoard 移植）
-- 規則：**任何 task 不得於週日或法定假日開工**；非 build 類 task 另須避開週六。
-  build 類（SMT / FAB / Pre-Build / Main build / OOBIP / T1+T2 / Tooling / ME parts / ME PV-R / Regression）
-  週六可開工。lead 側查 KS 假日表、region 側（site VN）查 region 假日表。
-- **Golden 重現模式豁免**：golden SR（2026-08-25）且零覆寫時**不 snap**——因 xlsx GOLDEN 本身含
-  週末/假日開工日（如 Tooling Release 週六 3/7、PV FAB 端午 6/19），驗證要求 byte-exact 重現。
-  任何其他 SR 或任何編輯 → 全面套用 snap。實作於 `build()` 內 `snapStart`/`goldenMode`。
+### 16.1 週日/假日順延規則 — **F1 原生版（owner 拍板 2026-07-17，v2）**
+
+> 沿革：461f5c1 曾把 **F2 的**假日 snap 移植進 F1（違反「**F1/F2 規則永不互相移植/覆寫**」鐵則，且造成 SR=4/1 時 DVT→MV G.O. 4 週縮成 2 週的 bug）→ 已撤銷。之後 owner 決定 **F1 自己也要**「週日與法定假日不排工作、順延到工作日」——以下為 **F1 原生規則**（非移植；與 F2 §9.6 的規則刻意不同）。
+
+- **規則**：任何 task 的 **start 不得落在週日或法定假日**，順延到下一個工作日。**週六為工作日（全部 task 皆可，無 build/非build 之分——這是與 F2 規則的刻意差異）**。lead 側查 KS（中國+台灣）假日表、site=VN 的 region task 查所選 region 假日表。
+- **不影響其他規則（實作保證）**：
+  1. **duration 不變**——snap 只移 start，end = start + span；
+  2. **dependency lag 不變**——下游仍由（snap 後的）前置日期 + 原 lag 推得；
+  3. **DVT Test → MV G.O. 恆為 `mvGoDays`（4 週）**——MV G.O. 錨改掛「該 SR 下 default 鏈（忽略一切 User 編輯）實際算出的 DVT Test Start」（`_nomPass`/`_nomCache` 自重跑取得）。無編輯時 nominal ≡ live → 間距任何 SR 恆 28 天；
+  4. **§13.1 不破**——nominal 忽略 User 編輯 → HW duration/日期編輯永遠動不了 MV G.O./CFZ/RTM/FCS；
+  5. **golden 豁免**——golden SR + 零編輯時不 snap（xlsx GOLDEN 本身含週日/假日開工日：SI ME parts 週日 4/26、PV FAB 端午 6/19），§4.2 byte-exact 驗證維持綠燈。
+- 驗證：golden PASS 38 WKs；SR 4/1、6/15、11/18、2027/3/3 掃描——**間距全部 28d、DEP task 週日/假日開工數 = 0**；HW 編輯下 gate Δ=0;編輯 self-test F1/F2 ALL LINKED。
 
 ### 16.2 Task Board UI 統一（F1 與 F2 同步）
 - **鎖定任務全鎖**：ANCHOR（純公式）任務的 start「與 end」輸入框皆 `disabled`（原本 end 看似可改實則無效）。

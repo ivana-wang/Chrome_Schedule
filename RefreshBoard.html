@@ -388,11 +388,11 @@ function dispName(nm){
   let s=nm;
   if(LEADNAME!=='KS') s=s.replace(/\bKS\b/g,LEADNAME);
   if(REGIONNAME!=='VN') s=s.replace(/\bVN\b/g,REGIONNAME);
-  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT');
+  // phase display renames: DB→Proto, SI→EVT(n/a in F2), PV→DVT, MV→PVT (consistency across all
+  // MV tasks: PVT SMT / PVT Pre-Build / PVT Main build / PVT G.O.). Display only, keys unchanged.
+  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT').replace(/\bMV\b/g,'PVT');
   // "<phase> Gerber release(d)" -> "<phase> G.O." (keep the phase prefix). §user req
   s=s.replace(/Gerber\s+release\w*/i,'G.O.');
-  // MV G.O. displays as "PVT G.O." (PVT = MV phase). §RefreshBoard req1
-  s=s.replace(/^MV G\.O\./,'PVT G.O.');
   // "... SMT Build" -> "... SMT" (narrower chip). §user req
   s=s.replace(/SMT\s+Build/i,'SMT');
   // gate label rename (display only — internal nm/keys keep "= CFZ"/"= RTM").

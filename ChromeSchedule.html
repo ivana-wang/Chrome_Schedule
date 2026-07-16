@@ -370,7 +370,9 @@ function dispName(nm){
   let s=nm;
   if(LEADNAME!=='KS') s=s.replace(/\bKS\b/g,LEADNAME);
   if(REGIONNAME!=='VN') s=s.replace(/\bVN\b/g,REGIONNAME);
-  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT');
+  // phase display renames: DB→Proto, SI→EVT, PV→DVT, MV→PVT (consistency across all MV tasks:
+  // PVT SMT / PVT Pre-Build / PVT Main build / PVT G.O.). §user req — display only, keys unchanged
+  s=s.replace(/\bDB\b/g,'Proto').replace(/\bSI\b/g,'EVT').replace(/\bPV\b(?!-R)(?! Regression)/g,'DVT').replace(/\bMV\b/g,'PVT');
   // "<phase> Gerber release(d)" -> "<phase> G.O." (keep the phase prefix). §user req
   s=s.replace(/Gerber\s+release\w*/i,'G.O.');
   // "... SMT Build" -> "... SMT" (narrower chip). §user req
@@ -526,6 +528,8 @@ let regionFcsList=[];
    cfzDaysOverride = Stable Release → CFZ ; rtmDaysOverride = CFZ → RTM ;
    mvGoDaysOverride = DVT Test Start → MV G.O. (default 28 = 4 weeks). */
 let cfzDaysOverride=null, rtmDaysOverride=null, mvGoDaysOverride=null;
+/* nominal-DVT computation guard + cache (build(): default-chain DVT test start at this SR). */
+let _nomPass=false, _nomCache={key:'',val:null};
 /* branch info parsed from the chromiumdash image (OCR). null until an image is read. */
 let BRANCH_INFO=null;
 let lastValidSrISO='';
@@ -648,31 +652,51 @@ function build(srISO){
   const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:28;
   // SR-nominal DVT Test Start — the fixed reference MV G.O. hangs off (§13.1); exported on the
   // model so a typed MV G.O. date can be translated back into an mvGoDays offset (task board).
-  const dvtNominal=addCal(GKEY['PV/Google dogfooding'].gs, shift);
+  // nominal = the DVT Test Start the DEFAULT chain produces at THIS SR (Sun/holiday deferral
+  // applied, every user edit ignored), computed by re-running the engine with all overrides
+  // cleared. No edits → nominal ≡ live → the DVT-test→MV-G.O. gap is exactly mvGoDays (4 wks)
+  // for ANY Stable Release. User edits are ignored by the nominal → §13.1 stays intact (HW
+  // duration/date edits can never move MV G.O., so CFZ/RTM/FCS stay locked).
+  let dvtNominal;
+  if(_nomPass){ dvtNominal=addCal(GKEY['PV/Google dogfooding'].gs, shift); }  // inner pass: MV side unused
+  else{
+    const ck=srISO+'|'+REGIONNAME;
+    if(_nomCache.key===ck) dvtNominal=_nomCache.val;
+    else{
+      _nomPass=true;
+      const sav=[durOverride,dateOverride,cfzDaysOverride,rtmDaysOverride,mvGoDaysOverride,dbSiDaysOverride,siPvDaysOverride];
+      durOverride={};dateOverride={};cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;dbSiDaysOverride=null;siPvDaysOverride=null;
+      const mdN=build(srISO);
+      [durOverride,dateOverride,cfzDaysOverride,rtmDaysOverride,mvGoDaysOverride,dbSiDaysOverride,siPvDaysOverride]=sav;
+      _nomPass=false;
+      dvtNominal=mdN.rows.find(r=>r.ph==='PV'&&r.nm==='Google dogfooding').s;
+      _nomCache={key:ck,val:dvtNominal};
+    }
+  }
   // ---- DAG nodes ----
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
   const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
   const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
-  // §user 2026-07 holiday rule (ported from F2): no task may START on a Sunday or statutory
-  // holiday; non-build tasks also skip Saturday (build-track tasks — SMT/FAB/builds/tooling —
-  // may run Saturdays per the F1 working-day contract). EXEMPTION: golden-reproduction mode
-  // (golden SR + zero edits) skips the snap, because the xlsx GOLDEN itself contains
-  // weekend/holiday starts (e.g. Tooling Release Sat 3/7, PV FAB on Dragon-Boat 6/19) and the
-  // self-validation demands byte-identical reproduction of it.
+  // §F1-NATIVE holiday rule (owner-decided 2026-07-17 — NOT a port; F1/F2 rules stay strictly
+  // independent, see the isolation iron rule): no task may START on a SUNDAY or a statutory
+  // holiday — the start defers to the next working day. Saturday is a working day for EVERY F1
+  // task (unlike F2's build/non-build split — deliberately different rules per function).
+  // Durations and dependency lags are untouched: the snap only places the start; end = start +
+  // span. EXEMPTION: golden-reproduction mode (golden SR + zero edits) skips the snap because
+  // the frozen xlsx GOLDEN itself contains Sunday/holiday starts (SI ME parts Sun 4/26, PV FAB
+  // Dragon-Boat 6/19) and §4.2 demands byte-exact reproduction.
   const anyEdit=Object.keys(durOverride).length>0||Object.keys(dateOverride).length>0
     ||dbSiDaysOverride!=null||siPvDaysOverride!=null
     ||cfzDaysOverride!=null||rtmDaysOverride!=null||mvGoDaysOverride!=null;
   const goldenMode=(shift===0&&!anyEdit);
   const holFor=r=> r.site==='VN'?REGIONHOL:LEADHOL;
-  const isBuildTask=r=>/SMT|Pre-?Build|Main.?build|OOBIP|PCB FAB|T1\+T2|Tooling|ME parts|ME PV-R|Regression/i.test(r.nm);
   const snapStart=(d,r)=>{ if(goldenMode)return d;
-    const hol=holFor(r);let c=new Date(d);
-    if(isBuildTask(r)){while(dow(c)===0||isHol(c,hol))c=addCal(c,1);}
-    else c=skipNonWork(c,hol);
-    return c;};
+    let c=new Date(d); const hol=holFor(r);
+    while(dow(c)===0||isHol(c,hol)) c=addCal(c,1);
+    return c; };
   const setSE=(r,s)=>{
     if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
-    const s2=snapStart(s,r);                                      // holiday rule (golden-mode exempt)
+    const s2=snapStart(s,r);                                      // Sun/holiday deferral (F1-native)
     r.s=s2; r.e=r.mile?s2:addCal(s2,spanOf(r));
   };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
