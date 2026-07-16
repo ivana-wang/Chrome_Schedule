@@ -249,6 +249,11 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59
 .tb-reg .rx{cursor:pointer;color:#b02a2a;background:none;border:0;font-size:14px;padding:0 2px}
 .tb-addreg{font-size:11.5px;color:#5d6b8a;background:none;border:1px dashed #cfd7e3;border-radius:8px;cursor:pointer;padding:4px 10px;margin-top:2px}
 .tb-addreg:hover{color:#2f56c9;border-color:#9ab0d8}
+/* edited-value highlight + invalid-input feedback (task board). §user UI-unify 2026-07 */
+.tb-date input.ovr,.tb-chip input.ovr,.tb-ww input.ovr{background:#fff3d0;border-radius:4px;color:#8a5a00;-webkit-text-fill-color:#8a5a00}
+.tb-date input.bad,.tb-chip input.bad{background:#fde2e2;border-radius:4px;color:#b02a2a;-webkit-text-fill-color:#b02a2a}
+.tb-resetedits{margin-left:auto;font-size:11.5px;color:#5d6b8a;background:none;border:1px dashed #cfd7e3;border-radius:8px;cursor:pointer;padding:3px 10px;align-self:center}
+.tb-resetedits:hover{color:#2f56c9;border-color:#9ab0d8}
 </style>
 </head>
 <body>
@@ -641,13 +646,34 @@ function build(srISO){
   const earlyCut=addCal(SR,-14);
   const fwLock=addCal(earlyCut,-7), fwCand=addCal(fwLock,-7);
   const mvGoDays=(mvGoDaysOverride!=null)?mvGoDaysOverride:28;
+  // SR-nominal DVT Test Start — the fixed reference MV G.O. hangs off (§13.1); exported on the
+  // model so a typed MV G.O. date can be translated back into an mvGoDays offset (task board).
+  const dvtNominal=addCal(GKEY['PV/Google dogfooding'].gs, shift);
   // ---- DAG nodes ----
   const rows=GOLDEN.map((t,i)=>({...t,i,fwd:isFwd(t),s:null,e:null,warn:''}));
   const byKey={}; rows.forEach(r=>byKey[r.ph+'/'+r.nm]=r);
   const spanOf=r=> r.mile?0:(durOverride[r.i]!=null?durOverride[r.i]:goldenSpan(r));
+  // §user 2026-07 holiday rule (ported from F2): no task may START on a Sunday or statutory
+  // holiday; non-build tasks also skip Saturday (build-track tasks — SMT/FAB/builds/tooling —
+  // may run Saturdays per the F1 working-day contract). EXEMPTION: golden-reproduction mode
+  // (golden SR + zero edits) skips the snap, because the xlsx GOLDEN itself contains
+  // weekend/holiday starts (e.g. Tooling Release Sat 3/7, PV FAB on Dragon-Boat 6/19) and the
+  // self-validation demands byte-identical reproduction of it.
+  const anyEdit=Object.keys(durOverride).length>0||Object.keys(dateOverride).length>0
+    ||dbSiDaysOverride!=null||siPvDaysOverride!=null
+    ||cfzDaysOverride!=null||rtmDaysOverride!=null||mvGoDaysOverride!=null;
+  const goldenMode=(shift===0&&!anyEdit);
+  const holFor=r=> r.site==='VN'?REGIONHOL:LEADHOL;
+  const isBuildTask=r=>/SMT|Pre-?Build|Main.?build|OOBIP|PCB FAB|T1\+T2|Tooling|ME parts|ME PV-R|Regression/i.test(r.nm);
+  const snapStart=(d,r)=>{ if(goldenMode)return d;
+    const hol=holFor(r);let c=new Date(d);
+    if(isBuildTask(r)){while(dow(c)===0||isHol(c,hol))c=addCal(c,1);}
+    else c=skipNonWork(c,hol);
+    return c;};
   const setSE=(r,s)=>{
     if(dateOverride[r.i]!=null) s=parseISO(dateOverride[r.i]);   // user-pinned start (task board)
-    r.s=s; r.e=r.mile?s:addCal(s,spanOf(r));
+    const s2=snapStart(s,r);                                      // holiday rule (golden-mode exempt)
+    r.s=s2; r.e=r.mile?s2:addCal(s2,spanOf(r));
   };
   const curRef=(ref,a)=>{ if(ref==='@CFZ')return CFZ; if(ref==='@RTM')return RTM; const x=byKey[ref]; return a==='s'?x.s:x.e; };
   const maxD=ds=>ds.reduce((m,d)=>d>m?d:m);
@@ -683,8 +709,7 @@ function build(srISO){
         // §13.1 two-block rule: the forward (MV/FCS) block is anchored to Stable Release, NOT to
         // the live (HW-editable) DVT test. So MV G.O. = SR-nominal DVT Test Start + N — HW/Days
         // edits in the backward chain never leak past SR into CFZ/RTM/FCS. (mvGoDays editable.)
-        const dvt=addCal(GKEY['PV/Google dogfooding'].gs, shift);
-        r.s=r.e=addCal(dvt, mvGoDays); return true; }
+        r.s=r.e=addCal(dvtNominal, mvGoDays); return true; }
       case 'KS FCS': { const k='MV/Product release - KS'; if(!resolved.has(k))return false;
         r.s=r.e=skipNonWork(addCal(byKey[k].s,7),LEADHOL); return true; }
       case 'VN FCS': { const k='MV/Product release - VN'; if(!resolved.has(k))return false;
@@ -707,7 +732,7 @@ function build(srISO){
   }
   const fcsKS=byKey['FCS/KS FCS'].s, fv=byKey['FCS/VN FCS'].s;
   return {hasAnchor:true,SR,CFZ,RTM,rows,projStart,fcsKS,fcsVN:fv,earlyCut,cfzDays,rtmDays,mvGoDays,
-          cfzRule,rtmRule,cfzPullIn,rtmPullIn,unresolved:rows.length-resolved.size};
+          dvtNominal,cfzRule,rtmRule,cfzPullIn,rtmPullIn,unresolved:rows.length-resolved.size};
 }
 function getDate(rows,nm){const r=rows.find(x=>x.nm===nm);return r?r.s:null;}
 
@@ -820,7 +845,7 @@ function render(model,val,srISO){
     ? `${LEADNAME} FCS <b>${ymd(model.fcsKS)}</b><br>${REGIONNAME} FCS <b>${ymd(model.fcsVN)}</b>` : '';
   // ---- PRODUCT_SPEC-style task board (renderer only — engine & task set untouched) ----
   document.getElementById('chevrons').style.display='none';
-  window._lastModelRows=model.rows; window._lastFcsKS=model.fcsKS||null;
+  window._lastModelRows=model.rows; window._lastFcsKS=model.fcsKS||null; window._lastModel=model;
   renderTaskBoard(model,has);
   renderVal(val,model);
 }
@@ -836,7 +861,8 @@ const TB_COLS=[['DB','DB'],['SI','SI'],['PV','PV'],['PVR','PVR'],['MV','MV'],['F
 const TB_GRID='1.05fr 1.05fr 1.05fr .58fr 1.05fr .78fr';
 function tbFmt(d){return d?ymd(d):'—';}
 function tbWkChip(id,weeks,title){
-  return `<span class="tb-ww" title="${title}"><input data-ww="${id}" value="${weeks}">ww</span>`;
+  const ovr = id==='dbsi'?dbSiDaysOverride!=null : id==='sipv'?siPvDaysOverride!=null : mvGoDaysOverride!=null;
+  return `<span class="tb-ww" title="${title}"><input data-ww="${id}"${ovr?' class="ovr"':''} value="${weeks}">ww</span>`;
 }
 function renderTaskBoard(model,has){
   const host=document.getElementById('phases');host.innerHTML='';
@@ -852,7 +878,8 @@ function renderTaskBoard(model,has){
     strip.innerHTML=
       `<span class="hd">Proto Testing <span class="arr">–</span> ${tbWkChip('dbsi',wk(dbT&&dbT.s,siGo&&siGo.s),'DB Testing start → EVT G.O. (weeks) — editable')} <span class="arr">→</span> EVT G.O.</span>`+
       `<span class="hd">EVT Testing <span class="arr">–</span> ${tbWkChip('sipv',wk(siT&&siT.s,pvGo&&pvGo.s),'SI Testing start → DVT G.O. (weeks) — editable')} <span class="arr">→</span> DVT G.O.</span>`+
-      `<span class="hd">DVT Testing <span class="arr">–</span> ${tbWkChip('mvgo',wk(pvT&&pvT.s,mvGo&&mvGo.s),'DVT Testing start → PVT G.O. (weeks) — editable')} <span class="arr">→</span> PVT G.O.</span>`;
+      `<span class="hd">DVT Testing <span class="arr">–</span> ${tbWkChip('mvgo',wk(pvT&&pvT.s,mvGo&&mvGo.s),'DVT Testing start → PVT G.O. (weeks) — editable')} <span class="arr">→</span> PVT G.O.</span>`+
+      `<button class="tb-resetedits" data-resetedits title="Clear every task-board edit (pinned dates, durations, gate offsets). The Stable Release is kept.">↺ Reset edits</button>`;
     host.appendChild(strip);
   }
   // --- gradient chevron header ---
@@ -885,25 +912,33 @@ function renderTaskBoard(model,has){
   tbWire(host);
 }
 function r0nm(r){return dispName(r.nm).replace(/\s*exit\s*$/i,'').trim();}
-/* one task row: • date(s) | name | chips (duration / gate / weekend-warning) */
+/* one task row: • date(s) | name | chips (duration / gate / weekend-warning).
+   SR-rule gates with an offset lever (CFZ/RTM/MV G.O.) keep their date box EDITABLE — a typed
+   date is translated back into the gate's day-offset override (single source of truth stays
+   SR + offsets), then the gate rule (Friday/working-day snap) reapplies. Pure formula anchors
+   (PLD, FW chain, FCS) are fully disabled, start AND end. §user UI-unify 2026-07 */
+const GATE_DATE={'Code Freeze (FSI candidate) = CFZ':'cfz','RTM Ties-1 = RTM':'rtm','MV Gerber release':'mvgo'};
+const GATE_OVR={cfz:()=>cfzDaysOverride!=null,rtm:()=>rtmDaysOverride!=null,mvgo:()=>mvGoDaysOverride!=null};
 function tbRow(r,model,has){
   const nm=dispName(r.nm), code=dispSite(r.site);
   const site=(r.site && !nm.includes(code))?` <span class="site ${r.site}">${code}</span>`:'';
-  const locked=ANCHOR_NAMES.has(r.nm);
+  const locked=ANCHOR_NAMES.has(r.nm), gd=GATE_DATE[r.nm];
   const sVal=has?tbFmt(r.s):'', eVal=has?tbFmt(r.e):'';
+  const dsOvr=dateOverride[r.i]!=null?' class="ovr"':'';
   const dateCell = r.mile
-    ? `<input data-ds="${r.i}" value="${sVal}" ${(!has||locked)?'disabled':''}>`
-    : `<input data-ds="${r.i}" value="${sVal ? sVal+' ~':''}" ${(!has||locked)?'disabled':''}>
-       <input data-de="${r.i}" value="${eVal}" ${!has?'disabled':''}>`;
+    ? (gd? `<input data-gd="${gd}"${GATE_OVR[gd]()?' class="ovr"':''} value="${sVal}" ${!has?'disabled':''} title="editable — the typed date becomes this gate's day-offset from its anchor, then the gate rule reapplies">`
+         : `<input data-ds="${r.i}"${dsOvr} value="${sVal}" ${(!has||locked)?'disabled':''}>`)
+    : `<input data-ds="${r.i}"${dsOvr} value="${sVal ? sVal+' ~':''}" ${(!has||locked)?'disabled':''}>
+       <input data-de="${r.i}" value="${eVal}" ${(!has||locked)?'disabled':''}>`;
   const chips=[];
   if(r.nm==='Code Freeze (FSI candidate) = CFZ')
-    chips.push(`<span class="tb-chip" title="Stable Release → CFZ (cal days)"><input data-gate="cfz" value="${model.cfzDays}">d</span>`);
+    chips.push(`<span class="tb-chip" title="Stable Release → CFZ (cal days)"><input data-gate="cfz"${cfzDaysOverride!=null?' class="ovr"':''} value="${model.cfzDays}">d</span>`);
   else if(r.nm==='RTM Ties-1 = RTM')
-    chips.push(`<span class="tb-chip" title="CFZ → RTM (cal days)"><input data-gate="rtm" value="${model.rtmDays}">d</span>`);
+    chips.push(`<span class="tb-chip" title="CFZ → RTM (cal days)"><input data-gate="rtm"${rtmDaysOverride!=null?' class="ovr"':''} value="${model.rtmDays}">d</span>`);
   else if(r.nm==='MV Gerber release')
-    chips.push(`<span class="tb-chip" title="DVT Test Start → MV G.O. (cal days)"><input data-gate="mvgo" value="${model.mvGoDays}">d</span>`);
+    chips.push(`<span class="tb-chip" title="DVT Test Start → MV G.O. (cal days)"><input data-gate="mvgo"${mvGoDaysOverride!=null?' class="ovr"':''} value="${model.mvGoDays}">d</span>`);
   else if(!r.mile)
-    chips.push(`<span class="tb-chip" title="duration (cal days) — editable"><input data-i="${r.i}" value="${durOverride[r.i]??goldenSpan(r)}">d</span>`);
+    chips.push(`<span class="tb-chip" title="duration (cal days) — editable"><input data-i="${r.i}"${durOverride[r.i]!=null?' class="ovr"':''} value="${durOverride[r.i]??goldenSpan(r)}">d</span>`);
   let warn='';
   if(has&&r.s){
     const wknd=dow(r.s)===0||dow(r.s)===6, hol=isHol(r.s,r.site==='VN'?REGIONHOL:LEADHOL);
@@ -951,25 +986,50 @@ function tbWire(host){
     else mvGoDaysOverride=ok?w*7:null;
     run();
   }));
-  // start-date pins (dateOverride) & end-date → duration
+  // start-date pins (dateOverride) & end-date → duration. Invalid input is flagged inline
+  // (red field, tooltip) instead of being silently ignored; clearing a field clears the pin.
   const parseTb=s=>{const t=String(s||'').replace(/~/g,'').trim();return parseInputDate(t);};
+  const markBad=(inp,msg)=>{inp.classList.add('bad');inp.title=msg;};
   host.querySelectorAll('input[data-ds]').forEach(inp=>inp.addEventListener('change',()=>{
-    const i=+inp.dataset.ds, d=parseTb(inp.value);
+    const i=+inp.dataset.ds, raw=String(inp.value).replace(/~/g,'').trim(), d=parseTb(inp.value);
+    if(raw && !d){ markBad(inp,'Invalid date — use YYYY/MM/DD, YYYY-MM-DD or MM/DD/YYYY'); return; }
     if(d) dateOverride[i]=iso(d); else delete dateOverride[i];
     run();
   }));
   host.querySelectorAll('input[data-de]').forEach(inp=>inp.addEventListener('change',()=>{
-    const i=+inp.dataset.de, d=parseTb(inp.value);
+    const i=+inp.dataset.de, raw=String(inp.value).trim(), d=parseTb(inp.value);
+    if(raw && !d){ markBad(inp,'Invalid date — use YYYY/MM/DD, YYYY-MM-DD or MM/DD/YYYY'); return; }
     if(d){const t=GOLDEN[i];
       const sIso=dateOverride[i]!=null?dateOverride[i]:null;
       // duration = typed end − current start (cal days)
       const curS=sIso?parseISO(sIso):null;
       const base=curS|| (window._lastModelRows&&window._lastModelRows[i]&&window._lastModelRows[i].s) || t.gs;
       const span=calDiff(base,d);
-      if(span>0)durOverride[i]=span;
+      if(span<=0){ markBad(inp,'End date must be after the start date'); return; }
+      durOverride[i]=span;
     }
     run();
   }));
+  // gate DATE boxes (CFZ/RTM/MV G.O.): a typed date is translated into the gate's day-offset
+  // override from its anchor, then the gate rule (Friday/working-day snap) reapplies — so the
+  // field re-renders with the rule-compliant date. §user UI-unify
+  host.querySelectorAll('input[data-gd]').forEach(inp=>inp.addEventListener('change',()=>{
+    const m=window._lastModel, raw=String(inp.value).trim(), d=parseTb(inp.value);
+    if(!m||!m.hasAnchor) return;
+    if(!d){ if(raw){ markBad(inp,'Invalid date — use YYYY/MM/DD, YYYY-MM-DD or MM/DD/YYYY'); } else run(); return; }
+    const g=inp.dataset.gd;
+    if(g==='cfz') cfzDaysOverride=calDiff(m.SR,d);
+    else if(g==='rtm') rtmDaysOverride=calDiff(m.CFZ,d);
+    else if(g==='mvgo') mvGoDaysOverride=calDiff(m.dvtNominal,d);
+    run();
+  }));
+  // Reset edits — clears every task-board override but keeps the Stable Release / project setup
+  const re=host.querySelector('button[data-resetedits]');
+  if(re)re.addEventListener('click',()=>{
+    durOverride={};dateOverride={};dbSiDaysOverride=null;siPvDaysOverride=null;
+    cfzDaysOverride=null;rtmDaysOverride=null;mvGoDaysOverride=null;
+    run();
+  });
   // region FCS rows (display layer)
   host.querySelectorAll('input[data-regn]').forEach(inp=>inp.addEventListener('change',()=>{
     regionFcsList[+inp.dataset.regn].name=inp.value.trim(); run();

@@ -725,3 +725,28 @@ ME 線 : ME design → … → T1+T2 → <phase> ME parts → ME ETA ┘
    **當視窗比設計寬度窄時用 CSS `transform: scale()` 等比縮小**、reflow 卡片高度，
    **永遠不出現水平捲軸、不需 user 手動拉**（render 後與 `window.resize` 皆觸發）。
    目的：整張圖隨時完整可見，可直接截圖貼進報告。
+
+---
+
+## §16. 2026-07-16 更新 — 假日規則移植 + Task Board UI 統一（§user，解除 frozen-golden 限制）
+
+> 本節記錄 user 於 2026-07-16 明確授權對 Function 1 的修改（原「F1 = frozen golden 不可更動」規則自此
+> 以「修改後 golden self-validation 必須維持綠燈」為新驗收條件取代）。
+
+### 16.1 假日 snap（自 F2 RefreshBoard 移植）
+- 規則：**任何 task 不得於週日或法定假日開工**；非 build 類 task 另須避開週六。
+  build 類（SMT / FAB / Pre-Build / Main build / OOBIP / T1+T2 / Tooling / ME parts / ME PV-R / Regression）
+  週六可開工。lead 側查 KS 假日表、region 側（site VN）查 region 假日表。
+- **Golden 重現模式豁免**：golden SR（2026-08-25）且零覆寫時**不 snap**——因 xlsx GOLDEN 本身含
+  週末/假日開工日（如 Tooling Release 週六 3/7、PV FAB 端午 6/19），驗證要求 byte-exact 重現。
+  任何其他 SR 或任何編輯 → 全面套用 snap。實作於 `build()` 內 `snapStart`/`goldenMode`。
+
+### 16.2 Task Board UI 統一（F1 與 F2 同步）
+- **鎖定任務全鎖**：ANCHOR（純公式）任務的 start「與 end」輸入框皆 `disabled`（原本 end 看似可改實則無效）。
+- **Gate 日期改為「可輸入、轉 offset」**：CFZ / RTM / MV G.O.（F2：CFZ / RTM / DVT G.O.）的日期欄開放輸入，
+  輸入日期換算回對 anchor 的天數差寫入對應 override（`cfzDays`/`rtmDays`/`mvGoDays`/`siToPvDays`），
+  gate 規則（週五 / 工作日 snap）重新套用後回填欄位。單一真相來源恆為 SR + offsets，不存在絕對日期 pin。
+  F2 之 PVT G.O.（= SR − 5）依 §user rule 維持完全鎖定（FCS 永不延後）。
+- **覆寫高亮**：被編輯過的欄位（`dateOverride`/`durOverride`/gate/ww）加 `.ovr` 黃底樣式。
+- **無效輸入回饋**：日期格式錯誤或 end ≤ start → 欄位標紅（`.bad`）+ tooltip，不再靜默忽略、不觸發重算。
+- **Reset edits 按鈕**（handoff strip 右端）：只清空所有 task-board 覆寫，保留 Stable Release 與 Project Setup。
